@@ -11,6 +11,7 @@
         "views/res_config_settings.xml",
         "views/sale_order_view.xml",
         "views/store_view.xml",
+        "views/product_tag_view.xml",
 
     ],
     'auto_install': True,

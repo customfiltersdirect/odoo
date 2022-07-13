@@ -35,6 +35,17 @@
         <field name="doall" eval="False"/>
    </record>
 
+          <record id="sync_tags_from_goflow_ir_cron_new" model="ir.cron">
+       <field name="name">Sync Goflow Tags</field>
+      <field name="model_id" ref="delivery_goflow.model_goflow_product_tag"/>
+        <field name="state">code</field>
+        <field name="code">model.sync_product_tag_goflow()</field>
+        <field name="interval_number">5</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="doall" eval="False"/>
+   </record>
+
 
 </data>
 
