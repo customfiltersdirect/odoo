@@ -17,8 +17,8 @@ class BearerAuth(requests.auth.AuthBase):
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
-    goflow_token = fields.Char(config_parameter='delivery_goflow.token_goflow',string = 'Token GoFlow', help='Necessary for integrations w', copy=True, default='', store=True)
-    goflow_subdomain = fields.Char(config_parameter='delivery_goflow.subdomain_goflow',string='Subdomain',help='Subdomain of Goflow account',copy=True, default='', store=True)
+    goflow_token = fields.Char(config_parameter='delivery_goflow.token_goflow',string = 'Token GoFlow', help='Necessary for integrations w', copy=True, default='5a07ac83f5d04ad89390da6026bf63d4', store=True)
+    goflow_subdomain = fields.Char(config_parameter='delivery_goflow.subdomain_goflow',string='Subdomain',help='Subdomain of Goflow account',copy=True, default='Mervfilters', store=True)
     @api.onchange('goflow_token','goflow_subdomain')
     def _onchange_goflow_token(self):
         if not self.goflow_token and self.goflow_subdomain:
