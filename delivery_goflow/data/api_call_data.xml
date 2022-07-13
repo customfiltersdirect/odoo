@@ -23,6 +23,19 @@
         <field name="numbercall">-1</field>
         <field name="doall" eval="False"/>
    </record>
+
+       <record id="sync_stores_from_goflow_ir_cron_new" model="ir.cron">
+       <field name="name">Sync Goflow Stores</field>
+      <field name="model_id" ref="delivery_goflow.model_goflow_store"/>
+        <field name="state">code</field>
+        <field name="code">model.sync_store_goflow()</field>
+        <field name="interval_number">5</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="doall" eval="False"/>
+   </record>
+
+
 </data>
 
 </odoo>

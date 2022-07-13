@@ -16,6 +16,34 @@ class goflow_store(models.Model):
     name = fields.Char('Name')
     goflow_id = fields.Char('Goflow ID')
     channel = fields.Char('Channel')
+    sync_orders = fields.Boolean('Sync Orders',default=True)
+
+    def sync_store_goflow(self):
+        goflow_token = self.env['ir.config_parameter'].get_param('delivery_goflow.token_goflow')
+        goflow_subdomain = self.env['ir.config_parameter'].get_param('delivery_goflow.subdomain_goflow')
+
+        url = 'https://%s.api.goflow.com/v1/stores' % goflow_subdomain
+        headers = {
+            'X-Beta-Contact': self.env.user.partner_id.email
+        }
+
+        result = requests.get(url, auth=BearerAuth(goflow_token), headers=headers)
+        goflow_api = result.json()
+        stores = goflow_api["data"]
+
+        while goflow_api["next"]:
+            goflow_api = requests.get(goflow_api["next"], auth=BearerAuth(goflow_token), headers=headers).json()
+            stores.extend(goflow_api["data"])
+        for store in stores:
+            goflow_store_id = store["id"]
+            goflow_store_obj = self.env['goflow.store'].search([('goflow_id', '=', goflow_store_id)])
+            if not goflow_store_obj:
+                goflow_store_name = store["name"]
+                goflow_store_channel = store["channel"]
+
+                self.env['goflow.store'].create(
+                    {'name': goflow_store_name, 'goflow_id': goflow_store_id, 'channel': goflow_store_channel})
+
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
@@ -100,9 +128,9 @@ class SaleOrder(models.Model):
         goflow_api = result.json()
         orders = goflow_api["data"]
         print ("orders",orders)
-        # while goflow_api["next"]:
-        #     goflow_api = requests.get(goflow_api["next"], auth=BearerAuth(goflow_token), headers=headers).json()
-        #     orders.extend(goflow_api["data"])
+        while goflow_api["next"]:
+            goflow_api = requests.get(goflow_api["next"], auth=BearerAuth(goflow_token), headers=headers).json()
+            orders.extend(goflow_api["data"])
 
         for order in orders:
             first_name = order["billing_address"]["first_name"]
@@ -165,78 +193,79 @@ class SaleOrder(models.Model):
                     goflow_store_channel = order["store"]["channel"]
 
                     goflow_store_obj = self.env['goflow.store'].create({'name':goflow_store_name,'goflow_id':goflow_store_id,'channel':goflow_store_channel})
+                if goflow_store_obj.sync_orders:
 
-                check_if_order_exists = self.search([('goflow_id','=',goflow_id)])
+                    check_if_order_exists = self.search([('goflow_id','=',goflow_id)])
 
-                goflow_order_no = order["order_number"]
-                goflow_order_status = order["status"]
-                print (goflow_order_status,goflow_id,goflow_order_no,goflow_date)
-                # order_date = datetime.datetime.fromisoformat(goflow_date)
-                order_date = self.convert_iso_to_utc(goflow_date)
-                goflow_shipped_at = self.convert_iso_to_utc(goflow_shipped_at)
-                goflow_store_latest_ship = self.convert_iso_to_utc(goflow_store_latest_ship)
-                goflow_store_latest_delivery = self.convert_iso_to_utc(goflow_store_latest_delivery)
+                    goflow_order_no = order["order_number"]
+                    goflow_order_status = order["status"]
+                    print (goflow_order_status,goflow_id,goflow_order_no,goflow_date)
+                    # order_date = datetime.datetime.fromisoformat(goflow_date)
+                    order_date = self.convert_iso_to_utc(goflow_date)
+                    goflow_shipped_at = self.convert_iso_to_utc(goflow_shipped_at)
+                    goflow_store_latest_ship = self.convert_iso_to_utc(goflow_store_latest_ship)
+                    goflow_store_latest_delivery = self.convert_iso_to_utc(goflow_store_latest_delivery)
 
 
-                if check_if_order_exists:
-                    order = check_if_order_exists
-                    order.goflow_invoice_no = goflow_invoice_no
-                    order.goflow_po_no = goflow_po_no
-                    order.goflow_carrier = goflow_shipment_carrier
-                    order.goflow_shipping_method = goflow_shipment_shipping_method
-                    order.goflow_scac = goflow_shipment_scac
-                    order.goflow_order_status = goflow_order_status
-                    order.goflow_shipped_at = goflow_shipped_at
-                    order.goflow_store_latest_ship = goflow_store_latest_ship
-                    order.goflow_store_latest_delivery = goflow_store_latest_delivery
-                    for line in tracking_line_list:
-                        goflow_line_id = line['order_line_id']
-                        line_obj = self.env['sale.order.line'].search([('goflow_id','=',goflow_line_id)])
-                        if line_obj:
-                            line_obj.goflow_tracking_number = line['tracking_number']
-                if not check_if_order_exists:
-                    order_vals = {}
-                    order_vals['partner_id'] = partner_obj.id
-                    order_vals['date_order'] = order_date
-                    order_vals['goflow_id'] = goflow_id
-                    order_vals['goflow_order_no'] = goflow_order_no
-                    order_vals['goflow_order_status'] = goflow_order_status
-                    order_vals['goflow_store_id'] = goflow_store_obj.id
-                    order_vals["goflow_invoice_no"]=goflow_invoice_no
-                    order_vals["goflow_po_no"] = goflow_po_no
-                    order_vals["goflow_carrier"] = goflow_shipment_carrier
-                    order_vals["goflow_shipping_method"] = goflow_shipment_shipping_method
-                    order_vals["goflow_scac"] = goflow_shipment_scac
-                    order_vals["goflow_shipped_at"] = goflow_shipped_at
-                    order_vals["goflow_store_latest_ship"] = goflow_store_latest_ship
-                    order_vals["goflow_store_latest_delivery"] = goflow_store_latest_delivery
+                    if check_if_order_exists:
+                        order = check_if_order_exists
+                        order.goflow_invoice_no = goflow_invoice_no
+                        order.goflow_po_no = goflow_po_no
+                        order.goflow_carrier = goflow_shipment_carrier
+                        order.goflow_shipping_method = goflow_shipment_shipping_method
+                        order.goflow_scac = goflow_shipment_scac
+                        order.goflow_order_status = goflow_order_status
+                        order.goflow_shipped_at = goflow_shipped_at
+                        order.goflow_store_latest_ship = goflow_store_latest_ship
+                        order.goflow_store_latest_delivery = goflow_store_latest_delivery
+                        for line in tracking_line_list:
+                            goflow_line_id = line['order_line_id']
+                            line_obj = self.env['sale.order.line'].search([('goflow_id','=',goflow_line_id)])
+                            if line_obj:
+                                line_obj.goflow_tracking_number = line['tracking_number']
+                    if not check_if_order_exists:
+                        order_vals = {}
+                        order_vals['partner_id'] = partner_obj.id
+                        order_vals['date_order'] = order_date
+                        order_vals['goflow_id'] = goflow_id
+                        order_vals['goflow_order_no'] = goflow_order_no
+                        order_vals['goflow_order_status'] = goflow_order_status
+                        order_vals['goflow_store_id'] = goflow_store_obj.id
+                        order_vals["goflow_invoice_no"]=goflow_invoice_no
+                        order_vals["goflow_po_no"] = goflow_po_no
+                        order_vals["goflow_carrier"] = goflow_shipment_carrier
+                        order_vals["goflow_shipping_method"] = goflow_shipment_shipping_method
+                        order_vals["goflow_scac"] = goflow_shipment_scac
+                        order_vals["goflow_shipped_at"] = goflow_shipped_at
+                        order_vals["goflow_store_latest_ship"] = goflow_store_latest_ship
+                        order_vals["goflow_store_latest_delivery"] = goflow_store_latest_delivery
 
-                    print (order_vals)
-                    so = self.env['sale.order'].create(order_vals)
-                    print (so)
-                    for line in order_lines:
-                        goflow_product_id = line["product"]["id"]
-                        product_obj = self.env["product.product"].search([('goflow_id','=',goflow_product_id)],limit=1)
-                        product_qty = line["quantity"]["amount"]
-                        product_price = line["charges"][0]["amount"]
-                        goflow_line_id =line["id"]
-                        tracking_obj = next(filter(lambda d: d.get('order_line_id') == goflow_line_id, tracking_line_list), None)
-                        try:
-                            tracking_number = tracking_obj['tracking_number']
-                        except:
-                            tracking_number = ''
-                        sol = self.env['sale.order.line'].create({
-                            'name': product_obj.name,
-                            'product_id': product_obj.id,
-                            'product_uom_qty': product_qty,
-                            'product_uom': product_obj.uom_id.id,
-                            'price_unit': product_price,
-                            'order_id': so.id,
-                            'tax_id':  False,
-                            'goflow_id':goflow_line_id,
-                            'goflow_tracking_number':tracking_number
+                        print (order_vals)
+                        so = self.env['sale.order'].create(order_vals)
+                        print (so)
+                        for line in order_lines:
+                            goflow_product_id = line["product"]["id"]
+                            product_obj = self.env["product.product"].search([('goflow_id','=',goflow_product_id)],limit=1)
+                            product_qty = line["quantity"]["amount"]
+                            product_price = line["charges"][0]["amount"]
+                            goflow_line_id =line["id"]
+                            tracking_obj = next(filter(lambda d: d.get('order_line_id') == goflow_line_id, tracking_line_list), None)
+                            try:
+                                tracking_number = tracking_obj['tracking_number']
+                            except:
+                                tracking_number = ''
+                            sol = self.env['sale.order.line'].create({
+                                'name': product_obj.name,
+                                'product_id': product_obj.id,
+                                'product_uom_qty': product_qty,
+                                'product_uom': product_obj.uom_id.id,
+                                'price_unit': product_price,
+                                'order_id': so.id,
+                                'tax_id':  False,
+                                'goflow_id':goflow_line_id,
+                                'goflow_tracking_number':tracking_number
 
-                        })
+                            })
 
             # if not check_if_order_exists:
             #     self.create({'goflow_id':goflow_id,'goflow_item_no':goflow_item_no})

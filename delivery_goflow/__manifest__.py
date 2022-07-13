@@ -6,9 +6,11 @@
     'version':'1.0',
     'depends': ['delivery', 'mail'],
     'data':[
+        'security/ir.model.access.csv',
         "data/api_call_data.xml",
         "views/res_config_settings.xml",
         "views/sale_order_view.xml",
+        "views/store_view.xml",
 
     ],
     'auto_install': True,
