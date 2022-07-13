@@ -19,6 +19,9 @@
                                     <field name="goflow_id"/>
                                     <field name="goflow_order_status"/>
                                     <field name="goflow_store_id"/>
+                                    <field name="goflow_shipped_at"/>
+                                    <field name="goflow_store_latest_ship"/>
+                                    <field name="goflow_store_latest_delivery"/>
 
 
                                 </group>

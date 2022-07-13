@@ -34,13 +34,64 @@ class SaleOrder(models.Model):
     goflow_carrier = fields.Char('Goflow Carrier')
     goflow_shipping_method = fields.Char('Goflow Shipping Method')
     goflow_scac = fields.Char('Goflow SCAC')
+    goflow_shipped_at = fields.Datetime('Goflow Shipped At')
+    goflow_store_latest_ship = fields.Date('Goflow Store Latest Ship')
+    goflow_store_latest_delivery = fields.Date('Goflow Store Latest Delivery')
+
+    def write(self, vals):
+        goflow_order_status = vals.get('goflow_order_status')
+        res = super(SaleOrder, self).write(vals)
+        if goflow_order_status and 'ready_to_pick' in goflow_order_status:
+            self.action_confirm()
+        if goflow_order_status and 'shipped' in goflow_order_status:
+            if self.state == 'draft':
+                self.action_confirm()
+            if self.picking_ids:
+                for picking in self.picking_ids:
+                    picking.action_assign()
+                    picking.action_confirm()
+                    for mv in picking.move_ids_without_package:
+                        mv.quantity_done = mv.product_uom_qty
+                    picking.button_validate()
+
+            if not self.invoice_ids:
+                self._create_invoices()
+
+            if self.invoice_ids:
+                for invoice in self.invoice_ids:
+                    invoice.action_post()
+
+        return res
+
+
+
+    def convert_iso_to_utc(self,date):
+        if date:
+            if '.' in date:
+                date = date.split(".")
+                date = date[0] + 'Z'
+            utc_date = str(dateutil.parser.isoparse(date))
+            try:
+                utc_date = utc_date.split("+")
+                utc_date = utc_date[0]
+            except:
+                utc_date = datetime.now()
+            return utc_date
+        else:
+            return False
     def sync_so_goflow(self):
         cron_job_id = self.env.ref('delivery_goflow.sync_order_from_goflow_ir_cron')
         lastcall = cron_job_id.lastcall
-        print(lastcall.strftime('%Y-%m-%dT%H:%M:%S.%f%z'))
+        print (lastcall)
+
         goflow_token = self.env['ir.config_parameter'].get_param('delivery_goflow.token_goflow')
         goflow_subdomain = self.env['ir.config_parameter'].get_param('delivery_goflow.subdomain_goflow')
-        url = 'https://%s.api.goflow.com/v1/orders?filters[status]=shipped' % goflow_subdomain
+        if lastcall:
+            goflow_lastcall = lastcall.strftime('%Y-%m-%dT%H:%M:%SZ ')
+            url = 'https://%s.api.goflow.com/v1/orders?filters[status_updated_at:gte]=%s' % (goflow_subdomain,str(goflow_lastcall))
+
+        else:
+            url = 'https://%s.api.goflow.com/v1/orders' % goflow_subdomain
         headers = {
             'X-Beta-Contact': self.env.user.partner_id.email
         }
@@ -83,6 +134,10 @@ class SaleOrder(models.Model):
                 print ("2",partner_name)
                 order_lines = order["lines"]
                 goflow_date = order["date"]
+                goflow_shipped_at = order["shipment"]["shipped_at"]
+                goflow_store_latest_ship =order["ship_dates"]["store_provided_latest_ship"]
+                goflow_store_latest_delivery =order["ship_dates"]["store_provided_latest_delivery"]
+
                 goflow_id = order["id"]
                 goflow_invoice_no = order["invoice_number"]
                 goflow_po_no = order["purchase_order_number"]
@@ -117,12 +172,12 @@ class SaleOrder(models.Model):
                 goflow_order_status = order["status"]
                 print (goflow_order_status,goflow_id,goflow_order_no,goflow_date)
                 # order_date = datetime.datetime.fromisoformat(goflow_date)
-                order_date =  str(dateutil.parser.isoparse(goflow_date))
-                try:
-                    order_date = order_date.split("+")
-                    order_date = order_date[0]
-                except:
-                    order_date = datetime.now()
+                order_date = self.convert_iso_to_utc(goflow_date)
+                goflow_shipped_at = self.convert_iso_to_utc(goflow_shipped_at)
+                goflow_store_latest_ship = self.convert_iso_to_utc(goflow_store_latest_ship)
+                goflow_store_latest_delivery = self.convert_iso_to_utc(goflow_store_latest_delivery)
+
+
                 if check_if_order_exists:
                     order = check_if_order_exists
                     order.goflow_invoice_no = goflow_invoice_no
@@ -131,6 +186,9 @@ class SaleOrder(models.Model):
                     order.goflow_shipping_method = goflow_shipment_shipping_method
                     order.goflow_scac = goflow_shipment_scac
                     order.goflow_order_status = goflow_order_status
+                    order.goflow_shipped_at = goflow_shipped_at
+                    order.goflow_store_latest_ship = goflow_store_latest_ship
+                    order.goflow_store_latest_delivery = goflow_store_latest_delivery
                     for line in tracking_line_list:
                         goflow_line_id = line['order_line_id']
                         line_obj = self.env['sale.order.line'].search([('goflow_id','=',goflow_line_id)])
@@ -149,6 +207,10 @@ class SaleOrder(models.Model):
                     order_vals["goflow_carrier"] = goflow_shipment_carrier
                     order_vals["goflow_shipping_method"] = goflow_shipment_shipping_method
                     order_vals["goflow_scac"] = goflow_shipment_scac
+                    order_vals["goflow_shipped_at"] = goflow_shipped_at
+                    order_vals["goflow_store_latest_ship"] = goflow_store_latest_ship
+                    order_vals["goflow_store_latest_delivery"] = goflow_store_latest_delivery
+
                     print (order_vals)
                     so = self.env['sale.order'].create(order_vals)
                     print (so)
