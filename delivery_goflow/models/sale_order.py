@@ -70,52 +70,68 @@ class SaleOrder(models.Model):
 
     @api.model
     def create(self, vals):
+        print (vals,'vreate')
         res =  super(SaleOrder, self).create(vals)
+        print (res.state,res.goflow_order_status)
         if res.goflow_order_status == 'ready_to_pick':
             if res.state == 'draft':
                 res.action_confirm()
-        if res.goflow_order_status =='shipped' :
+        if res.goflow_order_status =='shipped':
             if res.state == 'draft':
                 res.action_confirm()
+
             if res.picking_ids:
                 for picking in res.picking_ids:
-                    picking.action_assign()
-                    picking.action_confirm()
-                    for mv in picking.move_ids_without_package:
-                        mv.quantity_done = mv.product_uom_qty
-                    picking.button_validate()
+                    # picking.action_assign()
+                    # picking.action_confirm()
+                    for mv in picking.move_line_ids_without_package:
+                        if mv.product_uom_qty != 0.0:
+                            mv.qty_done = mv.product_uom_qty
+                    try:
+                        picking.button_validate()
+                    except:
+                        pass
+                if not res.invoice_ids:
+                    res._create_invoices()
 
-            if not res.invoice_ids:
-                res._create_invoices()
-
-            if res.invoice_ids:
-                for invoice in res.invoice_ids:
-                    invoice.action_post()
+                if res.invoice_ids:
+                    for invoice in res.invoice_ids:
+                        invoice.action_post()
 
         return res
 
     def write(self, vals):
-        goflow_order_status = vals.get('goflow_order_status')
+        print (vals,'wrte')
+
         res = super(SaleOrder, self).write(vals)
-        if goflow_order_status and 'ready_to_pick' in goflow_order_status:
-            self.action_confirm()
-        if goflow_order_status and 'shipped' in goflow_order_status:
+        print (self.state,self.goflow_order_status)
+
+        if self.state == 'draft' and self.goflow_order_status =='ready_to_pick' :
+           self.action_confirm()
+        if self.goflow_order_status == 'shipped':
             if self.state == 'draft':
                 self.action_confirm()
+            print (self.picking_ids)
             if self.picking_ids:
                 for picking in self.picking_ids:
-                    picking.action_assign()
-                    picking.action_confirm()
-                    for mv in picking.move_ids_without_package:
-                        mv.quantity_done = mv.product_uom_qty
-                    picking.button_validate()
+                    # picking.action_assign()
+                    # picking.action_confirm()
+                    for mv in picking.move_line_ids_without_package:
+                        print (mv.product_uom_qty)
+                        if mv.product_uom_qty != 0.0:
+                            mv.qty_done = mv.product_uom_qty
 
-            if not self.invoice_ids:
-                self._create_invoices()
+                    try:
+                        picking.button_validate()
+                    except:
+                        pass
 
-            if self.invoice_ids:
-                for invoice in self.invoice_ids:
-                    invoice.action_post()
+                if not self.invoice_ids:
+                    self._create_invoices()
+
+                # if self.invoice_ids:
+                #     for invoice in self.invoice_ids:
+                #         invoice.action_post()
 
         return res
 
@@ -157,12 +173,14 @@ class SaleOrder(models.Model):
         result = requests.get(url, auth=BearerAuth(goflow_token), headers=headers)
         goflow_api = result.json()
         orders = goflow_api["data"]
-        print ("orders",orders)
+        print ("orders",len(orders))
+
         while goflow_api["next"]:
             goflow_api = requests.get(goflow_api["next"], auth=BearerAuth(goflow_token), headers=headers).json()
             orders.extend(goflow_api["data"])
 
         for order in orders:
+            print (order['id'])
             first_name = order["billing_address"]["first_name"]
             last_name = order["billing_address"]["last_name"]
             if first_name and last_name:
@@ -226,7 +244,7 @@ class SaleOrder(models.Model):
                 if goflow_store_obj.sync_orders:
 
                     check_if_order_exists = self.search([('goflow_id','=',goflow_id)])
-
+                    print (check_if_order_exists,'check_if_order_existscheck_if_order_existscheck_if_order_exists')
                     goflow_order_no = order["order_number"]
                     goflow_order_status = order["status"]
                     print (goflow_order_status,goflow_id,goflow_order_no,goflow_date)
@@ -236,7 +254,7 @@ class SaleOrder(models.Model):
                     goflow_store_latest_ship = self.convert_iso_to_utc(goflow_store_latest_ship)
                     goflow_store_latest_delivery = self.convert_iso_to_utc(goflow_store_latest_delivery)
 
-
+                    print (goflow_store_latest_delivery)
                     if check_if_order_exists:
                         order = check_if_order_exists
                         order.goflow_invoice_no = goflow_invoice_no
@@ -277,7 +295,10 @@ class SaleOrder(models.Model):
                             goflow_product_id = line["product"]["id"]
                             product_obj = self.env["product.product"].search([('goflow_id','=',goflow_product_id)],limit=1)
                             product_qty = line["quantity"]["amount"]
-                            product_price = line["charges"][0]["amount"]
+                            try:
+                                product_price = line["charges"][0]["amount"]
+                            except:
+                                product_price = 0
                             goflow_line_id =line["id"]
                             tracking_obj = next(filter(lambda d: d.get('order_line_id') == goflow_line_id, tracking_line_list), None)
                             try:
