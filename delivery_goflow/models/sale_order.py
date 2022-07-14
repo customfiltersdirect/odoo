@@ -50,6 +50,8 @@ class SaleOrderLine(models.Model):
 
     goflow_id = fields.Char('Goflow ID')
     goflow_tracking_number = fields.Char('Goflow Tracking Ref')
+
+
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
@@ -65,6 +67,32 @@ class SaleOrder(models.Model):
     goflow_shipped_at = fields.Datetime('Goflow Shipped At')
     goflow_store_latest_ship = fields.Date('Goflow Store Latest Ship')
     goflow_store_latest_delivery = fields.Date('Goflow Store Latest Delivery')
+
+    @api.model
+    def create(self, vals):
+        res =  super(SaleOrder, self).create(vals)
+        if res.goflow_order_status == 'ready_to_pick':
+            if res.state == 'draft':
+                res.action_confirm()
+        if res.goflow_order_status =='shipped' :
+            if res.state == 'draft':
+                res.action_confirm()
+            if res.picking_ids:
+                for picking in res.picking_ids:
+                    picking.action_assign()
+                    picking.action_confirm()
+                    for mv in picking.move_ids_without_package:
+                        mv.quantity_done = mv.product_uom_qty
+                    picking.button_validate()
+
+            if not res.invoice_ids:
+                res._create_invoices()
+
+            if res.invoice_ids:
+                for invoice in res.invoice_ids:
+                    invoice.action_post()
+
+        return res
 
     def write(self, vals):
         goflow_order_status = vals.get('goflow_order_status')
@@ -107,6 +135,8 @@ class SaleOrder(models.Model):
             return utc_date
         else:
             return False
+
+
     def sync_so_goflow(self):
         cron_job_id = self.env.ref('delivery_goflow.sync_order_from_goflow_ir_cron')
         lastcall = cron_job_id.lastcall
