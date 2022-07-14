@@ -35,8 +35,16 @@ class ProductProduct(models.Model):
                     goflow_id = product['id']
                     check_if_product_exists = self.search([('goflow_id','=',goflow_id)])
                     goflow_item_no = product['item_number']
-                    if not check_if_product_exists:
-                        self.create({'name':prod_name,'goflow_id':goflow_id,'goflow_item_no':goflow_item_no})
+                    goflow_tags_json = product["tags"]
+                    allowed_tags = self.env['goflow.product.tag'].search([('sync_products','=',True)]).mapped('goflow_id')
+                    goflow_tags = []
+
+                    for tag in goflow_tags_json:
+                        goflow_tags.append(tag['id'])
+                    if not set(allowed_tags).isdisjoint(goflow_tags):
+
+                        if not check_if_product_exists:
+                            self.create({'name':prod_name,'goflow_id':goflow_id,'goflow_item_no':goflow_item_no})
         except:
             pass
 
