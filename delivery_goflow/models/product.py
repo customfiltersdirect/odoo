@@ -41,14 +41,14 @@ class ProductProduct(models.Model):
 
                     for tag in goflow_tags_json:
                         goflow_tags.append(tag['id'])
-                    if len(allowed_tags) == len(goflow_tags):
-                        if not check_if_product_exists:
-                            self.create({'name': prod_name, 'goflow_id': goflow_id, 'goflow_item_no': goflow_item_no})
-
-                    elif not set(allowed_tags).isdisjoint(goflow_tags):
-
-                        if not check_if_product_exists:
-                            self.create({'name':prod_name,'goflow_id':goflow_id,'goflow_item_no':goflow_item_no})
+                    # if len(allowed_tags) == len(goflow_tags):
+                    if not check_if_product_exists:
+                        self.create({'name': prod_name, 'goflow_id': goflow_id, 'goflow_item_no': goflow_item_no})
+                    #
+                    # elif not set(allowed_tags).isdisjoint(goflow_tags):
+                    #
+                    #     if not check_if_product_exists:
+                    #         self.create({'name':prod_name,'goflow_id':goflow_id,'goflow_item_no':goflow_item_no})
         except:
             pass
 
