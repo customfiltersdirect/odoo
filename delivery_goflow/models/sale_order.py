@@ -162,14 +162,15 @@ class SaleOrder(models.Model):
             first_name = order["billing_address"]["first_name"]
             last_name = order["billing_address"]["last_name"]
             if first_name and last_name:
-                print (order["billing_address"]["first_name"],order["billing_address"]["last_name"])
-                partner_name = order["billing_address"]["first_name"] or '' + " " + order["billing_address"]["last_name"]
+                vals_partner = {}
+                vals_partner['name'] = order["billing_address"]["first_name"] or '' + " " + order["billing_address"]["last_name"]
                 partner_country_code = order["billing_address"]["country_code"]
-                partner_street1 = order["billing_address"]["street1"]
-                partner_street2 = order["billing_address"]["street2"]
-                partner_city = order["billing_address"]["city"]
-                partner_state = order["billing_address"]["state"]
-                partner_zip = order["billing_address"]["zip_code"]
+                vals_partner['street'] = order["billing_address"]["street1"]
+                vals_partner['street2'] = order["billing_address"]["street2"]
+                vals_partner['city'] = order["billing_address"]["city"]
+                #vals_partner['state'] = order["billing_address"]["state"]
+                vals_partner['zip'] = order["billing_address"]["zip_code"]
+                vals_partner['type'] = 'invoice'
                 # print ("1",partner_country_code)
                 # country_id = self.env['res.country'].sudo().search([('name', '=', 'United States')], limit=1)
                 # print ("country_id",country_id)
@@ -179,12 +180,26 @@ class SaleOrder(models.Model):
                 # ], limit=1)
                 # print ("partner_state_obj",partner_state_obj)
 
+                vals_partner_ship = {}
+                vals_partner_ship['name'] = order["billing_address"]["first_name"] or '' + " " + order["billing_address"][
+                    "last_name"]
+                partner_country_code = order["shipping_address"]["country_code"]
+                vals_partner_ship['street'] = order["shipping_address"]["street1"]
+                vals_partner_ship['street2'] = order["shipping_address"]["street2"]
+                vals_partner_ship['city'] = order["shipping_address"]["city"]
+                #vals_partner_ship['state'] = order["shipping_address"]["state"]
+                vals_partner_ship['zip'] = order["shipping_address"]["zip_code"]
+                vals_partner_ship['type'] = 'delivery'
+
                 # partner_obj = self.env['res.partner'].search([('name','=',partner_name),('country_id','=',country_id)])
-                partner_obj = self.env['res.partner'].search([('name','=',partner_name)])
+                partner_obj = self.env['res.partner'].search([('name','=',vals_partner['name'])])
 
                 if not partner_obj:
                     # partner_obj = self.env['res.partner'].create({'name':partner_name,'country_id':country_id.id,'street1':partner_street1,'street2':partner_street2,'partner_zip':partner_zip,'city':partner_city,'state_id':partner_state_obj.id,'country_id':country_id})
-                    partner_obj = self.env['res.partner'].create({'name':partner_name,})
+                    
+                    partner_obj = self.env['res.partner'].create(vals_partner)
+                    vals_partner_ship['parent_id'] = partner_obj.id
+                    self.env['res.partner'].create(vals_partner_ship)
                 order_lines = order["lines"]
                 goflow_date = order["date"]
                 goflow_shipped_at = order["shipment"]["shipped_at"]
