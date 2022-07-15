@@ -68,72 +68,54 @@ class SaleOrder(models.Model):
     goflow_store_latest_ship = fields.Date('Goflow Store Latest Ship')
     goflow_store_latest_delivery = fields.Date('Goflow Store Latest Delivery')
 
-    @api.model
-    def create(self, vals):
-        print (vals,'vreate')
-        res =  super(SaleOrder, self).create(vals)
-        print (res.state,res.goflow_order_status)
-        if res.goflow_order_status == 'ready_to_pick':
-            if res.state == 'draft':
-                res.action_confirm()
-        if res.goflow_order_status =='shipped':
-            if res.state == 'draft':
-                res.action_confirm()
+    def update_so_status(self,lastcall):
+        if lastcall:
+            find_updated_orders = self.search(['|',('write_date','>=',lastcall),('create_date','>=',lastcall)])
+            for order in find_updated_orders:
+                order.create_invoice_delivery()
+        else:
+            find_all_orders = self.search([])
+            for order in find_all_orders:
+                order.create_invoice_delivery()
 
-            if res.picking_ids:
-                for picking in res.picking_ids:
-                    # picking.action_assign()
-                    # picking.action_confirm()
-                    for mv in picking.move_line_ids_without_package:
-                        if mv.product_uom_qty != 0.0:
-                            mv.qty_done = mv.product_uom_qty
-                    try:
-                        picking.button_validate()
-                    except:
-                        pass
-                if not res.invoice_ids:
-                    res._create_invoices()
 
-                if res.invoice_ids:
-                    for invoice in res.invoice_ids:
-                        invoice.action_post()
 
-        return res
-
-    def write(self, vals):
-        print (vals,'wrte')
-
-        res = super(SaleOrder, self).write(vals)
-        print (self.state,self.goflow_order_status)
-
+    def create_invoice_delivery(self):
         if self.state == 'draft' and self.goflow_order_status =='ready_to_pick' :
            self.action_confirm()
         if self.goflow_order_status == 'shipped':
             if self.state == 'draft':
                 self.action_confirm()
-            print (self.picking_ids)
+
             if self.picking_ids:
                 for picking in self.picking_ids:
-                    # picking.action_assign()
+                    if picking.state == 'waiting':
+                        picking.action_assign()
                     # picking.action_confirm()
-                    for mv in picking.move_line_ids_without_package:
-                        print (mv.product_uom_qty)
+                    for mv in picking.move_ids_without_package:
                         if mv.product_uom_qty != 0.0:
-                            mv.qty_done = mv.product_uom_qty
+                            mv.quantity_done = mv.product_uom_qty
 
-                    try:
+                    if picking.state == 'assigned':
                         picking.button_validate()
-                    except:
-                        pass
+
 
                 if not self.invoice_ids:
                     self._create_invoices()
 
-                # if self.invoice_ids:
-                #     for invoice in self.invoice_ids:
-                #         invoice.action_post()
+                if self.invoice_ids:
+                    for invoice in self.invoice_ids.filtered(lambda x: x.state == 'draft'):
+                        invoice.action_post()
 
-        return res
+
+    def api_call_for_sync_orders(self):
+        cron_job_id = self.env.ref('delivery_goflow.sync_order_from_goflow_ir_cron')
+        lastcall = cron_job_id.lastcall
+        print(lastcall)
+        self.sync_so_goflow(lastcall)
+        self.update_so_status(lastcall)
+
+
 
 
 
@@ -153,11 +135,7 @@ class SaleOrder(models.Model):
             return False
 
 
-    def sync_so_goflow(self):
-        cron_job_id = self.env.ref('delivery_goflow.sync_order_from_goflow_ir_cron')
-        lastcall = cron_job_id.lastcall
-        print (lastcall)
-
+    def sync_so_goflow(self,lastcall):
         goflow_token = self.env['ir.config_parameter'].get_param('delivery_goflow.token_goflow')
         goflow_subdomain = self.env['ir.config_parameter'].get_param('delivery_goflow.subdomain_goflow')
         if lastcall:
@@ -173,14 +151,14 @@ class SaleOrder(models.Model):
         result = requests.get(url, auth=BearerAuth(goflow_token), headers=headers)
         goflow_api = result.json()
         orders = goflow_api["data"]
-        print ("orders",len(orders))
+
 
         while goflow_api["next"]:
             goflow_api = requests.get(goflow_api["next"], auth=BearerAuth(goflow_token), headers=headers).json()
             orders.extend(goflow_api["data"])
 
         for order in orders:
-            print (order['id'])
+
             first_name = order["billing_address"]["first_name"]
             last_name = order["billing_address"]["last_name"]
             if first_name and last_name:
@@ -207,7 +185,6 @@ class SaleOrder(models.Model):
                 if not partner_obj:
                     # partner_obj = self.env['res.partner'].create({'name':partner_name,'country_id':country_id.id,'street1':partner_street1,'street2':partner_street2,'partner_zip':partner_zip,'city':partner_city,'state_id':partner_state_obj.id,'country_id':country_id})
                     partner_obj = self.env['res.partner'].create({'name':partner_name,})
-                print ("2",partner_name)
                 order_lines = order["lines"]
                 goflow_date = order["date"]
                 goflow_shipped_at = order["shipment"]["shipped_at"]
@@ -244,28 +221,26 @@ class SaleOrder(models.Model):
                 if goflow_store_obj.sync_orders:
 
                     check_if_order_exists = self.search([('goflow_id','=',goflow_id)])
-                    print (check_if_order_exists,'check_if_order_existscheck_if_order_existscheck_if_order_exists')
                     goflow_order_no = order["order_number"]
                     goflow_order_status = order["status"]
-                    print (goflow_order_status,goflow_id,goflow_order_no,goflow_date)
-                    # order_date = datetime.datetime.fromisoformat(goflow_date)
                     order_date = self.convert_iso_to_utc(goflow_date)
                     goflow_shipped_at = self.convert_iso_to_utc(goflow_shipped_at)
                     goflow_store_latest_ship = self.convert_iso_to_utc(goflow_store_latest_ship)
                     goflow_store_latest_delivery = self.convert_iso_to_utc(goflow_store_latest_delivery)
 
-                    print (goflow_store_latest_delivery)
                     if check_if_order_exists:
                         order = check_if_order_exists
-                        order.goflow_invoice_no = goflow_invoice_no
-                        order.goflow_po_no = goflow_po_no
-                        order.goflow_carrier = goflow_shipment_carrier
-                        order.goflow_shipping_method = goflow_shipment_shipping_method
-                        order.goflow_scac = goflow_shipment_scac
-                        order.goflow_order_status = goflow_order_status
-                        order.goflow_shipped_at = goflow_shipped_at
-                        order.goflow_store_latest_ship = goflow_store_latest_ship
-                        order.goflow_store_latest_delivery = goflow_store_latest_delivery
+                        vals_write={}
+                        vals_write['goflow_invoice_no'] = goflow_invoice_no
+                        vals_write['goflow_po_no'] = goflow_po_no
+                        vals_write['goflow_carrier'] = goflow_shipment_carrier
+                        vals_write['goflow_shipping_method'] = goflow_shipment_shipping_method
+                        vals_write['goflow_scac'] = goflow_shipment_scac
+                        vals_write['goflow_order_status'] = goflow_order_status
+                        vals_write['goflow_shipped_at'] = goflow_shipped_at
+                        vals_write['goflow_store_latest_ship'] = goflow_store_latest_ship
+                        vals_write['goflow_store_latest_delivery'] = goflow_store_latest_delivery
+                        order.write(vals_write)
                         for line in tracking_line_list:
                             goflow_line_id = line['order_line_id']
                             line_obj = self.env['sale.order.line'].search([('goflow_id','=',goflow_line_id)])
@@ -287,10 +262,7 @@ class SaleOrder(models.Model):
                         order_vals["goflow_shipped_at"] = goflow_shipped_at
                         order_vals["goflow_store_latest_ship"] = goflow_store_latest_ship
                         order_vals["goflow_store_latest_delivery"] = goflow_store_latest_delivery
-
-                        print (order_vals)
                         so = self.env['sale.order'].create(order_vals)
-                        print (so)
                         for line in order_lines:
                             goflow_product_id = line["product"]["id"]
                             product_obj = self.env["product.product"].search([('goflow_id','=',goflow_product_id)],limit=1)
@@ -305,7 +277,7 @@ class SaleOrder(models.Model):
                                 tracking_number = tracking_obj['tracking_number']
                             except:
                                 tracking_number = ''
-                            sol = self.env['sale.order.line'].create({
+                            self.env['sale.order.line'].create({
                                 'name': product_obj and product_obj.name or 'Test',
                                 'product_id': product_obj and product_obj.id or False,
                                 'product_uom_qty': product_qty,
@@ -317,7 +289,3 @@ class SaleOrder(models.Model):
                                 'goflow_tracking_number':tracking_number
 
                             })
-
-            # if not check_if_order_exists:
-            #     self.create({'goflow_id':goflow_id,'goflow_item_no':goflow_item_no})
-
