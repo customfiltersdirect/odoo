@@ -4,7 +4,7 @@
     'description': "Send your orders and shippings through Goflow and track them online",
     'category': 'Inventory/Delivery',
     'version':'1.0',
-    'depends': ['delivery', 'mail'],
+    'depends': ['sale', 'mail','delivery'],
     'data':[
         'security/ir.model.access.csv',
         "data/api_call_data.xml",

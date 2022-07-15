@@ -306,7 +306,7 @@ class SaleOrder(models.Model):
                             except:
                                 tracking_number = ''
                             sol = self.env['sale.order.line'].create({
-                                'name': product_obj.name,
+                                'name': product_obj and product_obj.name or '',
                                 'product_id': product_obj and product_obj.id or False,
                                 'product_uom_qty': product_qty,
                                 'product_uom': product_obj and product_obj.uom_id.id or False,
