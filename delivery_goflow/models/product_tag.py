@@ -17,7 +17,7 @@ class goflow_product_tag(models.Model):
     name = fields.Char('Name')
     goflow_id = fields.Char('Goflow ID')
     color = fields.Char('Color')
-    sync_products = fields.Boolean('Sync Products',default=True)
+    sync_products = fields.Boolean('Sync Products',default=False)
 
     def sync_product_tag_goflow(self):
         goflow_token = self.env['ir.config_parameter'].get_param('delivery_goflow.token_goflow')
