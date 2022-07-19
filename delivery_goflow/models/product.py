@@ -15,7 +15,6 @@ class ProductProduct(models.Model):
 
 
     def sync_product_goflow(self):
-        company_for_glow = self.env['res.company'].search([('use_for_goflow_api','=',True)],limit=1)
 
         goflow_token = self.env['ir.config_parameter'].get_param('delivery_goflow.token_goflow')
         goflow_subdomain = self.env['ir.config_parameter'].get_param('delivery_goflow.subdomain_goflow')
@@ -46,7 +45,7 @@ class ProductProduct(models.Model):
                     goflow_tags.append(tag['id'])
                 if len(allowed_tags) == len(total_tags):
                     if not check_if_product_exists:
-                        self.create({'name': prod_name, 'goflow_id': goflow_id, 'goflow_item_no': goflow_item_no,'company_id': company_for_glow and company_for_glow.id or False})
+                        self.create({'name': prod_name, 'goflow_id': goflow_id, 'goflow_item_no': goflow_item_no,})
                 elif not set(allowed_tags.mapped('goflow_id')).isdisjoint(goflow_tags):
                     if not check_if_product_exists:
-                        self.create({'name':prod_name,'goflow_id':goflow_id,'goflow_item_no':goflow_item_no,'company_id': company_for_glow and company_for_glow.id or False})
+                        self.create({'name':prod_name,'goflow_id':goflow_id,'goflow_item_no':goflow_item_no,})
