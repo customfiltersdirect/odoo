@@ -27,9 +27,9 @@ class ProductProduct(models.Model):
         result = requests.get(url, auth=BearerAuth(goflow_token), headers=headers)
         goflow_api = result.json()
         products = goflow_api["data"]
-        # while goflow_api["next"]:
-        #     goflow_api = requests.get(goflow_api["next"], auth=BearerAuth(goflow_token), headers=headers).json()
-        #     products.extend(goflow_api["data"])
+        while goflow_api["next"]:
+            goflow_api = requests.get(goflow_api["next"], auth=BearerAuth(goflow_token), headers=headers).json()
+            products.extend(goflow_api["data"])
 
         for product in products:
             prod_name = product['details']['name']
