@@ -12,6 +12,7 @@
         "views/sale_order_view.xml",
         "views/store_view.xml",
         "views/product_tag_view.xml",
+        "views/company_view.xml",
 
     ],
     'auto_install': True,

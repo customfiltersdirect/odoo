@@ -15,6 +15,8 @@ class ProductProduct(models.Model):
 
 
     def sync_product_goflow(self):
+        company_for_glow = self.env['res.company'].search([('use_for_goflow_api','=',True)],limit=1)
+
         goflow_token = self.env['ir.config_parameter'].get_param('delivery_goflow.token_goflow')
         goflow_subdomain = self.env['ir.config_parameter'].get_param('delivery_goflow.subdomain_goflow')
         url = 'https://%s.api.goflow.com/v1/products' % goflow_subdomain
@@ -36,19 +38,17 @@ class ProductProduct(models.Model):
                     check_if_product_exists = self.search([('goflow_id','=',goflow_id)])
                     goflow_item_no = product['item_number']
                     goflow_tags_json = product["tags"]
+                    total_tags = self.env['goflow.product.tag'].search([])
                     allowed_tags = self.env['goflow.product.tag'].search([('sync_products','=',True)]).mapped('goflow_id')
                     goflow_tags = []
-
                     for tag in goflow_tags_json:
                         goflow_tags.append(tag['id'])
-                    # if len(allowed_tags) == len(goflow_tags):
-                    if not check_if_product_exists:
-                        self.create({'name': prod_name, 'goflow_id': goflow_id, 'goflow_item_no': goflow_item_no})
-                    #
-                    # elif not set(allowed_tags).isdisjoint(goflow_tags):
-                    #
-                    #     if not check_if_product_exists:
-                    #         self.create({'name':prod_name,'goflow_id':goflow_id,'goflow_item_no':goflow_item_no})
+                    if len(allowed_tags) == len(total_tags):
+                        if not check_if_product_exists:
+                            self.create({'name': prod_name, 'goflow_id': goflow_id, 'goflow_item_no': goflow_item_no,'company_id': company_for_glow and company_for_glow.id or False})
+                    elif not set(allowed_tags).isdisjoint(goflow_tags):
+                        if not check_if_product_exists:
+                            self.create({'name':prod_name,'goflow_id':goflow_id,'goflow_item_no':goflow_item_no,'company_id': company_for_glow and company_for_glow.id or False})
         except:
             pass
 
