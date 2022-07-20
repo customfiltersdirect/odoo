@@ -7,6 +7,12 @@
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
                 <data>
+                     <xpath expr="//field[@name='partner_shipping_id']" position="attributes">
+                         <attribute name="context">
+                             {'default_type':'delivery', 'show_name_wo_parent': 1}
+                         </attribute>
+
+                    </xpath>
                     <xpath expr="//tree/field[@name='tax_id']" position="after">
                         <field name="goflow_id" optional="hide"/>
                         <field name="goflow_tracking_number" optional="hide"/>

@@ -119,7 +119,6 @@ class SaleOrder(models.Model):
     def api_call_for_sync_orders(self):
         cron_job_id = self.env.ref('delivery_goflow.sync_order_from_goflow_ir_cron')
         lastcall = cron_job_id.lastcall
-        print(lastcall)
         self.sync_so_goflow(lastcall)
         self.update_so_status(lastcall)
 
@@ -205,31 +204,24 @@ class SaleOrder(models.Model):
         headers = {
             'X-Beta-Contact': self.env.user.partner_id.email
         }
-        print (url,'ur;;')
         result = requests.get(url, auth=BearerAuth(goflow_token), headers=headers, verify=False)
         goflow_api = result.json()
         orders = goflow_api["data"]
         while goflow_api["next"]:
             goflow_api = requests.get(goflow_api["next"], auth=BearerAuth(goflow_token), headers=headers).json()
             orders.extend(goflow_api["data"])
-        print (len(orders),'afaf')
         for order in orders:
             goflow_store_id = order["store"]["id"]
             goflow_store_obj = self.env['goflow.store'].search([('goflow_id', '=', goflow_store_id)])
-            partner_ship_obj = None
-
-
-
             vals_partner_ship = {}
-            vals_partner_ship['name'] = order["shipping_address"]["first_name"] or '' + " " + (order["shipping_address"]["last_name"] or '')
+            vals_partner_ship['name'] = (order["shipping_address"]["first_name"] or '' )+ ((" " + order["shipping_address"]["last_name"]) or '')
             partner_ship_country_code = order["shipping_address"]["country_code"]
             vals_partner_ship['street'] = order["shipping_address"]["street1"]
             vals_partner_ship['street2'] = order["shipping_address"]["street2"]
             vals_partner_ship['city'] = order["shipping_address"]["city"]
             partner_ship_state_code = order["shipping_address"]["state"]
             vals_partner_ship['zip'] = order["shipping_address"]["zip_code"]
-            vals_partner_ship['email'] = order["billing_address"]["email"] or ''
-
+            vals_partner_ship['email'] = order["billing_address"]["email"] or None
             vals_partner_ship['type'] = 'delivery'
             ship_country_id = self.env['res.country'].search([('code', '=', partner_ship_country_code.upper())], limit=1)
             if ship_country_id:
