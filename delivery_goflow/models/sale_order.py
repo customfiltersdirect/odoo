@@ -214,7 +214,7 @@ class SaleOrder(models.Model):
             goflow_store_id = order["store"]["id"]
             goflow_store_obj = self.env['goflow.store'].search([('goflow_id', '=', goflow_store_id)])
             vals_partner_ship = {}
-            vals_partner_ship['name'] = (order["shipping_address"]["first_name"] or '' )+ ((" " + order["shipping_address"]["last_name"]) or '')
+            vals_partner_ship['name'] = (order["shipping_address"]["first_name"] or '' )+ ((" " + (order["shipping_address"]["last_name"] or '')))
             partner_ship_country_code = order["shipping_address"]["country_code"]
             vals_partner_ship['street'] = order["shipping_address"]["street1"]
             vals_partner_ship['street2'] = order["shipping_address"]["street2"]
