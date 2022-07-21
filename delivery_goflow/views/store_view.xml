@@ -1,0 +1,35 @@
+<odoo>
+    <data>
+        <record id="store_list_view" model="ir.ui.view">
+            <field name="name">store.list.view</field>
+            <field name="model">goflow.store</field>
+            <field name="arch" type="xml">
+                <tree string="Store" editable="bottom">
+                    <field name="name"/>
+                    <field name="channel"/>
+                    <field name="partner_id"/>
+
+                    <field name="sync_orders" widget="boolean_toggle"/>
+
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_order_stores" model="ir.actions.act_window">
+            <field name="name">Stores</field>
+            <field name="res_model">goflow.store</field>
+            <field name="view_id" ref="store_list_view"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create Order Stores
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_order_stores"
+                  parent="sale.menu_sale_config"
+
+                  name="Stores"
+                  action="action_order_stores"/>
+    </data>
+</odoo>

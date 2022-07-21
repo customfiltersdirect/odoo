@@ -1,0 +1,34 @@
+<?xml version = "1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.goflow</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval ="46"/>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@id='base_geolocalize']" position="after">
+                <div class="col-12 col-lg-6 o_setting_box" id="token_goflow_view">
+                    <div class="o_setting_right_pane">
+                        <span class ="o_form_label">Goflow</span>
+                        <div class ="content-group">
+                            <div class ="text-muted mb8">
+                                Setup a Goflow account to activate orders and shipping sync
+                            </div>
+                            <label for="goflow_token" string="API Token"/>
+                            <field name ="goflow_token"/>
+                            <br/>
+                             <label for="goflow_subdomain" string="Subdomain"/>
+                            <field name ="goflow_subdomain"/>
+                            <div class ="text-rigth" style="position:relative;">
+                                <a class="oe_link"  href="https://goflow.com/" target="_blank">
+                                    <i class="fa fa-arrow-right"/>
+                                    Get API token
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,33 @@
+<odoo>
+    <data>
+        <record id="product_tag_list_view" model="ir.ui.view">
+            <field name="name">product.tag.list.view</field>
+            <field name="model">goflow.product.tag</field>
+            <field name="arch" type="xml">
+                <tree string="Tags" editable="bottom">
+                    <field name="name"/>
+                    <field name="color"/>
+                    <field name="sync_products" widget="boolean_toggle"/>
+
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_product_tags" model="ir.actions.act_window">
+            <field name="name">Product Tags</field>
+            <field name="res_model">goflow.product.tag</field>
+            <field name="view_id" ref="product_tag_list_view"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create Product Tags
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_product_tags"
+                  parent="sale.menu_sale_config"
+
+                  name="Product Tags"
+                  action="action_product_tags"/>
+    </data>
+</odoo>

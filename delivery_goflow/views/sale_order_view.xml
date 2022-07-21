@@ -1,0 +1,49 @@
+<odoo>
+    <data>
+        <!-- included reject button in sale order form -->
+        <record id="inherit_sale_order_view" model="ir.ui.view">
+            <field name="name">sale.order.view</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <data>
+                     <xpath expr="//field[@name='partner_shipping_id']" position="attributes">
+                         <attribute name="context">
+                             {'default_type':'delivery', 'show_name_wo_parent': 1}
+                         </attribute>
+
+                    </xpath>
+                    <xpath expr="//tree/field[@name='tax_id']" position="after">
+                        <field name="goflow_id" optional="hide"/>
+                        <field name="goflow_tracking_number" optional="hide"/>
+
+                    </xpath>
+                    <xpath expr="//notebook//page[@name='other_information']" position="after">
+                        <page string="Goflow Info" name="goflow_information">
+                            <group>
+                                <group>
+                                    <field name="goflow_id"/>
+                                    <field name="goflow_order_status"/>
+                                    <field name="goflow_store_id"/>
+                                    <field name="goflow_shipped_at"/>
+                                    <field name="goflow_store_latest_ship"/>
+                                    <field name="goflow_store_latest_delivery"/>
+
+
+                                </group>
+                                <group>
+                                    <field name="goflow_order_no"/>
+                                    <field name="goflow_invoice_no"/>
+                                    <field name="goflow_po_no"/>
+                                    <field name="goflow_carrier"/>
+                                    <field name="goflow_shipping_method"/>
+                                    <field name="goflow_scac"/>
+                                </group>
+                            </group>
+                        </page>
+                    </xpath>
+                </data>
+            </field>
+        </record>
+    </data>
+</odoo>
