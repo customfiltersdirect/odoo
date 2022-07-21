@@ -91,6 +91,18 @@ class SaleOrder(models.Model):
     def create_invoice_delivery(self):
         if self.state == 'draft' and self.goflow_order_status =='ready_to_pick' :
            self.action_confirm()
+        if self.goflow_order_status == 'ready_for_pickup':
+            if self.state == 'draft':
+                self.action_confirm()
+            if self.picking_ids:
+                for picking in self.picking_ids:
+                    if picking.state == 'waiting':
+                        picking.action_assign()
+                    # picking.action_confirm()
+                    for mv in picking.move_ids_without_package:
+                        if mv.product_uom_qty != 0.0:
+                            mv.quantity_done = mv.product_uom_qty
+
         if self.goflow_order_status == 'shipped':
             if self.state == 'draft':
                 self.action_confirm()
@@ -201,6 +213,7 @@ class SaleOrder(models.Model):
             if warehouse_args:
                 url = url.rstrip()
                 url += '&' + warehouse_args
+        print (url,'urrrr')
         headers = {
             'X-Beta-Contact': self.env.user.partner_id.email
         }
