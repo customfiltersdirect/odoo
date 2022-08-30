@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="shipping_label_form" model="ir.ui.view">
+            <field name="name">shipping.label.form</field>
+            <field name="model">shipping.label</field>
+            <field name="arch" type="xml">
+                <form string="Shipping Label Form" create="false" edit="false" delete="false">
+                    <sheet>
+                        <group>
+                            <field name="create_date" widget="datetime" />
+                            <field name="carrier_id" ref="delivery_carrier" />
+                            <field name="picking_id" />
+                            <field name="tracking_numbers" />
+                            <field name="label_ids">
+                                <tree create="false" edit="false" delete="false">
+                                    <field name="document_id" />
+                                    <field name="package_id" />
+                                    <button name="print_label_with_package_via_printnode" type="object" icon="fa-print" string="Send to Printer" aria-label="Send to Printer" title="Send shipping labels to Printer via Direct Print" />
+                                </tree>
+                            </field>
+                            <field name="return_label_ids">
+                                <tree create="false" edit="false" delete="false">
+                                    <field name="document_id" />
+                                    <button name="print_label_with_package_via_printnode" type="object" icon="fa-print" string="Send to Printer" aria-label="Send to Printer" title="Send shipping labels to Printer via Direct Print" />
+                                </tree>
+                            </field>
+                            <field name="label_status" />
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="shipping_label_tree" model="ir.ui.view">
+            <field name="name">shipping.label.tree</field>
+            <field name="model">shipping.label</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Shipping Label Tree" create="false" edit="false" delete="false" decoration-muted="label_status == 'inactive'">
+                    <field name="create_date" widget="datetime" />
+                    <field name="carrier_id" ref="delivery_carrier" />
+                    <field name="picking_id" />
+                    <field name="tracking_numbers" />
+                    <field name="label_ids" />
+                    <field name="return_label_ids" />
+                    <field name="label_status" />
+                    <button name="print_via_printnode" type="object" icon="fa-print" string="Send to Printer" aria-label="Send to Printer" title="Send shipping labels to Printer via Direct Print" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="shipping_label_document_form" model="ir.ui.view">
+            <field name="name">shipping.label.document.form</field>
+            <field name="model">shipping.label.document</field>
+            <field name="arch" type="xml">
+                <form string="Shipping Label Document Form">
+                    <sheet>
+                        <group>
+                            <field name="document_id" widget="many2one_barcode" />
+                            <field name="package_id" />
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="shipping_label_search_view" model="ir.ui.view">
+            <field name="name">shipping.label.search</field>
+            <field name="model">shipping.label</field>
+            <field name="arch" type="xml">
+                <search string="Shipping Label">
+                    <filter string="Active labels" name="active_labels" domain="[('label_status', '=', 'active')]" />
+                    <field name="picking_id" />
+                </search>
+            </field>
+        </record>
+
+        <record id="shipping_labels_action" model="ir.actions.act_window">
+            <field name="name">Shipping Labels</field>
+            <field name="res_model">shipping.label</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="shipping_label_tree" />
+            <field name="context">{'search_default_active_labels': 1}</field>
+        </record>
+
+        <menuitem id="menu_shipping_labels"
+                  name="Shipping Labels"
+                  parent="menu_printnode"
+                  sequence="34"
+                  action="shipping_labels_action"
+        />
+
+    </data>
+</odoo>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="printnode_scales_form" model="ir.ui.view">
+            <field name="name">printnode_scales.form</field>
+            <field name="model">printnode.scales</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Scales" create="false" edit="true" delete="false">
+                    <header>
+                    </header>
+                    <group>
+                        <field name="id" invisible="1"/>
+                        <field name="printnode_id" />
+                        <field name="active" widget="boolean_toggle" />
+                        <field name="online" widget="boolean_toggle" />
+                        <field name="name" />
+                        <field name="device_num" />
+                        <field name="computer_id" />
+                        <field name="account_id" />
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="printnode_scales_tree" model="ir.ui.view">
+            <field name="name">printnode_scales.tree</field>
+            <field name="model">printnode.scales</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Scales" create="false" edit="false" delete="false">
+                    <field name="name" />
+                    <field name="device_num" />
+                    <field name="computer_id" />
+                    <field name="account_id" />
+                    <field name="status" invisible="1" />
+                    <field name="active" widget="boolean_toggle" />
+                    <field name="online" widget="boolean_toggle" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="printnode_scales_action" model="ir.actions.act_window">
+            <field name="name">Scales</field>
+            <field name="res_model">printnode.scales</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="printnode_scales_tree" />
+            <field name="context">{"active_test": False}</field>
+        </record>
+
+        <menuitem id="menu_printnode_scales"
+                  name="Scales"
+                  parent="menu_printnode_service"
+                  sequence="45"
+                  action="printnode_scales_action"
+        />
+
+    </data>
+</odoo>

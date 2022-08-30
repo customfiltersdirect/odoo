@@ -1,0 +1,29 @@
+.o_printnode_status_menu_releases .printnode_faq_link:first-child {
+    display: none;
+}
+
+.o_printnode_status_icon {
+    font-size: larger;
+}
+
+
+.o_printnode_status_menu_dropdown {
+    width: 400px;
+    padding: 1rem;
+}
+
+.o_printnode_status_badge {
+    position: relative;
+    transform: translate(-5px, -5px);
+    background-color: #017e84;
+    margin-right: -10px;
+}
+
+.o_printnode_status_loading {
+    width: 100%;
+    text-align: center;
+}
+
+.o_printnode_status_menu_rate_us {
+    text-align: right;
+}

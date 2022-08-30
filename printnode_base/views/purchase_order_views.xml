@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_purchase_order_rfq_printnode_search" model="ir.ui.view">
+            <field name="name">purchase.order.rfq.search</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+            <field name="arch" type="xml">
+               <filter name="activities_exception" position="before">
+                    <filter string="Printed" name="printed" domain="[('printnode_printed','=', True)]"/>
+                    <filter string="Not Printed" name="not_printed" domain="[('printnode_printed','=', False)]"/>
+                    <separator/>
+                </filter>
+            </field>
+        </record>
+
+        <record id="view_purchase_order_printnode_search" model="ir.ui.view">
+            <field name="name">purchase.order.search</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_view_search"/>
+            <field name="arch" type="xml">
+               <filter name="activities_exception" position="before">
+                    <filter string="Printed" name="printed" domain="[('printnode_printed','=', True)]"/>
+                    <filter string="Not Printed" name="not_printed" domain="[('printnode_printed','=', False)]"/>
+                    <separator/>
+                </filter>
+            </field>
+        </record>
+
+    </data>
+</odoo>

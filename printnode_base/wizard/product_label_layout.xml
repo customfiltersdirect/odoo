@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="product_label_layout_form" model="ir.ui.view">
+        <field name="name">product.label.layout.form</field>
+        <field name="model">product.label.layout</field>
+        <field name="inherit_id" ref="product.product_label_layout_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='custom_quantity']" position="before">
+                <field name="picking_quantity"/>
+            </xpath>
+            <xpath expr="/form/group" position="after">
+                <group>
+                    <group>
+                        <field name="active_model" invisible="1"/>
+                        <field name="is_dpc_enabled" invisible="1" />
+                        <field name="printer_id" widget="printnode_product_label_layout_printer_many2one" attrs="{'invisible': [('is_dpc_enabled', '=', False)]}"/>
+                        <field name="printer_bin" attrs="{'invisible': [('is_dpc_enabled', '=', False)]}"/>
+                        <field name="status" invisible="1"/>
+                    </group>
+                    <group>
+                         <span class="text-danger" attrs="{'invisible': [('status', '!=', 'offline')]}">
+                            Printer is not available. Please, choose another printer.
+                        </span>
+                    </group>
+                </group>
+                <field name="product_line_ids"
+                       attrs="{'invisible': ['|', ('picking_quantity', '!=', 'custom_per_product'), ('active_model', '=', 'product.template')]}">
+                    <tree editable="top">
+                        <field name="product_id" required="True"/>
+                        <field name="quantity"/>
+                    </tree>
+                </field>
+                <field name="product_tmpl_line_ids"
+                       attrs="{'invisible': ['|', ('picking_quantity', '!=', 'custom_per_product'), ('active_model', '=', 'product.product')]}">
+                    <tree editable="top">
+                        <field name="product_tmpl_id" required="True"/>
+                        <field name="quantity"/>
+                    </tree>
+                </field>
+            </xpath>
+            <xpath expr='//field[@name="custom_quantity"]' position="attributes">
+                <attribute name="attrs">
+                    {'invisible': [('picking_quantity', '!=', 'custom')]}
+                </attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="product_label_layout_form_picking" model="ir.ui.view">
+        <field name="name">product.label.layout.form</field>
+        <field name="model">product.label.layout</field>
+        <field name="inherit_id" ref="stock.product_label_layout_form_picking"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='picking_quantity']" position="replace"/>
+            <xpath expr='//field[@name="custom_quantity"]' position="attributes">
+                <attribute name="attrs">
+                    {'invisible': [('picking_quantity', '!=', 'custom')]}
+                </attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

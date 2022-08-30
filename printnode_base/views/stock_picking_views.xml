@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_picking_form" model="ir.ui.view">
+            <field name="name">stock.picking.form</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//header/button[@name='action_toggle_is_locked']" position="after">
+                    <button name="print_last_shipping_label"
+                            string="Print Last Shipping Label"
+                            attrs="{'invisible': ['|', '|',
+                                ('picking_type_code', '!=', 'outgoing'),
+                                ('state', 'in', ('draft', 'cancel')),
+                                ('is_locked', '=', False)]}"
+                            groups="printnode_base.printnode_security_group_user"
+                            type="object" />
+                </xpath>
+                <xpath expr="//page[last()]" position="after">
+                    <page string="Shipping Labels"
+                          attrs="{'invisible': ['|', '|',
+                                ('picking_type_code', '!=', 'outgoing'),
+                                ('state', 'in', ('draft', 'cancel')),
+                                ('is_locked', '=', False)]}"
+                          groups="printnode_base.printnode_security_group_user">
+                        <field name="shipping_label_ids" />
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_stock_picking_printnode_search" model="ir.ui.view">
+            <field name="name">stock.picking.search</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+            <field name="arch" type="xml">
+               <filter name="activities_exception" position="before">
+                    <filter string="Printed" name="printed" domain="[('printnode_printed','=', True)]"/>
+                    <filter string="Not Printed" name="not_printed" domain="[('printnode_printed','=', False)]"/>
+                    <separator/>
+                </filter>
+            </field>
+        </record>
+
+    </data>
+</odoo>

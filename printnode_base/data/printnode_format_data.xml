@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="printnode_content_type_pdf" model="printnode.format">
+            <field name="name">PDF</field>
+            <field name="qweb">qweb-pdf</field>
+        </record>
+        <record id="printnode_content_type_raw" model="printnode.format">
+            <field name="name">TXT</field>
+            <field name="qweb">qweb-text</field>
+        </record>
+        <record id="printnode_content_type_py3o" model="printnode.format">
+            <field name="name">PDF(py3o)</field>
+            <field name="qweb">py3o</field>
+        </record>
+
+    </data>
+</odoo>

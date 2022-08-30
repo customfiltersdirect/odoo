@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="printnode_print_reports_universal_wizard_form" model="ir.ui.view">
+        <field name="name">printnode.print.reports.universal.wizard.form</field>
+        <field name="model">printnode.print.reports.universal.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="report_id" required="1" options="{'no_create': True}"/>
+                </group>
+
+                <group name="documents_for_printing">
+                    <field name="record_names" readonly="1"/>
+                </group>
+
+                <group name="quantity_to_print">
+                    <field name="with_custom_qty" />
+                </group>
+
+                <group attrs="{'invisible': [('with_custom_qty', '=', True)]}">
+                    <field name="number_copy" required="1"/>
+                </group>
+
+                <group attrs="{'invisible': [('with_custom_qty', '!=', True)]}">
+                    <field name="record_line_ids" nolabel="1">
+                        <tree editable="bottom" create="false">
+                            <field name="record_id" readonly="1"/>
+                            <field name="quantity"/>
+                        </tree>
+                    </field>
+                </group>
+
+                <group name="printer">
+                    <field name="printer_id" options="{'no_create': True, 'no_open': True}"/>
+                    <field name="printer_bin" options="{'no_create': True, 'no_open': True}"/>
+                    <field name="status" invisible="1"/>
+                </group>
+
+                <p colspan="4" class="text-danger" attrs="{'invisible': [('status', '!=', 'offline')]}">
+                    Printer is not available. Please, choose another printer.
+                </p>
+
+                <footer>
+                    <button string="Print" name="do_print" type="object" class="oe_highlight"/>
+                    <button string="Cancel" class="btn btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

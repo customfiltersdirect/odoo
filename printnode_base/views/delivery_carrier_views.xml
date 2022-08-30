@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_delivery_carrier_form" model="ir.ui.view">
+            <field name="name">delivery.carrier.form</field>
+            <field name="model">delivery.carrier</field>
+            <field name="inherit_id" ref="delivery.view_delivery_carrier_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//notebook/page[last()]" position="after">
+                    <page name="printnode" string="Direct Print">
+                        <group>
+                            <field name="autoprint_paperformat_id" />
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_delivery_carrier_printnode_tree" model="ir.ui.view">
+            <field name="name">delivery.carrier.printnode.tree</field>
+            <field name="model">delivery.carrier</field>
+            <field name="priority">100</field>
+            <field name="arch" type="xml">
+                <tree string="Delivery Carrier" editable="bottom" create="false" delete="false">
+                    <field name="name" readonly="1" />
+                    <field name="autoprint_paperformat_id" />
+                    <field name="printer_id" options="{'no_create': True}" />
+                    <field name="printer_bin" options="{'no_create': True}" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="printnode_carrier_settings" model="ir.actions.act_window">
+            <field name="name">Quick Delivery Carrier Direct Print Settings</field>
+            <field name="res_model">delivery.carrier</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="printnode_base.view_delivery_carrier_printnode_tree" />
+        </record>
+
+        <menuitem id="menu_printnode_carrier_settings"
+                  name="Delivery Carrier Settings"
+                  parent="menu_printnode_policy"
+                  sequence="35"
+                  action="printnode_carrier_settings"
+        />
+
+    </data>
+</odoo>

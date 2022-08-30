@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="printnode_computer_form" model="ir.ui.view">
+            <field name="name">printnode_computer.form</field>
+            <field name="model">printnode.computer</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Computer" create="false" edit="false" delete="false">
+                    <header></header>
+                    <group>
+                        <field name="printnode_id" />
+                        <field name="active" widget="boolean_toggle" />
+                        <field name="name" />
+                        <field name="status" />
+                        <field name="account_id" />
+                        <field name="printer_ids" />
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="printnode_computer_tree" model="ir.ui.view">
+            <field name="name">printnode_computer.tree</field>
+            <field name="model">printnode.computer</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Computers" editable="bottom" create="false" edit="false" delete="false">
+                    <field name="printnode_id" />
+                    <field name="name" />
+                    <field name="status" />
+                    <field name="account_id" />
+                    <field name="active" widget="boolean_toggle" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="printnode_computer_action" model="ir.actions.act_window">
+            <field name="name">Computers</field>
+            <field name="res_model">printnode.computer</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="printnode_computer_tree" />
+            <field name="context">{"active_test": False}</field>
+        </record>
+
+        <menuitem id="menu_printnode_computers"
+                  name="Computers"
+                  parent="menu_printnode_service"
+                  sequence="39"
+                  action="printnode_computer_action"
+        />
+
+    </data>
+</odoo>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<templates>
+    <t t-name="printnode_workstation_devices">
+        <t t-foreach="devices" t-as="device">
+            <div>
+                <b><t t-esc="device[0]" />:</b>
+                <t t-if="device[1]">
+                    <t t-esc="device[1]" />
+                </t>
+                <t t-else="">
+                    Device isn't set
+                </t>
+                
+            </div>
+        </t>
+    </t>
+</templates>

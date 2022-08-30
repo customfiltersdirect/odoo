@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="printnode_security_category" model="ir.module.category">
+            <field name="name">Direct Print</field>
+            <field name="sequence">90</field>
+        </record>
+
+        <record id="printnode_security_group_user" model="res.groups">
+            <field name="name">User</field>
+            <field name="category_id" ref="printnode_security_category" />
+        </record>
+
+        <record id="printnode_security_group_manager" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+            <field name="implied_ids" eval="[(4, ref('printnode_security_group_user'))]" />
+            <field name="category_id" ref="printnode_security_category" />
+        </record>
+
+    </data>
+
+    <record model="res.groups" id="base.group_user">
+        <field name="implied_ids" eval="[(4, ref('printnode_security_group_user'))]" />
+    </record>
+</odoo>

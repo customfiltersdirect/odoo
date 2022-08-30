@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <menuitem id="menu_printnode"
+                  name="Direct Print"
+                  sequence="80"
+                  web_icon="printnode_base,static/description/icon.png"
+                  groups="printnode_security_group_manager"
+        />
+
+        <menuitem id="menu_printnode_policy"
+                  name="Print Report Policy"
+                  parent="menu_printnode"
+                  sequence="30"
+        />
+
+        <menuitem id="menu_printnode_service"
+                  name="Configuration"
+                  parent="menu_printnode"
+                  sequence="36"
+        />
+
+    </data>
+</odoo>
