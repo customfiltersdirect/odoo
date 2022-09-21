@@ -222,7 +222,6 @@ class SaleOrder(models.Model):
         headers = {
             'X-Beta-Contact': self.env.user.partner_id.email
         }
-        error
         result = requests.get(url, auth=BearerAuth(goflow_token), headers=headers, verify=False)
         goflow_api = result.json()
         orders = goflow_api["data"]
