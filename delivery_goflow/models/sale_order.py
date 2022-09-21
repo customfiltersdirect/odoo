@@ -208,7 +208,9 @@ class SaleOrder(models.Model):
                 url += '&' + warehouse_args
 
         else:
-            goflow_cutoff = goflow_cutoff_date.strftime('%Y-%m-%dT%H:%M:%SZ ')
+            datetime_obj = datetime.strptime(goflow_cutoff_date, '%Y-%m-%d %H:%M:%S')
+
+            goflow_cutoff = datetime_obj.strftime('%Y-%m-%dT%H:%M:%SZ ')
             url = 'https://%s.api.goflow.com/v1/orders?filters[status]=ready_for_pickup&filters[date:gte]=%s'  % (goflow_subdomain,str(goflow_cutoff))
             if store_args:
                 url = url.rstrip()
@@ -220,6 +222,7 @@ class SaleOrder(models.Model):
         headers = {
             'X-Beta-Contact': self.env.user.partner_id.email
         }
+        error
         result = requests.get(url, auth=BearerAuth(goflow_token), headers=headers, verify=False)
         goflow_api = result.json()
         orders = goflow_api["data"]
