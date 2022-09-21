@@ -32,7 +32,7 @@ class SaleOrder(models.Model):
                 ("state", "in", ("assigned", "partially_available")),
                 ("batch_id", "=", False),
 
-            ],limit=no_of_orders
+            ],limit=int(no_of_orders)
         )
 
     def _create_batch(self, pickings):

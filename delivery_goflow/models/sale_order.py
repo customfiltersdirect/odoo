@@ -343,7 +343,7 @@ class SaleOrder(models.Model):
                     goflow_product_item_no = line["product"]["item_number"]
                     product_obj = self.env["product.product"].search([('goflow_id','=',goflow_product_id)],limit=1)
                     if not product_obj:
-                        product_obj =  self.create({'name':goflow_product_name,'goflow_id':goflow_product_id,'goflow_item_no':goflow_product_item_no,'company_id': company_for_glow and company_for_glow.id or False})
+                        product_obj =  self.env['product.product'].create({'name':goflow_product_name,'goflow_id':goflow_product_id,'goflow_item_no':goflow_product_item_no,'company_id': company_for_glow and company_for_glow.id or False})
 
 
                     product_qty = line["quantity"]["amount"]
