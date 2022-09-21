@@ -14,6 +14,9 @@
                             <div class ="text-muted mb8">
                                 Setup a Goflow account to activate orders and shipping sync
                             </div>
+                              <label for="goflow_cutoff_date" string="Cut Off Date"/>
+                            <field name ="goflow_cutoff_date"/>
+                             <br/>
                             <label for="goflow_token" string="API Token"/>
                             <field name ="goflow_token"/>
                             <br/>

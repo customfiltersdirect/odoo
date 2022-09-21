@@ -17,6 +17,8 @@ class BearerAuth(requests.auth.AuthBase):
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
+    ## new date for cut off
+    goflow_cutoff_date = fields.Datetime('Cutoff Date',config_parameter='delivery_goflow.goflow_cutoff_date',help='Cut off Date')
     goflow_token = fields.Char(config_parameter='delivery_goflow.token_goflow',string = 'Token GoFlow', help='Necessary for integrations w', copy=True, default='5a07ac83f5d04ad89390da6026bf63d4', store=True)
     goflow_subdomain = fields.Char(config_parameter='delivery_goflow.subdomain_goflow',string='Subdomain',help='Subdomain of Goflow account',copy=True, default='Mervfilters', store=True)
     @api.onchange('goflow_token','goflow_subdomain')

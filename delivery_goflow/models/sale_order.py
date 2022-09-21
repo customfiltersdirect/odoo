@@ -193,6 +193,8 @@ class SaleOrder(models.Model):
         company_for_glow = self.env['res.company'].search([('use_for_goflow_api','=',True)],limit=1)
         goflow_token = self.env['ir.config_parameter'].get_param('delivery_goflow.token_goflow')
         goflow_subdomain = self.env['ir.config_parameter'].get_param('delivery_goflow.subdomain_goflow')
+        goflow_cutoff_date = self.env['ir.config_parameter'].get_param('delivery_goflow.goflow_cutoff_date')
+
         store_args = self.get_store_param()
         warehouse_args = self.get_warehouse_param(company_for_glow)
         if lastcall:
@@ -206,10 +208,11 @@ class SaleOrder(models.Model):
                 url += '&' + warehouse_args
 
         else:
-            url = 'https://%s.api.goflow.com/v1/orders' % goflow_subdomain
+            goflow_cutoff = goflow_cutoff_date.strftime('%Y-%m-%dT%H:%M:%SZ ')
+            url = 'https://%s.api.goflow.com/v1/orders?filters[status]=ready_for_pickup&filters[date:gte]=%s'  % (goflow_subdomain,str(goflow_cutoff))
             if store_args:
                 url = url.rstrip()
-                url += '?'+store_args
+                url += '&'+store_args
             if warehouse_args:
                 url = url.rstrip()
                 url += '&' + warehouse_args
