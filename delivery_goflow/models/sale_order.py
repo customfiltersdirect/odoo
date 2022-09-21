@@ -65,6 +65,7 @@ class SaleOrder(models.Model):
 
     goflow_id = fields.Char('Goflow ID')
     goflow_order_no = fields.Char('Goflow Order Number')
+    goflow_order_date = fields.Date('Goflow Order Date')
     goflow_order_status = fields.Char('Goflow Order Status')
     goflow_store_id = fields.Many2one('goflow.store','Store')
     goflow_invoice_no = fields.Char('Goflow Invoice No')
@@ -309,6 +310,7 @@ class SaleOrder(models.Model):
                 vals_write['goflow_shipped_at'] = goflow_shipped_at
                 vals_write['goflow_store_latest_ship'] = goflow_store_latest_ship
                 vals_write['goflow_store_latest_delivery'] = goflow_store_latest_delivery
+                vals_write['goflow_order_date'] = order_date
                 order.write(vals_write)
 
                 for line in tracking_line_list:
@@ -325,6 +327,7 @@ class SaleOrder(models.Model):
                 order_vals['warehouse_id'] = warehouse_obj.id
                 order_vals['goflow_id'] = goflow_id
                 order_vals['goflow_order_no'] = goflow_order_no
+                order_vals['goflow_order_date'] = order_date
                 order_vals['goflow_order_status'] = goflow_order_status
                 order_vals['goflow_store_id'] = goflow_store_obj.id
                 order_vals["goflow_invoice_no"]=goflow_invoice_no
