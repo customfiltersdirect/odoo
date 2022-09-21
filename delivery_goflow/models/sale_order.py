@@ -211,7 +211,7 @@ class SaleOrder(models.Model):
             datetime_obj = datetime.strptime(goflow_cutoff_date, '%Y-%m-%d %H:%M:%S')
 
             goflow_cutoff = datetime_obj.strftime('%Y-%m-%dT%H:%M:%SZ ')
-            url = 'https://%s.api.goflow.com/v1/orders?filters[status]=ready_for_pickup&filters[date:gte]=%s'  % (goflow_subdomain,str(goflow_cutoff))
+            url = 'https://%s.api.goflow.com/v1/orders?filters[status]=ready_to_pick&filters[date:gte]=%s'  % (goflow_subdomain,str(goflow_cutoff))
             if store_args:
                 url = url.rstrip()
                 url += '&'+store_args
@@ -228,6 +228,7 @@ class SaleOrder(models.Model):
         while goflow_api["next"]:
             goflow_api = requests.get(goflow_api["next"], auth=BearerAuth(goflow_token), headers=headers).json()
             orders.extend(goflow_api["data"])
+        print (len(orders))
         for order in orders:
             goflow_store_id = order["store"]["id"]
             goflow_store_obj = self.env['goflow.store'].search([('goflow_id', '=', goflow_store_id)])
