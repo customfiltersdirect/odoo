@@ -1,0 +1,27 @@
+<?xml version = "1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.auto.batch</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval ="46"/>
+        <field name="inherit_id" ref="sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@id='product_configurator']" position="after">
+                <div class="col-12 col-lg-6 o_setting_box" id="auto_batch_view">
+                    <div class="o_setting_right_pane">
+                        <span class ="o_form_label">Auto Batch Orders</span>
+                        <div class ="content-group">
+                            <div class ="text-muted mb8">
+                                Orders to be completed before auto batch is initiated
+                            </div>
+                            <label for="auto_batch_orders" string="After"/>
+                            <field name ="auto_batch_orders"/> Orders
+                            <br/>
+
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

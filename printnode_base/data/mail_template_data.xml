@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="reaching_limit_notification_email" model="mail.template">
+            <field name="name">Direct Print Account Reaching Limit</field>
+            <field name="model_id" ref="base.model_res_company"/>
+            <field name="email_from">${object.email |safe}</field>
+            <field name="email_to">${object.printnode_notification_email}</field>
+            <field name="subject">Direct Print Account Reaching Limit</field>
+            <field name="auto_delete" eval="True"/>
+            <field name="lang">${object.partner_id.lang}</field>
+            <field name="body_html"><![CDATA[
+<p>Hello.</p>
+<br/>
+<p>
+    The following accounts are reaching their printing limits. You can still print for an additional fee (billed per print). Upgrade your Direct Print plan to avoid additional expenses!
+    <br>
+    % for account in ctx['accounts']:
+        ${account.name} - ${account.printed} out of ${account.limits} prints left
+    % endfor
+</p>
+<br/>
+]]>
+            </field>
+        </record>
+    </data>
+</odoo>

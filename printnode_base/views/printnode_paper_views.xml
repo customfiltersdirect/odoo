@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="printnode_paper_tree" model="ir.ui.view">
+            <field name="name">printnode_paper.tree</field>
+            <field name="model">printnode.paper</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Papers" editable="bottom">
+                    <field name="name" />
+                    <field name="width" />
+                    <field name="height" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="printnode_paper_action" model="ir.actions.act_window">
+            <field name="name">Papers</field>
+            <field name="res_model">printnode.paper</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="printnode_paper_tree" />
+        </record>
+
+        <menuitem id="menu_printnode_papers"
+                  name="Papers"
+                  parent="menu_printnode_service"
+                  sequence="50"
+                  action="printnode_paper_action"
+        />
+
+    </data>
+</odoo>

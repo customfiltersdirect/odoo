@@ -1,0 +1,16 @@
+<templates>
+    <t t-name="printnode.DownloadDDMenu" t-inherit="web.DropdownMenu" t-inherit-mode="primary" owl="1">
+        <xpath expr="//DropdownMenuItem" position="replace">
+            <DownloadDDMenuItem t-else="" t-props="item"/>
+        </xpath>
+    </t>
+    <t t-inherit="web.ActionMenus" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[hasclass('o_cp_action_menus')]/DropdownMenu[@items='printItems']" position="after">
+            <DownloadDDMenu t-if="printItems.length and printnode_enabled"
+                title="env._t('Download')"
+                items="printItems"
+                icon="'fa fa-download'"
+            />
+        </xpath>
+    </t>
+</templates>

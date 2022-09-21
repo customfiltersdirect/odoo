@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="printnode_scenario_tree" model="ir.ui.view">
+            <field name="name">printnode.scenario.tree</field>
+            <field name="model">printnode.scenario</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Scenarios" editable="bottom" decoration-muted="not active">
+                    <field name="action" options="{'no_create': True}" />
+                    <field name="domain" readonly="1" />
+                    <field name="description" />
+                    <field name="reports_model_id" groups="base.group_no_one" readonly="1" />
+                    <field name="report_id" options="{'no_create': True}"
+                                            domain="[
+                                                ('model_id', '=', reports_model_id),
+                                                ('report_type', 'in', ['qweb-pdf', 'qweb-text', 'py3o']),
+                                                ('report_name', 'not in', [
+                                                    'sale.report_saleorder_pro_forma',
+                                                    'product.report_pricelist',
+                                                ]),
+                                            ]"/>
+                    <field name="number_of_copies" />
+                    <field name="printer_id" options="{'no_create': True}" />
+                    <field name="printer_bin" options="{'no_create': True}" />
+                    <field name="active" widget="boolean_toggle" />
+                    <button name="edit_domain" string="Domain Editor" type="object" icon="fa-edit" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="printnode_scenario_domain_editor" model="ir.ui.view">
+            <field name="name">printnode.scenario.domain.editor</field>
+            <field name="model">printnode.scenario</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <field name="model_id" readonly="1" />
+                        <field name="model" readonly="1" />
+                        <field name="domain" widget="domain" options="{'model': 'model'}" />
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="printnode_scenarios" model="ir.actions.act_window">
+            <field name="name">Scenarios</field>
+            <field name="res_model">printnode.scenario</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="printnode_scenario_tree" />
+            <field name="context">{'active_test': False}</field>
+        </record>
+
+        <menuitem id="menu_printnode_scenarios"
+                  name="Print Scenarios"
+                  parent="menu_printnode"
+                  sequence="33"
+                  action="printnode_scenarios"
+        />
+
+    </data>
+</odoo>

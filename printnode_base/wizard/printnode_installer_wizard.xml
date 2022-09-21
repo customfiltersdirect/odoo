@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="printnode_installer_wizard_view" model="ir.ui.view">
+            <field name="name">printnode.installer.form</field>
+            <field name="model">printnode.installer</field>
+            <field name="arch" type="xml">
+                <form string='Direct Print Client Installer'>
+                    <field invisible="1" name="state"/>
+
+                    <h1>App Installed</h1>
+                    <div states="introduction">
+                        <p>
+                            Now you need to subscribe to our Printing Service.
+                            <br />
+                            <small>
+                                Or
+                                <button string="enter your API key" name="show_settings" type="object" class="btn-link btn-small p-0"/>
+                                if you already have it
+                            </small>
+                        </p>
+
+                        <hr />
+
+                        <a href="https://print.ventor.tech/docs" target="_blank">Installation Documentation</a>
+
+                    </div>
+
+                    <group states="settings">
+                        <field name="api_key" />
+                        <!-- <field name="is_allowed_to_collect_data" /> -->
+                    </group>
+
+                    <footer states="introduction">
+                        <button string="Continue" name="get_api_key" type="object" class="btn-primary"/>
+                    </footer>
+
+                    <footer states="settings">
+                        <button string="Save" name="save_settings" type="object" class="btn-primary"/>
+                        <button string="Back" name="show_introduction" type="object" class="btn-secondary"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="printnode_installer_action" model="ir.actions.act_window">
+            <field name="name">Direct Print Client Installer</field>
+            <field name="res_model">printnode.installer</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="printnode_installer_wizard_view"/>
+            <field name="target">new</field>
+        </record>
+    </data>
+
+    <data noupdate="1">
+        <record id="printnode_installer_todo" model="ir.actions.todo">
+            <field name="state">open</field>
+            <field name="action_id" ref="printnode_installer_action"/>
+        </record>
+    </data>
+</odoo>

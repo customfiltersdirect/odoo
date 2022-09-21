@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_sale_order_quotation_printnode_search" model="ir.ui.view">
+            <field name="name">sale.order.quotation.search</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.sale_order_view_search_inherit_quotation"/>
+            <field name="arch" type="xml">
+               <filter name="filter_create_date" position="before">
+                    <filter string="Printed" name="printed" domain="[('printnode_printed','=', True)]"/>
+                    <filter string="Not Printed" name="not_printed" domain="[('printnode_printed','=', False)]"/>
+                    <separator/>
+                </filter>
+            </field>
+        </record>
+
+        <record id="view_sale_order_printnode_search" model="ir.ui.view">
+            <field name="name">sale.order.search</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.sale_order_view_search_inherit_sale"/>
+            <field name="arch" type="xml">
+               <filter name="order_date" position="before">
+                    <filter string="Printed" name="printed" domain="[('printnode_printed','=', True)]"/>
+                    <filter string="Not Printed" name="not_printed" domain="[('printnode_printed','=', False)]"/>
+                    <separator/>
+                </filter>
+            </field>
+        </record>
+
+    </data>
+</odoo>

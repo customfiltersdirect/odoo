@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_account_move_printnode_search" model="ir.ui.view">
+            <field name="name">account.out.invoice.tree</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+            <field name="arch" type="xml">
+               <filter name="invoice_date" position="before">
+                    <filter string="Printed" name="printed" domain="[('printnode_printed','=', True)]"/>
+                    <filter string="Not Printed" name="not_printed" domain="[('printnode_printed','=', False)]"/>
+                    <separator/>
+                </filter>
+            </field>
+        </record>
+
+    </data>
+</odoo>

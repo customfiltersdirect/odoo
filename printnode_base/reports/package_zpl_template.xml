@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_package_slip_zpl">
+<t t-foreach="docs" t-as="o">
+^XA
+
+<t t-if="o.quant_ids">
+
+^CF0,30
+^FO30,30^FDProduct^FS
+^FO640,30^FDQuantity^FS
+^FO0,70^GB800,1,1^FS
+<t t-set="margin" t-value="85"/>
+
+
+^CFdN,22
+<t t-set="count" t-value="0"/>
+<t t-set="product_len" t-value="0"/>
+<t t-set="line_draw" t-value="85"/>
+<t t-foreach="o.quant_ids" t-as="quant">
+    <t t-set="product_len" t-value="len(quant.product_id.display_name)"/>
+    <t t-set="count" t-value="int(count) + 1"/>
+    <t t-set="line_draw" t-value="line_draw"/>
+    <t t-if="int(count) != 1 and margin != line_draw">
+        <t t-set="margin" t-value="margin + 40"/>
+^FO0,<t t-esc="str(margin)"/>^GB800,1,1^FS
+        <t t-set="margin" t-value="int(margin) + 15"/>
+    </t>
+^FB400,20^FO30,<t t-esc="str(margin)"/>^AdN,22,12^FH^FD<t t-out="quant.product_id.display_name.replace('^', '_5E').replace('~', '_7E')"/>^FS
+
+^FB400,20^FO660,<t t-esc="str(margin)"/>^AdN,22,12^FD<t t-esc="quant.quantity"/>^FS
+<t t-set="margin" t-value="int(margin) + 30"/>
+^FB400,20^FO660,<t t-esc="str(margin)"/>^AdN,22,12^FD<t t-esc="quant.product_id.uom_id.name"/>^FS
+    <t t-if="product_len &gt; 200">
+        <t t-set="margin" t-value="int(margin) + 95"/>
+    </t>
+    <t t-if="product_len &gt; 150 and product_len &lt; 200">
+        <t t-set="margin" t-value="int(margin) + 75"/>
+    </t>
+    <t t-if="product_len &gt; 100 and product_len &lt; 150">
+        <t t-set="margin" t-value="int(margin) + 65"/>
+    </t>
+    <t t-if="product_len &gt; 50 and product_len &lt; 100">
+        <t t-set="margin" t-value="int(margin) + 45"/>
+    </t>
+
+    <t t-if="margin &gt; 1075 and count != len(o.quant_ids)">
+
+<t t-set="margin" t-value="85"/>
+<t t-set="line_draw" t-value="85"/>
+^XZ
+^XA
+^CF0,30
+^FO30,30^FDProduct^FS
+^FO640,30^FDQuantity^FS
+^FO0,70^GB800,1,1^FS
+
+    </t>
+</t>
+<t t-set="outer_margin" t-value="int(margin) + 80"/>
+</t>
+
+^XZ
+        </t>
+    </template>
+
+    <record id="action_report_package_slip_zpl" model="ir.actions.report">
+        <field name="name">Package Content (ZPL)</field>
+        <field name="model">stock.quant.package</field>
+        <field name="report_type">qweb-text</field>
+        <field name="report_name">printnode_base.report_package_slip_zpl</field>
+        <field name="report_file">printnode_base.report_package_slip_zpl</field>
+        <field name="print_report_name">'Package Slip - %s' % object.name</field>
+        <field name="binding_model_id" ref="stock.model_stock_quant_package"/>
+        <field name="binding_type">report</field>
+    </record>
+
+</odoo>

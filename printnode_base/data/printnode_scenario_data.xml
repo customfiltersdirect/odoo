@@ -1,0 +1,144 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="transfer_confirm_ups_carrier_scenario" model="printnode.scenario">
+            <field name="action" eval="ref('printnode_base.print_document_on_transfer')" />
+            <field name="active">False</field>
+            <field name="description">Print Delivery Slip only for UPS Delivery Carrier (after validation)</field>
+            <field name="domain">[["carrier_id.delivery_type","=","ups"]]</field>
+            <field name="model_id" eval="ref('stock.model_stock_picking')"/>
+            <field name="report_id" eval="ref('stock.action_report_delivery')"/>
+        </record>
+
+        <record id="transfer_confirm_nl_only_scenario" model="printnode.scenario">
+            <field name="action" eval="ref('printnode_base.print_document_on_transfer')" />
+            <field name="active">False</field>
+            <field name="description">Print Delivery Slip only for Customers from Netherlands (after validation)</field>
+            <field name="domain">[["partner_id.country_id.code","=","NL"]]</field>
+            <field name="model_id" eval="ref('stock.model_stock_picking')"/>
+            <field name="report_id" eval="ref('stock.action_report_delivery')"/>
+        </record>
+
+        <record id="transfer_confirm_outgoing_scenario" model="printnode.scenario">
+            <field name="action" eval="ref('printnode_base.print_document_on_transfer')" />
+            <field name="active">False</field>
+            <field name="description">Print Delivery Slip for all outgoing transfers (after validation)</field>
+            <field name="domain">[["picking_type_code","=","outgoing"]]</field>
+            <field name="model_id" eval="ref('stock.model_stock_picking')"/>
+            <field name="report_id" eval="ref('stock.action_report_delivery')"/>
+        </record>
+
+        <record id="transfer_confirm_with_backorder_scenario" model="printnode.scenario">
+            <field name="action" eval="ref('printnode_base.print_document_on_backorder')" />
+            <field name="active">False</field>
+            <field name="description">Print Delivery Slip after Delivery Order Confirmation for backorder (created after Transfer validation)</field>
+            <field name="model_id" eval="ref('stock.model_stock_picking')"/>
+            <field name="report_id" eval="ref('stock.action_report_delivery')"/>
+        </record>
+
+        <record id="sale_order_confirm_scenario" model="printnode.scenario">
+            <field name="action" eval="ref('printnode_base.print_document_on_sales_order')" />
+            <field name="active">False</field>
+            <field name="description">Print document on Sales Order (after confirmation)</field>
+            <field name="model_id" eval="ref('sale.model_sale_order')"/>
+            <field name="report_id" eval="ref('sale.action_report_saleorder')"/>
+        </record>
+
+        <record id="purchase_order_confirm_scenario" model="printnode.scenario">
+            <field name="action" eval="ref('printnode_base.print_document_on_purchase_order')" />
+            <field name="active">False</field>
+            <field name="description">Print document on Purchase Order (after confirmation)</field>
+            <field name="model_id" eval="ref('purchase.model_purchase_order')"/>
+            <field name="report_id" eval="ref('purchase.action_report_purchase_order')"/>
+        </record>
+
+        <record id="print_product_labels_on_transfer_scenario" model="printnode.scenario">
+            <field name="action" eval="ref('printnode_base.print_product_labels_on_transfer')" />
+            <field name="active">False</field>
+            <field name="description">Print product labels for validated transfer</field>
+            <field name="domain">[["picking_type_code","=","incoming"]]</field>
+            <field name="report_id" eval="ref('stock.label_product_product')"/>
+        </record>
+
+        <record id="print_picking_document_after_so_confirmation_scenario" model="printnode.scenario">
+            <field name="action" eval="ref('printnode_base.print_picking_document_after_so_confirmation')" />
+            <field name="active">False</field>
+            <field name="description">Print Picking Document after Sales Order Validation</field>
+            <field name="report_id" eval="ref('stock.action_report_picking')"/>
+        </record>
+
+        <record id="print_picking_document_after_po_confirmation_scenario" model="printnode.scenario">
+            <field name="action" eval="ref('printnode_base.print_picking_document_after_po_confirmation')" />
+            <field name="active">False</field>
+            <field name="description">Print Picking Document after Purchase Order Validation</field>
+            <field name="report_id" eval="ref('stock.action_report_picking')"/>
+        </record>
+
+        <record id="print_single_product_label_on_transfer_scenario" model="printnode.scenario">
+            <field name="action" eval="ref('printnode_base.print_single_product_label_on_transfer')" />
+            <field name="active">False</field>
+            <field name="description">Print single product label when processing Incoming Shipment</field>
+            <field name="domain">[["picking_type_code","=","incoming"]]</field>
+            <field name="report_id" eval="ref('stock.label_product_product')"/>
+        </record>
+
+        <record id="print_single_lot_labels_on_transfer_after_validation_scenario" model="printnode.scenario">
+            <field name="action" eval="ref('printnode_base.print_single_lot_labels_on_transfer_after_validation')" />
+            <field name="active">False</field>
+            <field name="description">Print single lot labels for validated transfer</field>
+            <field name="domain">[["picking_type_code","=","incoming"]]</field>
+            <field name="report_id" eval="ref('stock.action_report_lot_label')"/>
+        </record>
+
+        <record id="print_multiple_lot_labels_on_transfer_after_validation_scenario" model="printnode.scenario">
+            <field name="action" eval="ref('printnode_base.print_multiple_lot_labels_on_transfer_after_validation')" />
+            <field name="active">False</field>
+            <field name="description">Print multiple lot labels for validated transfer</field>
+            <field name="domain">[["picking_type_code","=","incoming"]]</field>
+            <field name="report_id" eval="ref('stock.action_report_lot_label')"/>
+        </record>
+
+        <record id="print_single_lot_label_on_transfer_scenario" model="printnode.scenario">
+            <field name="action" eval="ref('printnode_base.print_single_lot_label_on_transfer')" />
+            <field name="active">False</field>
+            <field name="description">Print lot labels when processing Incoming Shipment</field>
+            <field name="domain">[["picking_type_code","=","incoming"]]</field>
+            <field name="report_id" eval="ref('stock.action_report_lot_label')"/>
+        </record>
+
+        <record id="print_packages_label_on_transfer_scenario" model="printnode.scenario">
+            <field name="action" eval="ref('printnode_base.print_packages_label_on_transfer')" />
+            <field name="active">False</field>
+            <field name="description">Print All Packages after Delivery Order is Validated</field>
+            <field name="domain">[["picking_type_code","=","outgoing"]]</field>
+            <field name="report_id" eval="ref('printnode_base.action_report_package_slip_zpl')"/>
+        </record>
+
+        <record id="print_customer_invoice_on_validation" model="printnode.scenario">
+            <field name="action" eval="ref('printnode_base.print_invoice_document_after_validation')" />
+            <field name="active">False</field>
+            <field name="description">Print Customer Invoice after Validation</field>
+            <field name="domain">[["move_type","=","out_invoice"]]</field>
+            <field name="report_id" eval="ref('account.account_invoices')"/>
+        </record>
+
+        <record id="print_delivery_slip_on_picking_status_becomes_ready" model="printnode.scenario">
+            <field name="action" eval="ref('printnode_base.print_document_on_picking_status_change')" />
+            <field name="active">False</field>
+            <field name="description">Print Delivery Slip on Picking Status becomes Ready</field>
+            <field name="domain">[["state","=","assigned"], ["picking_type_code","=","outgoing"]]</field>
+            <field name="model_id" eval="ref('stock.model_stock_picking')"/>
+            <field name="report_id" eval="ref('stock.action_report_delivery')"/>
+        </record>
+
+        <record id="print_package_on_put_in_pack_scenario" model="printnode.scenario">
+            <field name="action" eval="ref('printnode_base.print_package_on_put_in_pack')" />
+            <field name="active">False</field>
+            <field name="description">Print Package on Put in Pack for Internal Pickings</field>
+            <field name="domain">[["picking_type_code","=","internal"]]</field>
+            <field name="report_id" eval="ref('stock.action_report_quant_package_barcode_small')"/>
+        </record>
+
+    </data>
+</odoo>

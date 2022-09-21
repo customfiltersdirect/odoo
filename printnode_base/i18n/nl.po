@@ -1,0 +1,1016 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* printnode_base
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 13.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-08-25 12:11+0000\n"
+"PO-Revision-Date: 2020-08-25 12:11+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_account_form
+msgid "9f68a54b09ff07ae13d4442c120ff0eeaaeadfxx"
+msgstr ""
+
+#. module: printnode_base
+#. openerp-web
+#: code:addons/printnode_base/static/src/js/action_manager.js:0
+#, python-format
+msgid ""
+"A popup window with your report was blocked. You may need to change your "
+"browser settings to allow popup windows for this page."
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_computer__account_id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printer__account_id
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_account_form
+msgid "Account"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.constraint,message:printnode_base.constraint_printnode_account_printnode_id
+msgid "Account already exists."
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.actions.act_window,name:printnode_base.printnode_account_action
+#: model:ir.ui.menu,name:printnode_base.menu_printnode_accounts
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_account_tree
+msgid "Accounts"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,help:printnode_base.field_printnode_action_button__active
+msgid ""
+"Activate or Deactivate the print action button.\n"
+"                If no active then move to the status 'archive'.\n"
+"                Still can by found using filters button"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,help:printnode_base.field_printnode_rule__active
+msgid ""
+"Activate or Deactivate the report policy.\n"
+"                If no active then move to the status 'archive'.\n"
+"                Still can by found using filters button"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_button__active
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_computer__active
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printer__active
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_rule__active
+#: model:ir.model.fields.selection,name:printnode_base.selection__shipping_label__label_status__active
+msgid "Active"
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.shipping_label_search_view
+msgid "Active labels"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_account__alias
+msgid "Alias"
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_action_button_search
+msgid "Archived"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_res_company__auto_send_slp
+#: model:ir.model.fields,field_description:printnode_base.field_res_config_settings__auto_send_slp
+msgid "Auto-send to Shipping Label Printer"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_delivery_carrier__autoprint_paperformat_id
+msgid "Autoprint Paper Format"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.actions.act_window,name:printnode_base.printnode_action_buttons
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_action_button_search
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_action_button_tree
+msgid "Buttons"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,help:printnode_base.field_printnode_action_button__preprint
+msgid ""
+"By default the report will be printed after your action.\n"
+"                First you click a button, server make the action then print\n"
+"                result of this. If you want to print first and only after\n"
+"                that make an action assigned to the button, then activate\n"
+"                this field. Valid per each action (button)."
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_report_abstract_wizard_form
+msgid "Cancel"
+msgstr ""
+
+#. module: printnode_base
+#: code:addons/printnode_base/models/printnode_device.py:0
+#, python-format
+msgid "Cannot send printnode job (%s)."
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,help:printnode_base.field_printnode_action_button__model
+msgid ""
+"Choose a model where the button is placed. You can find the\n"
+"                model name in the URL. For example the model of this page is\n"
+"                'model=printnode.action.button'.\n"
+"                Check this in the URL after the 'model='."
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,help:printnode_base.field_printnode_action_button__report_id
+msgid "Choose a report that will be printed after you hit a button"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model,name:printnode_base.model_res_company
+msgid "Companies"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printer__computer_id
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_computer_form
+msgid "Computer"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.constraint,message:printnode_base.constraint_printnode_computer_printnode_id
+msgid "Computer ID should be unique."
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.actions.act_window,name:printnode_base.printnode_computer_action
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_account__computer_ids
+#: model:ir.ui.menu,name:printnode_base.menu_printnode_computers
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_computer_tree
+msgid "Computers"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model,name:printnode_base.model_res_config_settings
+msgid "Config Settings"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.ui.menu,name:printnode_base.menu_printnode_service
+msgid "Configuration"
+msgstr ""
+
+#. module: printnode_base
+#: code:addons/printnode_base/models/printnode_device.py:0
+#: code:addons/printnode_base/models/printnode_report.py:0
+#: code:addons/printnode_base/models/printnode_rule.py:0
+#, python-format
+msgid "Configuration is valid."
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_format__name
+msgid "Content Type"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_report_abstract_wizard__number_copy
+msgid "Copies"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_account__create_uid
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_button__create_uid
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_method__create_uid
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_computer__create_uid
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_format__create_uid
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_paper__create_uid
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printer__create_uid
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printjob__create_uid
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_report_policy__create_uid
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_rule__create_uid
+#: model:ir.model.fields,field_description:printnode_base.field_shipping_label__create_uid
+#: model:ir.model.fields,field_description:printnode_base.field_shipping_label_document__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_account__create_date
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_button__create_date
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_method__create_date
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_computer__create_date
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_format__create_date
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_paper__create_date
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printer__create_date
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printjob__create_date
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_report_policy__create_date
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_rule__create_date
+#: model:ir.model.fields,field_description:printnode_base.field_shipping_label__create_date
+#: model:ir.model.fields,field_description:printnode_base.field_shipping_label_document__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_printjob_form
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_printjob_tree
+msgid "Date"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_res_users__printnode_printer
+#: model_terms:ir.ui.view,arch_db:printnode_base.res_config_settings_view_form
+msgid "Default Printer"
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.res_config_settings_view_form
+msgid "Default Shipping Label Printer"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_shipping_label__carrier_id
+#: model_terms:ir.ui.view,arch_db:printnode_base.view_delivery_carrier_printnode_tree
+msgid "Delivery Carrier"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.ui.menu,name:printnode_base.menu_printnode_carrier_settings
+msgid "Delivery Carrier Settings"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_shipping_label__picking_id
+msgid "Delivery Order"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_button__description
+msgid "Description"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_account__display_name
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_button__display_name
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_method__display_name
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_computer__display_name
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_format__display_name
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_paper__display_name
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printer__display_name
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printjob__display_name
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_report_abstract_wizard__display_name
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_report_policy__display_name
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_rule__display_name
+#: model:ir.model.fields,field_description:printnode_base.field_shipping_label__display_name
+#: model:ir.model.fields,field_description:printnode_base.field_shipping_label_document__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_button__domain
+msgid "Domain"
+msgstr ""
+
+#. module: printnode_base
+#: code:addons/printnode_base/models/printnode_action.py:0
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_action_button_tree
+#, python-format
+msgid "Domain Editor"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_account__endpoint
+msgid "Endpoint"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printer__error
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_report_policy__error
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_rule__error
+msgid "Error"
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_account_form
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_account_tree
+msgid "Forget Account"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printer__format_ids
+msgid "Formats"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_paper__height
+msgid "Height"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_account__id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_account__printnode_id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_button__id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_method__id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_computer__id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_computer__printnode_id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_format__id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_paper__id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printer__id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printer__printnode_id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printjob__id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printjob__printnode_id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_report_abstract_wizard__id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_report_policy__id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_rule__id
+#: model:ir.model.fields,field_description:printnode_base.field_shipping_label__id
+#: model:ir.model.fields,field_description:printnode_base.field_shipping_label_document__id
+msgid "ID"
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.res_config_settings_view_form
+msgid ""
+"If this checkbox is set the printer status is verified when documents are "
+"set in printing Wizard"
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.res_config_settings_view_form
+msgid ""
+"If this option is selected then when user Validates Delivery Order,\n"
+"                                    shipping labels are automatically sent to the printer that is set in\n"
+"                                    user preferences. In case no Shipping Label Printer is selected on User,\n"
+"                                    then system will try to send to the printer selected below.\n"
+"                                    If no printer is selected below - user will get error message."
+msgstr ""
+
+#. module: printnode_base
+#: code:addons/printnode_base/models/printnode_device.py:0
+#, python-format
+msgid ""
+"Immediate printing via PrintNode is disabled for company {}. Please, contact"
+" Administrator to re-enable it."
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_account_form
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_account_tree
+msgid "Import Printers"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields.selection,name:printnode_base.selection__shipping_label__label_status__inactive
+msgid "In Active"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printjob__description
+msgid "Label"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_account____last_update
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_button____last_update
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_method____last_update
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_computer____last_update
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_format____last_update
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_paper____last_update
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printer____last_update
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printjob____last_update
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_report_abstract_wizard____last_update
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_report_policy____last_update
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_rule____last_update
+#: model:ir.model.fields,field_description:printnode_base.field_shipping_label____last_update
+#: model:ir.model.fields,field_description:printnode_base.field_shipping_label_document____last_update
+msgid "Last Modified on"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_account__write_uid
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_button__write_uid
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_method__write_uid
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_computer__write_uid
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_format__write_uid
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_paper__write_uid
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printer__write_uid
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printjob__write_uid
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_report_policy__write_uid
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_rule__write_uid
+#: model:ir.model.fields,field_description:printnode_base.field_shipping_label__write_uid
+#: model:ir.model.fields,field_description:printnode_base.field_shipping_label_document__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_account__write_date
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_button__write_date
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_method__write_date
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_computer__write_date
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_format__write_date
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_paper__write_date
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printer__write_date
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printjob__write_date
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_report_policy__write_date
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_rule__write_date
+#: model:ir.model.fields,field_description:printnode_base.field_shipping_label__write_date
+#: model:ir.model.fields,field_description:printnode_base.field_shipping_label_document__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.res_config_settings_view_form
+msgid "Manage accounts"
+msgstr ""
+
+#. module: printnode_base
+#: model:res.groups,name:printnode_base.printnode_security_group_manager
+msgid "Manager"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_res_company__printnode_recheck
+#: model:ir.model.fields,field_description:printnode_base.field_res_config_settings__printnode_recheck
+msgid "Mandatory check Printing Status"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_button__method
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_button__method_id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_method__method
+msgid "Method"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.actions.act_window,name:printnode_base.printnode_action_methods
+#: model:ir.ui.menu,name:printnode_base.menu_printnode_methods
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_action_method_tree
+msgid "Methods"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_button__model_id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_method__model_id
+msgid "Model"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_report_policy__report_model
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_rule__report_model
+msgid "Model Name"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_method__name
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_computer__name
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_paper__name
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printer__name
+msgid "Name"
+msgstr ""
+
+#. module: printnode_base
+#: code:addons/printnode_base/models/printnode_action.py:0
+#, python-format
+msgid ""
+"Neither on action button level, no on user level, no on company level "
+"printer is defined for method \"%s\". Please, define it."
+msgstr ""
+
+#. module: printnode_base
+#: code:addons/printnode_base/models/res_users.py:0
+#, python-format
+msgid ""
+"Neither on company level, no on user level default label printer is defined."
+" Please, define it."
+msgstr ""
+
+#. module: printnode_base
+#: code:addons/printnode_base/wizard/printnode_report_abstract_wizard.py:0
+#, python-format
+msgid "No attachment found."
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printer__notes
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_report_policy__notes
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_rule__notes
+msgid "Note"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_report_abstract_wizard__number_copy_selectable
+msgid "Number Copy Selectable"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printer__online
+msgid "Online"
+msgstr ""
+
+#. module: printnode_base
+#: code:addons/printnode_base/wizard/printnode_report_abstract_wizard.py:0
+#, python-format
+msgid "Only 1 copy can be downloaded when printer is not selected."
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.res_config_settings_view_form
+msgid "Other Settings"
+msgstr ""
+
+#. module: printnode_base
+#: code:addons/printnode_base/models/printnode_device.py:0
+#, python-format
+msgid ""
+"Paper size for report {} ({}) and for printer {} ({}) do not match. Please "
+"update Printer or Report Settings."
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.actions.act_window,name:printnode_base.printnode_paper_action
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printer__paper_ids
+#: model:ir.ui.menu,name:printnode_base.menu_printnode_papers
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_paper_tree
+msgid "Papers"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_account__password
+msgid "Password"
+msgstr ""
+
+#. module: printnode_base
+#: code:addons/printnode_base/models/printnode_rule.py:0
+#, python-format
+msgid "Please, fill in the Report and Printer fields"
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_report_abstract_wizard_form
+msgid "Print"
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_printjob_form
+msgid "Print Job"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.actions.act_window,name:printnode_base.printnode_printjob_action
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printer__printjob_ids
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_printjob_tree
+msgid "Print Jobs"
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.view_picking_form
+msgid "Print Last Shipping Label"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.ui.menu,name:printnode_base.menu_printnode_policy
+msgid "Print Report Policy"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model,name:printnode_base.model_printnode_report_abstract_wizard
+msgid "Print Report via PrintNode"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.ui.menu,name:printnode_base.menu_printnode_buttons
+msgid "Print action buttons"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_button__preprint
+msgid "Print before action"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.ui.menu,name:printnode_base.menu_printnode_log
+msgid "Print jobs"
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.res_config_settings_view_form
+msgid ""
+"Print reports immediately via Printnode service (otherwise it would be "
+"downloaded)"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.actions.server,name:printnode_base.shipping_label_print
+#: model:ir.model.fields,field_description:printnode_base.field_res_company__printnode_enabled
+#: model:ir.model.fields,field_description:printnode_base.field_res_config_settings__printnode_enabled
+#: model:ir.model.fields,field_description:printnode_base.field_res_users__printnode_enabled
+msgid "Print via PrintNode"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.module.category,name:printnode_base.printnode_security_category
+#: model:ir.ui.menu,name:printnode_base.menu_printnode
+#: model_terms:ir.ui.view,arch_db:printnode_base.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:printnode_base.view_delivery_carrier_form
+msgid "PrintNode"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model,name:printnode_base.model_printnode_account
+msgid "PrintNode Account"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model,name:printnode_base.model_printnode_action_button
+msgid "PrintNode Action Button"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model,name:printnode_base.model_printnode_action_method
+msgid "PrintNode Action Method"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model,name:printnode_base.model_printnode_computer
+msgid "PrintNode Computer"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model,name:printnode_base.model_printnode_format
+msgid "PrintNode Format"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model,name:printnode_base.model_printnode_printjob
+msgid "PrintNode Job"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model,name:printnode_base.model_printnode_paper
+msgid "PrintNode Paper"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model,name:printnode_base.model_printnode_printer
+msgid "PrintNode Printer"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model,name:printnode_base.model_printnode_report_policy
+msgid "PrintNode Report Policy"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model,name:printnode_base.model_printnode_rule
+msgid "PrintNode Rule"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printer__status
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_report_abstract_wizard__status
+msgid "PrintNode Status"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_button__printer_id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_printjob__printer_id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_report_abstract_wizard__printer_id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_rule__printer_id
+#: model:ir.model.fields,field_description:printnode_base.field_res_company__printnode_printer
+#: model:ir.model.fields,field_description:printnode_base.field_res_config_settings__printnode_printer
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_printer_form
+msgid "Printer"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.constraint,message:printnode_base.constraint_printnode_printer_printnode_id
+msgid "Printer ID should be unique."
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.actions.act_window,name:printnode_base.printnode_policy_printer
+#: model:ir.ui.menu,name:printnode_base.menu_printnode_policy_printers
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_policy_printer_tree
+msgid "Printer Settings"
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_report_abstract_wizard_form
+msgid "Printer is not available. Please, choose another printer."
+msgstr ""
+
+#. module: printnode_base
+#: code:addons/printnode_base/models/printnode_device.py:0
+#, python-format
+msgid ""
+"Printer {} is not available. Please check it for errors or select another "
+"printer."
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.actions.act_window,name:printnode_base.printnode_printer_action
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_computer__printer_ids
+#: model:ir.ui.menu,name:printnode_base.menu_printnode_printers
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_printer_tree
+msgid "Printers"
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.res_user_form
+#: model_terms:ir.ui.view,arch_db:printnode_base.view_users_form_preferences
+msgid "Printing"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_format__qweb
+msgid "QWeb Name"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.actions.act_window,name:printnode_base.printnode_carrier_settings
+msgid "Quick Delivery Carrier PrintNode Settings"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_button__model
+msgid "Related Document Model"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_shipping_label_document__shipping_id
+msgid "Related Shipping Label"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_action_button__report_id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_report_policy__report_id
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_rule__report_id
+msgid "Report"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_report_policy__report_paper_id
+msgid "Report Paper"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.actions.act_window,name:printnode_base.printnode_policy_report
+#: model:ir.ui.menu,name:printnode_base.menu_printnode_policy_reports
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_policy_report_tree
+msgid "Report Settings"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_report_policy__report_type
+msgid "Report Type"
+msgstr ""
+
+#. module: printnode_base
+#: code:addons/printnode_base/models/printnode_device.py:0
+#, python-format
+msgid ""
+"Report expected three required parameters: {}. Make sure all of them passed "
+"correctly. Report: {}."
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.constraint,message:printnode_base.constraint_printnode_report_policy_report_id
+msgid "Report policy is unique for report."
+msgstr ""
+
+#. module: printnode_base
+#: code:addons/printnode_base/models/printnode_device.py:0
+#, python-format
+msgid ""
+"Report type for report {} ({}) and for printer {} ({}) do not match. Please "
+"update Printer or Report Settings."
+msgstr ""
+
+#. module: printnode_base
+#: code:addons/printnode_base/models/printnode_device.py:0
+#, python-format
+msgid ""
+"Report {} is not properly configured (no paper size). Please update Report "
+"Settings or choose another report."
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.constraint,message:printnode_base.constraint_printnode_rule_rule_id
+msgid "Rule should be unique."
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.shipping_label_tree
+msgid "Send shipping labels to Printer via PrintNode"
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.shipping_label_tree
+msgid "Send to Printer"
+msgstr ""
+
+#. module: printnode_base
+#: code:addons/printnode_base/controllers/main.py:0
+#, python-format
+msgid "Sent to PrintNode"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.actions.act_window,name:printnode_base.printnode_configs_action
+#: model:ir.ui.menu,name:printnode_base.menu_printnode_general
+msgid "Settings"
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.shipping_label_search_view
+msgid "Shipping Label"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_shipping_label_document__document_id
+msgid "Shipping Label Document"
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.shipping_label_document_form
+msgid "Shipping Label Document Form"
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.shipping_label_form
+msgid "Shipping Label Form"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_res_company__company_label_printer
+#: model:ir.model.fields,field_description:printnode_base.field_res_config_settings__company_label_printer
+#: model:ir.model.fields,field_description:printnode_base.field_res_users__user_label_printer
+msgid "Shipping Label Printer"
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.shipping_label_tree
+msgid "Shipping Label Tree"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_shipping_label__label_ids
+msgid "Shipping Label(s)"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.actions.act_window,name:printnode_base.shipping_labels_action
+#: model:ir.model.fields,field_description:printnode_base.field_stock_picking__shipping_label_ids
+#: model:ir.ui.menu,name:printnode_base.menu_shipping_labels
+#: model_terms:ir.ui.view,arch_db:printnode_base.view_picking_form
+msgid "Shipping Labels"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model,name:printnode_base.model_delivery_carrier
+msgid "Shipping Methods"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_account__status
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_computer__status
+#: model:ir.model.fields,field_description:printnode_base.field_shipping_label__label_status
+msgid "Status"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,help:printnode_base.field_printnode_action_button__description
+msgid "Text field for notes and memo."
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,help:printnode_base.field_printnode_action_button__method_id
+msgid ""
+"The technical name of the action that a button performs.\n"
+"                It can be seen only in debug mode. Hover the cursor on\n"
+"                the desired button using debug mode and type a method name\n"
+"                in this field."
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,help:printnode_base.field_printnode_report_policy__report_type
+msgid ""
+"The type of the report that will be rendered, each one having its own "
+"rendering method. HTML means the report will be opened directly in your "
+"browser PDF means the report will be rendered using Wkhtmltopdf and "
+"downloaded by the user."
+msgstr ""
+
+#. module: printnode_base
+#: code:addons/printnode_base/models/stock_picking.py:0
+#, python-format
+msgid ""
+"There are no available \"shipping labels\" for printing, or last \"shipping "
+"label\" in state \"In Active\""
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,help:printnode_base.field_delivery_carrier__autoprint_paperformat_id
+msgid ""
+"This settings defines which paperformat should be chosen for printing lables"
+" of this carrier."
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_shipping_label__tracking_numbers
+msgid "Tracking Number(s)"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model,name:printnode_base.model_stock_picking
+msgid "Transfer"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_rule__user_id
+#: model:res.groups,name:printnode_base.printnode_security_group_user
+msgid "User"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.actions.act_window,name:printnode_base.printnode_rules
+#: model:ir.ui.menu,name:printnode_base.menu_printnode_rules
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_rules_tree
+msgid "User Rules"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_account__username
+msgid "Username"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.constraint,message:printnode_base.constraint_printnode_account_username
+msgid "Username (token) must be unique."
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model,name:printnode_base.model_res_users
+msgid "Users"
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.res_config_settings_view_form
+msgid "View mappings"
+msgstr ""
+
+#. module: printnode_base
+#. openerp-web
+#: code:addons/printnode_base/static/src/js/action_manager.js:0
+#, python-format
+msgid "Warning"
+msgstr ""
+
+#. module: printnode_base
+#. openerp-web
+#: code:addons/printnode_base/static/src/js/action_manager.js:0
+#, python-format
+msgid ""
+"Well, actually it has been just sent to the printer via PrintNode service"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model.fields,field_description:printnode_base.field_printnode_paper__width
+msgid "Width"
+msgstr ""
+
+#. module: printnode_base
+#. openerp-web
+#: code:addons/printnode_base/static/src/js/action_manager.js:0
+#, python-format
+msgid "Wow, the report is printed!"
+msgstr ""
+
+#. module: printnode_base
+#: model_terms:ir.ui.view,arch_db:printnode_base.printnode_account_form
+msgid "https://api.printnode.com"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model,name:printnode_base.model_shipping_label
+msgid "shipping.label"
+msgstr ""
+
+#. module: printnode_base
+#: model:ir.model,name:printnode_base.model_shipping_label_document
+msgid "shipping.label.document"
+msgstr ""

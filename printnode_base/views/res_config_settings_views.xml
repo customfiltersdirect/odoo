@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="res_config_settings_view_form" model="ir.ui.view">
+            <field name="name">Settings</field>
+            <field name="model">res.config.settings</field>
+            <field name="priority" eval="40" />
+            <field name="inherit_id" ref="base.res_config_settings_view_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//div[hasclass('settings')]" position="inside">
+                    <div class="app_settings_block" string="Direct Print" data-string="Direct Print" data-key="printnode_base" groups="printnode_base.printnode_security_group_manager">
+
+                        <h2>Account</h2>
+                        <div class="row mt16 o_settings_container">
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_right_pane">
+                                    <label for="dpc_api_key" class="o_form_label d-block">API Key</label>
+                                    <field name="dpc_api_key" />
+
+                                    <div class="text-muted pt-3 pb-3">
+                                        <small>
+                                            <strong>NOTE:</strong> You can use your Printnode account and API Key
+                                        </small>
+                                    </div>
+
+                                    <button name="%(printnode_installer_action)d" string="Get API Key" type="action" class="oe_highlight mr-4" />
+                                    <button name="import_devices" string=" Import Printers &amp; Scales" type="object" class="oe_highlight" icon="fa-cloud-download" />
+                                    <br />
+                                    <small>
+                                        <strong>NOTE:</strong> In order to import scales, they should be connected and switched on (online)
+                                    </small>
+                                    <br />
+
+                                    <div class="mt-4 mb-4" groups="base.group_no_one">
+                                        <button name="activate_account" string="Activate" type="object" class="oe_highlight" />
+                                        <br />
+                                        <small>
+                                            <strong>NOTE:</strong> Click on this button will clear all printers and devices loaded in Odoo
+                                        </small>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_right_pane">
+                                    <label for="dpc_status" class="o_form_label d-block">Status</label>
+                                    <strong class="mt-2 mb-2 d-block">
+                                        <field name="dpc_status" style="color: red;" attrs="{'invisible': [['dpc_status','=','OK']]}"/>
+                                        <field name="dpc_status" style="color: green;" attrs="{'invisible': [['dpc_status','!=','OK']]}"/>
+                                    </strong>
+
+                                    <div class="text-muted">
+                                        Please, report us the text above if you have issues or errors.
+                                    </div>
+                                    <div class="content-group">
+                                        <div class="mt16">
+                                            <button name="%(printnode_base.printnode_printer_action)d" type="action" class="btn-link" icon="fa-arrow-right" string="View Printers" />
+                                        </div>
+                                        <div class="mt16">
+                                            <button name="%(printnode_base.printnode_scales_action)d" type="action" class="btn-link" icon="fa-arrow-right" string="View Scales" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h2>Printer Settings</h2>
+                        <div class="row mt16 o_settings_container">
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                    <field name="printnode_enabled" />
+                                </div>
+                                <div class="o_setting_right_pane">
+                                    <label for="printnode_enabled" />
+                                    <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." groups="base.group_multi_company"/>
+                                    <div class="text-muted">
+                                        Print reports immediately via Direct Print service (otherwise it would be downloaded)
+                                    </div>
+
+                                    <div class="content-group">
+                                        <div class="mt16 row">
+                                            <label for="printnode_printer" string="Default Printer" class="col-4 col-lg-4 o_light_label" />
+                                            <field name="printnode_printer" class="oe_inline" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane"></div>
+                                <div class="o_setting_right_pane">
+                                    <div class="text-muted">
+                                        Other Settings
+                                    </div>
+                                    <div class="content-group">
+                                        <div class="mt16">
+                                            <button name="%(printnode_base.printnode_scenarios)d" type="action" class="btn-link" icon="fa-arrow-right" string="Configure Print Scenarios" />
+                                        </div>
+                                        <div class="mt16">
+                                            <button name="%(printnode_base.printnode_rules)d" type="action" class="btn-link" icon="fa-arrow-right" string="Configure User Print Rules" />
+                                        </div>
+                                        <div class="mt16">
+                                            <button name="%(printnode_base.printnode_policy_report)d" type="action" class="btn-link" icon="fa-arrow-right" string="Define Report Settings" />
+                                        </div>
+                                    </div>
+                                    <div class="text-muted">
+                                        Other Settings
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                    <field name="auto_send_slp" />
+                                </div>
+                                <div class="o_setting_right_pane">
+                                    <label for="auto_send_slp" />
+                                    <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." groups="base.group_multi_company"/>
+                                    <div class="text-muted">
+                                        If this option is selected then when user Validates Delivery Order,
+                                        shipping labels are automatically sent to the printer that is set in
+                                        user preferences. In case no Shipping Label Printer is selected on User,
+                                        then system will try to send to the printer selected below.
+                                        If no printer is selected below - user will get error message.
+                                    </div>
+
+                                    <div class="content-group">
+                                        <div class="mt16 row">
+                                            <label for="company_label_printer" string="Default Shipping Label Printer" class="col-4 col-lg-4 o_light_label" />
+                                            <field name="company_label_printer" class="oe_inline" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_right_pane">
+                                    <label for="print_labels_format" />
+                                    <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." groups="base.group_multi_company"/>
+                                    <br />
+                                    <field name="print_labels_format" class="oe_inline" />
+                                    <div class="text-muted">
+                                        This option sets the default product label format for printing
+                                        product labels using print scenarios. If this field is blank,
+                                        then the user will not be able to use scenarios for print product labels.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6 o_setting_box" attrs="{'invisible': [('print_sl_from_attachment', '=', True)]}">
+                                <div class="o_setting_left_pane">
+                                    <field name="print_package_with_label" />
+                                </div>
+                                <div class="o_setting_right_pane">
+                                    <label for="print_package_with_label" />
+                                    <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." groups="base.group_multi_company"/>
+                                    <div class="text-muted">
+                                        (Experimental) System will try to guess which Shipping Label is related to which Package.
+                                        This is quite complex in Odoo standard and is possible ONLY if on every Delivery Order you
+                                        will be using "Put In Pack" button. So quantity of Shipping Labels will be equal to quantity
+                                        of Packages related to Delivery Order. So by enabling this checkbox you also will automatically
+                                        enable "Put In  Pack" feature on Delivery Order AND will force users to always "Put In Pack"
+                                        on Delivery Order. Additionally it will Print Package on the same Label Printer as Shipping
+                                        Label (just after Shipping Label is Printed).
+                                    </div>
+
+                                    <div class="content-group" attrs="{'invisible': [('print_package_with_label', '=', False)]}">
+                                        <div class="mt16 row">
+                                            <label for="printnode_package_report" class="col-4 col-lg-4 o_light_label" />
+                                            <field name="printnode_package_report" class="oe_inline" attrs="{'required': [('print_package_with_label', '=', True)]}" options="{'no_create': True}" domain="[('model', '=', 'stock.quant.package'), ('report_type', 'in', ['qweb-pdf', 'qweb-text', 'py3o'])]" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="col-12 col-lg-6 o_setting_box" attrs="{'invisible': [('print_package_with_label', '=', True)]}">
+                                <div class="o_setting_left_pane">
+                                    <field name="print_sl_from_attachment" />
+                                </div>
+                                <div class="o_setting_right_pane" attrs="{'invisible': [('print_package_with_label', '=', True)]}">
+                                    <label for="print_sl_from_attachment" />
+                                    <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." groups="base.group_multi_company"/>
+                                    <div class="text-muted">
+                                        If you use Odoo Enterprise standard carrier integration modules
+                                        (DHL, UPS, Fedex, USPS and etc.), than do not select this checkbox.
+                                        But in some cases when you use Shipping Carrier Integration modules
+                                        purchased from Odoo App Store that are done NOT according to
+                                        Odoo Standards of coding, auto-printing of shipping labels may not work.
+                                        As this modules are adding Shipping Labels directly to the attachments
+                                        avoiding standard Odoo mechanisms. This checkbox helps you to workaround
+                                        this problem. If enabled, it will try to search for latest attachments in
+                                        Delivery Order with the same Creation Date and will send them to the printer.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h2>Scales Settings</h2>
+                        <div class="row mt16 o_settings_container">
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                    <field name="scales_enabled" />
+                                </div>
+                                <div class="o_setting_right_pane">
+                                    <label for="scales_enabled" />
+                                    <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." groups="base.group_multi_company"/>
+                                    <div class="text-muted">
+                                        Switch on/off automatic Scales measurement during 'Put In Pack' action on Delivery Order for the whole company
+                                    </div>
+
+                                    <div class="content-group">
+                                        <div class="mt16 row">
+                                            <label for="printnode_scales" string="Default Scales" class="col-4 col-lg-4 o_light_label" />
+                                            <field name="printnode_scales" class="oe_inline" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6 o_setting_box" groups="base.group_no_one">
+                                <div class="o_setting_right_pane">
+                                    <div class="o_form_label">
+                                        Define Pickings to which we should apply auto-weighing
+                                        <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." groups="base.group_multi_company"/>
+                                    </div>
+                                    <div class="mt16">
+                                        <field name="scales_picking_domain"
+                                               widget="domain"
+                                               options="{'model': 'stock.picking'}"
+                                               class="oe_inline" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h2>Notifications</h2>
+                        <div class="row mt16 o_settings_container">
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_right_pane">
+                                    <label for="printnode_notification_email">Notification email</label>
+                                    <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." groups="base.group_multi_company"/>
+                                    <br />
+                                    <field name="printnode_notification_email" />
+                                    <div class="text-muted">
+                                        Odoo will send notification emails on this email address.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_right_pane">
+                                    <label for="printnode_notification_page_limit">Notification number of pages</label>
+                                    <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." groups="base.group_multi_company"/>
+                                    <field name="printnode_notification_page_limit" />
+                                    <div class="text-muted">
+                                        Odoo will send notificaiton email when number of available pages will be less than value of this field.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h2>Technical Settings</h2>
+                        <div class="row mt16 o_settings_container">
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                    <field name="printnode_recheck" />
+                                </div>
+                                <div class="o_setting_right_pane">
+                                    <label for="printnode_recheck" />
+                                    <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." groups="base.group_multi_company"/>
+                                    <div class="text-muted">
+                                        If this checkbox is set the printer status is verified when documents are set in printing Wizard
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                    <field name="im_a_teapot" />
+                                </div>
+                                <div class="o_setting_right_pane">
+                                    <label for="im_a_teapot" />
+                                    <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." groups="base.group_multi_company"/>
+                                    <div class="text-muted">
+                                        Shows message that report was successfully sent to Direct Print service.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                    <field name="dpc_is_allowed_to_collect_data" />
+                                </div>
+                                <div class="o_setting_right_pane">
+                                    <label for="dpc_is_allowed_to_collect_data" />
+                                    <div class="text-muted">
+                                        We don't collect any sensitive information.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                    <field name="printnode_fit_to_page" />
+                                </div>
+                                <div class="o_setting_right_pane">
+                                    <label for="printnode_fit_to_page" />
+                                    <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." groups="base.group_multi_company"/>
+                                    <div class="text-muted">
+                                        Set this checkbox to disable automatic scaling of the document to fit
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h2>Print directly from handheld device (barcode scanner)</h2>
+                        <div class="row mt16 o_settings_container">
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="w-50">
+                                    <div class="o_setting_right_pane">
+                                        <a class="d-block mx-auto" href="https://ventor.app/" target="blank">
+                                            <img alt="On Google Play" class="d-block mx-auto img img-fluid" src="/printnode_base/static/src/images/ventor.jpg"/>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_right_pane">
+                                    <p>Use the Ventor mobile app to print shipping labels and other reports directly from handheld device</p>
+                                    <p><a href="https://youtu.be/Wmv91oVADJc?t=91" target="_blank">How it works</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="printnode_config_action" model="ir.actions.act_window">
+            <field name="name">Settings</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.config.settings</field>
+            <field name="view_mode">form</field>
+            <field name="target">inline</field>
+            <field name="context">{'module' : 'printnode_base'}</field>
+        </record>
+
+        <menuitem id="menu_printnode_general"
+                  name="Settings"
+                  parent="menu_printnode_service"
+                  sequence="37"
+                  action="printnode_config_action"
+        />
+
+    </data>
+</odoo>

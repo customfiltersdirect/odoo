@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="res_user_form">
+            <field name="name">Users Preferences</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='messaging']" position="before">
+                    <group string="Printers" name="printing" col="2" groups="printnode_base.printnode_security_group_user">
+                        <field name="printnode_enabled" />
+                        <field name="printnode_printer" />
+                        <p class="text-danger" attrs="{'invisible': [('printnode_rule_ids', '=', [])]}">
+                            NOTE: There is User Rule defined for the current user.
+                            Beware that User Rules are overriding Default Printer
+                            in User Settings for particular Reports
+                        </p>
+                        <field name="user_label_printer" />
+                        <field name="printnode_rule_ids" invisible="1" />
+                    </group>
+                    <group string="Scales" name="scales" col="2" groups="printnode_base.printnode_security_group_user">
+                        <field name="scales_enabled" readonly="0" />
+                        <field name="printnode_scales" readonly="0"/>
+                        <p attrs="{'invisible': [('scales_enabled', '=', False)]}">
+                            <small>
+                            NOTE: Automatic weighing will be done only on Delivery Orders.
+                            Make sure that either you specify scales here
+                            or they are specified in PrintNode -> Settings (check with your Administrator)
+                            </small>
+                        </p>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_users_form_preferences" model="ir.ui.view">
+            <field name="name">res.users.preferences.form</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_form_simple_modif" />
+            <field name="arch" type="xml">
+                <notebook position="inside">
+                    <page string="Direct Print Settings">
+                        <group string="Printers" name="printing" col="2" groups="printnode_base.printnode_security_group_user">
+                            <field name="printnode_enabled" readonly="0" />
+                            <field name="printnode_printer" readonly="0" attrs="{'required': [('printnode_enabled', '=', True)]}" />
+                            <p class="text-danger" attrs="{'invisible': [('printnode_rule_ids', '=', [])]}">
+                                NOTE: There is User Rule defined for the current user.
+                                Beware that User Rules are overriding Default Printer
+                                in User Settings for particular Reports
+                            </p>
+
+                            <field name="user_label_printer" readonly="0"/>
+                            <field name="printnode_rule_ids" invisible="1"/>
+                        </group>
+                        <group string="Scales" name="scales" col="2" groups="printnode_base.printnode_security_group_user">
+                            <field name="scales_enabled" readonly="0" />
+                            <field name="printnode_scales" readonly="0"/>
+                            <p attrs="{'invisible': [('scales_enabled', '=', False)]}">
+                                <small>
+                                NOTE: Automatic weighing will be done only on Delivery Orders.
+                                Make sure that either you specify scales here
+                                or they are specified in PrintNode -> Settings (check with your Administrator)
+                                </small>
+                            </p>
+                        </group>
+
+                        <group string="Workstation Devices" name="worksation" col="2" groups="printnode_base.printnode_security_group_user">
+                            <field name="printnode_workstation_printer_id" widget="printnode_res_users_workstation_device_many2one" readonly="0" />
+                            <field name="printnode_workstation_label_printer_id" widget="printnode_res_users_workstation_device_many2one" readonly="0" />
+                            <field name="printnode_workstation_scales_id" widget="printnode_res_users_workstation_device_many2one" readonly="0" />
+                            <p>
+                                <small>
+                                NOTE: Workstation devices cleaned once you do logout!
+                                </small>
+                            </p>
+                        </group>
+                    </page>
+                </notebook>
+            </field>
+        </record>
+
+    </data>
+</odoo>

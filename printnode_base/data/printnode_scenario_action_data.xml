@@ -1,0 +1,126 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data>
+
+        <!-- Actions -->
+        <record id="print_document_on_transfer" model="printnode.scenario.action">
+            <field name="name">Print document on Transfer (after validation)</field>
+            <field name="code">print_document_on_transfer</field>
+            <field name="model_id" eval="ref('stock.model_stock_picking')"/>
+            <field name="reports_model_id" eval="ref('stock.model_stock_picking')"/>
+        </record>
+
+        <record id="print_document_on_backorder" model="printnode.scenario.action">
+            <field name="name">Print document on Backorder (created after Transfer validation)</field>
+            <field name="code">print_document_on_backorder</field>
+            <field name="model_id" eval="ref('stock.model_stock_picking')"/>
+            <field name="reports_model_id" eval="ref('stock.model_stock_picking')"/>
+        </record>
+
+        <record id="print_document_on_sales_order" model="printnode.scenario.action">
+            <field name="name">Print document on Sales Order (after confirmation)</field>
+            <field name="code">print_document_on_sales_order</field>
+            <field name="model_id" eval="ref('sale.model_sale_order')"/>
+            <field name="reports_model_id" eval="ref('sale.model_sale_order')"/>
+        </record>
+
+        <record id="print_product_labels_on_transfer" model="printnode.scenario.action">
+            <field name="name">Print product labels on Transfer (after validation)</field>
+            <field name="code">print_product_labels_on_transfer</field>
+            <field name="model_id" eval="ref('stock.model_stock_picking')"/>
+            <field name="reports_model_id" eval="ref('product.model_product_product')"/>
+        </record>
+
+        <record id="print_picking_document_after_so_confirmation" model="printnode.scenario.action">
+            <field name="name">Print Picking Document after Sales Order Confirmation</field>
+            <field name="code">print_picking_document_after_so_confirmation</field>
+            <field name="model_id" eval="ref('sale.model_sale_order')"/>
+            <field name="reports_model_id" eval="ref('stock.model_stock_picking')"/>
+        </record>
+
+        <record id="print_document_on_purchase_order" model="printnode.scenario.action">
+            <field name="name">Print document on Purchase Order (after confirmation)</field>
+            <field name="code">print_document_on_purchase_order</field>
+            <field name="model_id" eval="ref('purchase.model_purchase_order')"/>
+            <field name="reports_model_id" eval="ref('purchase.model_purchase_order')"/>
+        </record>
+
+        <record id="print_picking_document_after_po_confirmation" model="printnode.scenario.action">
+            <field name="name">Print Picking Document after Purchase Order Confirmation</field>
+            <field name="code">print_picking_document_after_po_confirmation</field>
+            <field name="model_id" eval="ref('purchase.model_purchase_order')"/>
+            <field name="reports_model_id" eval="ref('stock.model_stock_picking')"/>
+        </record>
+
+        <record id="print_single_product_label_on_transfer" model="printnode.scenario.action">
+            <field name="name">Print single product label on Transfer (real time)</field>
+            <field name="code">print_single_product_label_on_transfer</field>
+            <field name="model_id" eval="ref('stock.model_stock_picking')"/>
+            <field name="reports_model_id" eval="ref('product.model_product_product')"/>
+        </record>
+
+        <record id="print_multiple_product_labels_on_transfer" model="printnode.scenario.action">
+            <field name="name">Print multiple product labels on Transfer (real time)</field>
+            <field name="code">print_multiple_product_labels_on_transfer</field>
+            <field name="model_id" eval="ref('stock.model_stock_picking')"/>
+            <field name="reports_model_id" eval="ref('product.model_product_product')"/>
+        </record>
+
+        <record id="print_single_lot_labels_on_transfer_after_validation" model="printnode.scenario.action">
+            <field name="name">Print single lot labels on Transfer (after validation)</field>
+            <field name="code">print_single_lot_labels_on_transfer_after_validation</field>
+            <field name="model_id" eval="ref('stock.model_stock_picking')"/>
+            <field name="reports_model_id" eval="ref('stock.model_stock_production_lot')"/>
+        </record>
+
+        <record id="print_multiple_lot_labels_on_transfer_after_validation" model="printnode.scenario.action">
+            <field name="name">Print multiple lot labels on Transfer (after validation)</field>
+            <field name="code">print_multiple_lot_labels_on_transfer_after_validation</field>
+            <field name="model_id" eval="ref('stock.model_stock_picking')"/>
+            <field name="reports_model_id" eval="ref('stock.model_stock_production_lot')"/>
+        </record>
+
+        <record id="print_single_lot_label_on_transfer" model="printnode.scenario.action">
+            <field name="name">Print single lot label on Transfer (real time)</field>
+            <field name="code">print_single_lot_label_on_transfer</field>
+            <field name="model_id" eval="ref('stock.model_stock_picking')"/>
+            <field name="reports_model_id" eval="ref('stock.model_stock_production_lot')"/>
+        </record>
+
+        <record id="print_multiple_lot_labels_on_transfer" model="printnode.scenario.action">
+            <field name="name">Print multiple lot labels on Transfer (real time)</field>
+            <field name="code">print_multiple_lot_labels_on_transfer</field>
+            <field name="model_id" eval="ref('stock.model_stock_picking')"/>
+            <field name="reports_model_id" eval="ref('stock.model_stock_production_lot')"/>
+        </record>
+
+        <record id="print_packages_label_on_transfer" model="printnode.scenario.action">
+            <field name="name">Print Packages Label on Transfer (after validation)</field>
+            <field name="code">print_packages_label_on_transfer</field>
+            <field name="model_id" eval="ref('stock.model_stock_picking')"/>
+            <field name="reports_model_id" eval="ref('stock.model_stock_quant_package')"/>
+        </record>
+
+        <record id="print_invoice_document_after_validation" model="printnode.scenario.action">
+            <field name="name">Print Invoice Document (after validation)</field>
+            <field name="code">print_invoice_document_after_validation</field>
+            <field name="model_id" eval="ref('account.model_account_move')"/>
+            <field name="reports_model_id" eval="ref('account.model_account_move')"/>
+        </record>
+
+        <record id="print_document_on_picking_status_change" model="printnode.scenario.action">
+            <field name="name">Print Document on Picking Status Change</field>
+            <field name="code">print_document_on_picking_status_change</field>
+            <field name="model_id" eval="ref('stock.model_stock_picking')"/>
+            <field name="reports_model_id" eval="ref('stock.model_stock_picking')"/>
+        </record>
+
+        <record id="print_package_on_put_in_pack" model="printnode.scenario.action">
+            <field name="name">Print Package on Put in Pack</field>
+            <field name="code">print_package_on_put_in_pack</field>
+            <field name="model_id" eval="ref('stock.model_stock_picking')"/>
+            <field name="reports_model_id" eval="ref('stock.model_stock_quant_package')"/>
+        </record>
+
+    </data>
+</odoo>

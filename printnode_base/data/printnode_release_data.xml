@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Clean existing information about new release on each module upgrade -->
+        <function model="printnode.release" name="clean" />
+    </data>
+
+</odoo>

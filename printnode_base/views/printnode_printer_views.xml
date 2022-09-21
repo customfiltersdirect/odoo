@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Configuration - Printers -->
+        <record id="printnode_printer_form" model="ir.ui.view">
+            <field name="name">printnode_printer.form</field>
+            <field name="model">printnode.printer</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Printer" create="false" edit="true" delete="false">
+                    <header>
+                    </header>
+                    <group>
+                        <field name="id" invisible="1"/>
+                        <field name="printnode_id" />
+                        <field name="active" widget="boolean_toggle" />
+                        <field name="online" widget="boolean_toggle" />
+                        <field name="name" />
+                        <field name="status" />
+                        <field name="computer_id" />
+                        <field name="account_id" />
+                        <field name="paper_ids" widget="many2many_tags" />
+                        <field name="format_ids" widget="many2many_tags" />
+                        <field name="default_printer_bin" domain="[('printer_id', '=', id)]" options="{'no_create': True}" />
+                        <field name="printer_bin_ids"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="printnode_printer_tree" model="ir.ui.view">
+            <field name="name">printnode_printer.tree</field>
+            <field name="model">printnode.printer</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Printers" create="false" edit="false" delete="false">
+                    <field name="name" />
+                    <field name="computer_id" />
+                    <field name="account_id" />
+                    <field name="status" invisible="1" />
+                    <field name="active" widget="boolean_toggle" />
+                    <field name="online" widget="boolean_toggle" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="printnode_printer_action" model="ir.actions.act_window">
+            <field name="name">Printers</field>
+            <field name="res_model">printnode.printer</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="printnode_printer_tree" />
+            <field name="context">{"active_test": False}</field>
+        </record>
+
+        <menuitem id="menu_printnode_printers"
+                  name="Printers"
+                  parent="menu_printnode_service"
+                  sequence="40"
+                  action="printnode_printer_action"
+        />
+
+        <!-- Print Report Policy - Printer Settings -->
+         <record id="printnode_policy_printer_tree" model="ir.ui.view">
+            <field name="name">printnode.policy.printer.tree</field>
+            <field name="model">printnode.printer</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Printer Settings" create="false" editable="bottom" decoration-warning="error">
+                    <field name="computer_id" readonly="1" />
+                    <field name="name" readonly="1" />
+                    <field name="id" invisible="1" />
+                    <field name="default_printer_bin" domain="[('printer_id', '=', id)]" options="{'no_create': True}" />
+                    <field name="paper_ids" widget="many2many_tags" />
+                    <field name="format_ids" widget="many2many_tags" />
+                    <field name="error" invisible="1" />
+                    <field name="notes" widget="html" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="printnode_policy_printer" model="ir.actions.act_window">
+            <field name="name">Printer Settings</field>
+            <field name="res_model">printnode.printer</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="printnode_policy_printer_tree" />
+            <field name="context">{"active_test": False}</field>
+        </record>
+
+        <menuitem id="menu_printnode_policy_printers"
+                  name="Printer Settings"
+                  parent="menu_printnode_policy"
+                  sequence="32"
+                  action="printnode_policy_printer"
+        />
+
+    </data>
+</odoo>
