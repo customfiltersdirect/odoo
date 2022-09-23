@@ -92,25 +92,25 @@ class SaleOrder(models.Model):
     def create_invoice_delivery(self):
         if self.state == 'draft' and self.goflow_order_status =='ready_to_pick' :
            self.action_confirm()
-        if self.goflow_order_status == 'ready_for_pickup':
+        if self.goflow_order_status in ('ready_for_pickup','in_picking'):
             if self.state == 'draft':
                 self.action_confirm()
             if self.picking_ids:
                 for picking in self.picking_ids:
-                    if picking.state == 'waiting':
+                    if picking.state in ('waiting','confirmed'):
                         picking.action_assign()
                     # picking.action_confirm()
                     for mv in picking.move_ids_without_package:
                         if mv.product_uom_qty != 0.0:
                             mv.quantity_done = mv.product_uom_qty
 
-        if self.goflow_order_status == 'shipped':
+        if self.goflow_order_status in ('shipped','in_packing'):
             if self.state == 'draft':
                 self.action_confirm()
 
             if self.picking_ids:
                 for picking in self.picking_ids:
-                    if picking.state == 'waiting':
+                    if picking.state in ('waiting','confirmed'):
                         picking.action_assign()
                     # picking.action_confirm()
                     for mv in picking.move_ids_without_package:
