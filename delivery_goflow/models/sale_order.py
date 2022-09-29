@@ -6,7 +6,7 @@ from odoo.exceptions import UserError
 import requests
 from odoo.http import request
 from .res_config_settings import BearerAuth
-from datetime import datetime
+from datetime import datetime,timezone,timedelta
 from dateutil.tz import tzutc
 import dateutil.parser
 
@@ -96,7 +96,7 @@ class SaleOrder(models.Model):
             if self.state == 'draft':
                 self.action_confirm()
             if self.picking_ids:
-                for picking in self.picking_ids:
+                for picking in self.picking_ids.filtered(lambda x: x.state != 'cancel'):
                     if picking.state in ('waiting','confirmed'):
                         picking.action_assign()
                     # picking.action_confirm()
@@ -109,7 +109,7 @@ class SaleOrder(models.Model):
                 self.action_confirm()
 
             if self.picking_ids:
-                for picking in self.picking_ids:
+                for picking in self.picking_ids.filtered(lambda x: x.state != 'cancel'):
                     if picking.state in ('waiting','confirmed'):
                         picking.action_assign()
                     # picking.action_confirm()
@@ -117,7 +117,7 @@ class SaleOrder(models.Model):
                         if mv.product_uom_qty != 0.0:
                             mv.quantity_done = mv.product_uom_qty
 
-                    if picking.state == 'assigned':
+                    if picking.state != 'done':
                         picking.button_validate()
 
 
@@ -132,8 +132,9 @@ class SaleOrder(models.Model):
     def api_call_for_sync_orders(self):
         cron_job_id = self.env.ref('delivery_goflow.sync_order_from_goflow_ir_cron')
         lastcall = cron_job_id.lastcall
-        self.sync_so_goflow(lastcall)
-        self.update_so_status(lastcall)
+        lastcall_delay = lastcall - timedelta(minutes=5)
+        self.sync_so_goflow(lastcall_delay)
+        self.update_so_status(lastcall_delay)
 
 
 
@@ -198,6 +199,7 @@ class SaleOrder(models.Model):
 
         store_args = self.get_store_param()
         warehouse_args = self.get_warehouse_param(company_for_glow)
+
         if lastcall:
             goflow_lastcall = lastcall.strftime('%Y-%m-%dT%H:%M:%SZ ')
             url = 'https://%s.api.goflow.com/v1/orders?filters[status_updated_at:gte]=%s' % (goflow_subdomain,str(goflow_lastcall))
@@ -219,7 +221,6 @@ class SaleOrder(models.Model):
             if warehouse_args:
                 url = url.rstrip()
                 url += '&' + warehouse_args
-        print (url,'urrrr')
         headers = {
             'X-Beta-Contact': self.env.user.partner_id.email
         }
@@ -232,7 +233,7 @@ class SaleOrder(models.Model):
         print (len(orders))
         for order in orders:
             goflow_store_id = order["store"]["id"]
-            goflow_store_obj = self.env['goflow.store'].search([('goflow_id', '=', goflow_store_id)])
+            goflow_store_obj = self.env['goflow.store'].search([('goflow_id', '=', goflow_store_id)],limit=1)
             vals_partner_ship = {}
             vals_partner_ship['name'] = (order["shipping_address"]["first_name"] or '' )+ ((" " + (order["shipping_address"]["last_name"] or '')))
             partner_ship_country_code = order["shipping_address"]["country_code"]
@@ -273,7 +274,7 @@ class SaleOrder(models.Model):
             goflow_ship_boxes  = order["shipment"]["boxes"]
             goflow_warehouse_id = order["warehouse"]["id"]
             goflow_warehouse_name = order["warehouse"]["name"]
-            warehouse_obj = self.env['stock.warehouse'].search([('goflow_id','=',goflow_warehouse_id)])
+            warehouse_obj = self.env['stock.warehouse'].search([('goflow_id','=',goflow_warehouse_id)],limit=1)
             if not warehouse_obj:
                 warehouse_obj = self.env['stock.warehouse'].create({'name':goflow_warehouse_name,'goflow_id':goflow_warehouse_id,'code':goflow_warehouse_name[:2],'company_id':company_for_glow and company_for_glow.id or False,'sync_orders':True})
             tracking_line_list = []
@@ -285,7 +286,7 @@ class SaleOrder(models.Model):
                     tracking_line_dict['order_line_id'] = line["order_line_id"]
                 if tracking_line_dict:
                     tracking_line_list.append(tracking_line_dict)
-            check_if_order_exists = self.search([('goflow_id','=',goflow_id)])
+            check_if_order_exists = self.search([('goflow_id','=',goflow_id)],limit=1)
             goflow_order_no = order["order_number"]
             goflow_order_status = order["status"]
             order_date = self.convert_iso_to_utc(goflow_date)
@@ -315,7 +316,7 @@ class SaleOrder(models.Model):
 
                 for line in tracking_line_list:
                     goflow_line_id = line['order_line_id']
-                    line_obj = self.env['sale.order.line'].search([('goflow_id','=',goflow_line_id)])
+                    line_obj = self.env['sale.order.line'].search([('goflow_id','=',goflow_line_id)],limit=1)
                     if line_obj:
                         line_obj.goflow_tracking_number = line['tracking_number']
             if not check_if_order_exists:
