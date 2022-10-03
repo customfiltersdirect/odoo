@@ -14,6 +14,7 @@
         "views/product_tag_view.xml",
         "views/company_view.xml",
         "views/warehouse_view.xml",
+        "views/invoice_view.xml",
 
     ],
     'auto_install': True,

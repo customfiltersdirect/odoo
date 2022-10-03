@@ -10,6 +10,16 @@ from datetime import datetime,timezone,timedelta
 from dateutil.tz import tzutc
 import dateutil.parser
 
+
+class AccountMove(models.Model):
+    _inherit = 'account.move'
+
+## Add goflow invoice id to odoo invoice
+    goflow_invoice_no = fields.Char('Goflow Invoice No')
+
+
+
+
 class goflow_store(models.Model):
     _name = 'goflow.store'
 
@@ -126,6 +136,8 @@ class SaleOrder(models.Model):
 
                 if self.invoice_ids:
                     for invoice in self.invoice_ids.filtered(lambda x: x.state == 'draft'):
+                        ## copy goflow invoice no to invoice in odoo
+                        invoice.goflow_invoice_no = self.goflow_invoice_no
                         invoice.action_post()
 
 
