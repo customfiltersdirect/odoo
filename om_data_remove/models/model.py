@@ -19,8 +19,7 @@ class ResConfigSettings(models.TransientModel):
                 continue
             obj_name = line
             obj = self.pool.get(obj_name)
-            check_if_company_id  = self.env['ir.model.fields'].search([('model_id.model','=',obj_name),('name','=','company_id')])
-
+            check_if_company_id  = self.env['ir.model.fields'].search([('model_id.model','=',obj_name),('name','=','company_id'),('store','=',True)])
             if not obj:
                 t_name = obj_name.replace('.', '_')
             else:
