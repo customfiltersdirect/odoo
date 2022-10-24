@@ -19,11 +19,16 @@ class ResConfigSettings(models.TransientModel):
                 continue
             obj_name = line
             obj = self.pool.get(obj_name)
+            check_if_company_id  = self.env['ir.model.fields'].search([('model_id.model','=',obj_name),('name','=','company_id')])
+
             if not obj:
                 t_name = obj_name.replace('.', '_')
             else:
                 t_name = obj._table
-            sql = "delete from %s" % t_name
+            if check_if_company_id:
+                sql = "delete from %s where company_id = %s" % (t_name,self.env.company.id)
+            else:
+                sql = "delete from %s " % t_name
             try:
                 self._cr.execute(sql)
                 self._cr.commit()
