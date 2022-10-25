@@ -110,9 +110,9 @@ class SaleOrder(models.Model):
                     if picking.state in ('waiting','confirmed'):
                         picking.action_assign()
                     # picking.action_confirm()
-                    for mv in picking.move_ids_without_package:
-                        if mv.product_uom_qty != 0.0:
-                            mv.quantity_done = mv.product_uom_qty
+                    # for mv in picking.move_ids_without_package:
+                    #     if mv.product_uom_qty != 0.0:
+                    #         mv.quantity_done = mv.product_uom_qty
 
         if self.goflow_order_status in ('shipped'):
             if self.state == 'draft':
