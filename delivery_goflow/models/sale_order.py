@@ -134,11 +134,11 @@ class SaleOrder(models.Model):
 
         lastcall = cron_job_id.lastcall
         if lastcall:
-            lastcall_delay = lastcall - timedelta(minutes=5)
+            lastcall_delay = lastcall
         else:
             lastcall_delay = False
         self.sync_so_goflow(lastcall_delay)
-       # self.update_so_status(lastcall_delay)
+        self.update_so_status(lastcall_delay)
 
     def convert_iso_to_utc(self, date):
         if date:
