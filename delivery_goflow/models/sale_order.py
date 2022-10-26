@@ -192,11 +192,9 @@ class SaleOrder(models.Model):
         company_for_glow = self.env['res.company'].search([('use_for_goflow_api', '=', True)], limit=1)
         goflow_token = self.env['ir.config_parameter'].get_param('delivery_goflow.token_goflow')
         goflow_subdomain = self.env['ir.config_parameter'].get_param('delivery_goflow.subdomain_goflow')
-        goflow_cutoff_date = self.env['ir.config_parameter'].get_param('delivery_goflow.goflow_cutoff_date')
-
+        #goflow_cutoff_date = self.env['ir.config_parameter'].get_param('delivery_goflow.goflow_cutoff_date')
         store_args = self.get_store_param()
         warehouse_args = self.get_warehouse_param(company_for_glow)
-
         if lastcall:
             goflow_lastcall = lastcall.strftime('%Y-%m-%dT%H:%M:%SZ ')
             url = 'https://%s.api.goflow.com/v1/orders?filters[status_updated_at:gte]=%s' % (
@@ -209,7 +207,7 @@ class SaleOrder(models.Model):
                 url += '&' + warehouse_args
 
         else:
-            datetime_obj = datetime.strptime(goflow_cutoff_date, '%Y-%m-%d %H:%M:%S')
+            #datetime_obj = datetime.strptime(goflow_cutoff_date, '%Y-%m-%d %H:%M:%S')
             # goflow_cutoff = datetime_obj.strftime('%Y-%m-%dT%H:%M:%SZ ')
             # url = 'https://%s.api.goflow.com/v1/orders?filters[status]=ready_to_pick&filters[date:gte]=%s'  % (goflow_subdomain,str(goflow_cutoff))
             url = 'https://%s.api.goflow.com/v1/orders?filters[status]=ready_to_pick' % (goflow_subdomain)
