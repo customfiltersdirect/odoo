@@ -95,9 +95,7 @@ class SaleOrder(models.Model):
     def create_invoice_delivery(self):
         goflow_order_status = self.goflow_order_status or ''
         order_state = self.state
-        if order_state == 'draft' and goflow_order_status == 'in_picking':
-            self.action_confirm()
-        if goflow_order_status in ('in_picking', 'in_packing'):
+        if goflow_order_status in ('in_picking','in_packing'):
             if order_state == 'draft':
                 self.action_confirm()
             if self.picking_ids:
@@ -129,15 +127,40 @@ class SaleOrder(models.Model):
                         invoice.goflow_invoice_no = self.goflow_invoice_no
                         invoice.action_post()
 
-    def api_call_for_sync_orders(self):
-        cron_job_id = self.env.ref('delivery_goflow.sync_order_from_goflow_ir_cron')
+    def api_call_for_sync_orders_in_picking(self):
+        cron_job_id = self.env.ref('delivery_goflow.sync_order_in_picking_from_goflow_ir_cron')
 
         lastcall = cron_job_id.lastcall
         if lastcall:
             lastcall_delay = lastcall
         else:
             lastcall_delay = False
-        self.sync_so_goflow(lastcall_delay)
+        goflow_state ='in_picking'
+        self.sync_so_goflow(lastcall_delay,goflow_state)
+        self.update_so_status(lastcall_delay)
+
+    def api_call_for_sync_orders_shipped(self):
+        cron_job_id = self.env.ref('delivery_goflow.sync_order_shipped_from_goflow_ir_cron')
+
+        lastcall = cron_job_id.lastcall
+        if lastcall:
+            lastcall_delay = lastcall
+        else:
+            lastcall_delay = False
+        goflow_state ='shipped'
+        self.sync_so_goflow(lastcall_delay,goflow_state)
+        self.update_so_status(lastcall_delay)
+
+    def api_call_for_sync_orders_in_packing(self):
+        cron_job_id = self.env.ref('delivery_goflow.sync_order_in_packing_from_goflow_ir_cron')
+
+        lastcall = cron_job_id.lastcall
+        if lastcall:
+            lastcall_delay = lastcall
+        else:
+            lastcall_delay = False
+        goflow_state ='in_packing'
+        self.sync_so_goflow(lastcall_delay,goflow_state)
         self.update_so_status(lastcall_delay)
 
     def convert_iso_to_utc(self, date):
@@ -188,7 +211,7 @@ class SaleOrder(models.Model):
                 warehouse_args = None
             return warehouse_args
 
-    def sync_so_goflow(self, lastcall):
+    def sync_so_goflow(self, lastcall,goflow_state):
         company_for_glow = self.env['res.company'].search([('use_for_goflow_api', '=', True)], limit=1)
         goflow_token = self.env['ir.config_parameter'].get_param('delivery_goflow.token_goflow')
         goflow_subdomain = self.env['ir.config_parameter'].get_param('delivery_goflow.subdomain_goflow')
@@ -197,8 +220,8 @@ class SaleOrder(models.Model):
         warehouse_args = self.get_warehouse_param(company_for_glow)
         if lastcall:
             goflow_lastcall = lastcall.strftime('%Y-%m-%dT%H:%M:%SZ ')
-            url = 'https://%s.api.goflow.com/v1/orders?filters[status_updated_at:gte]=%s' % (
-            goflow_subdomain, str(goflow_lastcall))
+            url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s&filters[status_updated_at:gte]=%s' % (
+            goflow_subdomain,goflow_state, str(goflow_lastcall))
             if store_args:
                 url = url.rstrip()
                 url += '&' + store_args
@@ -210,7 +233,7 @@ class SaleOrder(models.Model):
             #datetime_obj = datetime.strptime(goflow_cutoff_date, '%Y-%m-%d %H:%M:%S')
             # goflow_cutoff = datetime_obj.strftime('%Y-%m-%dT%H:%M:%SZ ')
             # url = 'https://%s.api.goflow.com/v1/orders?filters[status]=ready_to_pick&filters[date:gte]=%s'  % (goflow_subdomain,str(goflow_cutoff))
-            url = 'https://%s.api.goflow.com/v1/orders?filters[status]=ready_to_pick' % (goflow_subdomain)
+            url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s' % (goflow_subdomain,goflow_state)
             if store_args:
                 url = url.rstrip()
                 url += '&' + store_args
@@ -226,6 +249,7 @@ class SaleOrder(models.Model):
         while goflow_api["next"]:
             goflow_api = requests.get(goflow_api["next"], auth=BearerAuth(goflow_token), headers=headers).json()
             orders.extend(goflow_api["data"])
+        print (len(orders))
         for order in orders:
             goflow_store_id = order["store"]["id"]
             goflow_store_obj = self.env['goflow.store'].search([('goflow_id', '=', goflow_store_id)], limit=1)
