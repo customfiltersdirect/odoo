@@ -15,18 +15,45 @@
         </record>
 
 
-        <record id="sync_order_from_goflow_ir_cron" model="ir.cron">
-            <field name="name">Sync Goflow Orders</field>
+        <record id="sync_order_in_picking_from_goflow_ir_cron" model="ir.cron">
+            <field name="name">Sync Goflow Orders In Picking</field>
             <field name="model_id" ref="sale.model_sale_order"/>
             <field name="state">code</field>
-            <field name="code">model.api_call_for_sync_orders()</field>
-            <field name="interval_number">1</field>
-            <field name="interval_type">days</field>
+            <field name="code">model.api_call_for_sync_orders_in_picking()</field>
+            <field name="interval_number">5</field>
+            <field name="interval_type">minutes</field>
             <field name="numbercall">-1</field>
             <field name="doall" eval="False"/>
-            <field name="active" eval="True"/>
+            <field name="active" eval="False"/>
 
         </record>
+
+         <record id="sync_order_shipped_from_goflow_ir_cron" model="ir.cron">
+            <field name="name">Sync Goflow Orders Shipped</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="state">code</field>
+            <field name="code">model.api_call_for_sync_orders_shipped()</field>
+            <field name="interval_number">5</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+            <field name="active" eval="False"/>
+
+        </record>
+
+        <record id="sync_order_in_packing_from_goflow_ir_cron" model="ir.cron">
+            <field name="name">Sync Goflow Orders In Packing</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="state">code</field>
+            <field name="code">model.api_call_for_sync_orders_in_packing()</field>
+            <field name="interval_number">5</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+            <field name="active" eval="False"/>
+
+        </record>
+
 
         <record id="sync_stores_from_goflow_ir_cron_new" model="ir.cron">
             <field name="name">Sync Goflow Stores</field>
