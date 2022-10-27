@@ -16,7 +16,7 @@ class goflow_product_tag(models.Model):
 
     name = fields.Char('Name')
     goflow_id = fields.Char('Goflow ID')
-    color = fields.Char('Color')
+    color = fields.Char('Color Field')
     sync_products = fields.Boolean('Sync Products',default=False)
 
     def sync_product_tag_goflow(self):
