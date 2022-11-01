@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data>
+
+        <record model="ir.config_parameter" id="zld_converter_url">
+            <field name="key">zpl_label_designer.zld_converter_url</field>
+            <field name="value">https://labels.ventor.tech/v1</field>
+        </record>
+
+    </data>
+</odoo>

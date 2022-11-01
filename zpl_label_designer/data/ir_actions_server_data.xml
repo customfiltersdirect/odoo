@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="publish_zpl_label" model="ir.actions.server">
+        <field name="name">Publish</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="zpl_label_designer.model_zld_label" />
+        <field name="binding_model_id" ref="zpl_label_designer.model_zld_label" />
+        <field name="state">code</field>
+        <field name="code">
+for record in records:
+    record.publish()
+        </field>
+    </record>
+
+    <record id="unpublish_zpl_label" model="ir.actions.server">
+        <field name="name">Unpublish</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="zpl_label_designer.model_zld_label" />
+        <field name="binding_model_id" ref="zpl_label_designer.model_zld_label" />
+        <field name="state">code</field>
+        <field name="code">
+for record in records:
+    try:
+        record.unpublish()
+    except Exception as err:
+        raise UserError("Label '%s' can't be unpublished due error.\n\nException: %s" % (record.name, err))
+        </field>
+    </record>
+
+</odoo>

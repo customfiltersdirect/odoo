@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="zpl_label_designer.LabelEditor">
+        <div class="o_field_label_editor">
+            <div class="label-container">
+                <canvas id="canvas" class="border label-canvas"></canvas>
+            </div>
+
+            <div class="control-panel mt-4">
+                <div class="quick-buttons"></div>
+
+                <hr />
+
+                <div class="default-buttons mb-4">
+                    <button type="button" class="btn btn-outline-primary mr-2 mb-2 zld-add-text" data-attribute-name="">Add Custom Text</button>
+                    <button type="button" class="btn btn-outline-primary mr-2 mb-2" id="zld-add-rectangle">Add Rectangle</button>
+
+                    <span class="ml-2 mr-2"> or </span>
+
+                    <span class="zld-add-custom-field mb-2">
+                        <select class="o_input o_field_widget col-md-4 mr-2" aria-label="Select custom field to add">
+                            <option value="">Select Custom Field</option>
+                        </select>
+                        <button class="btn btn-primary">Add Custom Field</button>
+                    </span>
+                </div>
+
+                <p class="notice">
+                    <small>
+                        <strong>NOTE:</strong> In order to add image to your ZPL label drag&amp;drop it
+                        to the above area. We support PNG and JPEG images (PNG gives the best quality).
+                        Note that color images will be automatically converted to black and white format
+                        as they are only supported by ZPL label printers. Maximum allowed size is 1 MB.
+                    </small>
+                </p>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="zpl_label_designer.DropOverlay">
+        <div class="o_drag_over d-none">
+            <div class="o_drag_over_content">
+                <div>
+                    <i class="fa fa-file-o fa-5x" aria-hidden="true" />
+                </div>
+                <div>
+                    <t>
+                        <h2>Drop your images here</h2>
+                    </t>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>
