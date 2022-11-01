@@ -9,7 +9,7 @@
                 <t t-foreach="range(len(docs))" t-as="index">
                     <t t-set="mo" t-value="docs[index]"/>
                     <t t-set="qty" t-value="qtys[index]"/>
-                    <t t-foreach="range(int(mo.product_qty))" t-as="j">
+                    <t t-foreach="range(int(mo.qty_producing))" t-as="j">
                         <div class="o_label_page text-center align-middle">
                             <div style="font-size: 10px" t-esc="mo.name"/>
                             <div class="font-weight-bold" style="font-size: 10px" t-esc="mo.product_id.display_name"/>
