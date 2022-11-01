@@ -95,7 +95,7 @@ class SaleOrder(models.Model):
     def create_invoice_delivery(self):
         goflow_order_status = self.goflow_order_status or ''
         order_state = self.state
-        if goflow_order_status in ('in_picking','in_packing'):
+        if goflow_order_status in ('in_picking','in_packing','ready_to_pick'):
             if order_state == 'draft':
                 self.action_confirm()
             if self.picking_ids:
