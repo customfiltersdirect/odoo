@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="product_label_layout_form" model="ir.ui.view">
+        <field name="name">product.label.layout.form</field>
+        <field name="model">product.label.layout</field>
+        <field name="inherit_id" ref="product.product_label_layout_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='print_format']" position="after">
+                <field name="zld_label_id" widget="zld_label_radio" attrs="{'invisible': [('print_format', '!=', 'zld_label')]}" />
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

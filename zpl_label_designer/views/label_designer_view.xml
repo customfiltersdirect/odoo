@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="zld_label_form" model="ir.ui.view">
+            <field name="name">zld.label.form</field>
+            <field name="model">zld.label</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Label View" js_class="zld_label_form">
+                    <header>
+                        <button name="generate_zpl" string="Generate ZPL And Preview" type="object" class="oe_read_only" />
+                        <button name="publish" string="Publish" type="object" class="oe_highlight oe_read_only" attrs="{'invisible': [('view_id', '!=', False)]}" />
+                        <button name="publish" string="Update Published Label" type="object" class="oe_highlight oe_read_only" attrs="{'invisible': [('view_id', '=', False)]}" />
+                        <button name="unpublish" string="Unpublish" type="object" class="oe_read_only" attrs="{'invisible': [('view_id', '=', False)]}"/>
+                        <button name="open_view" string="Open Label View" type="object" class="oe_read_only" groups="base.group_no_one" attrs="{'invisible': [('view_id', '=', False)]}"/>
+                    </header>
+
+                    <sheet>
+
+                        <group attrs="{'invisible': [['is_modified', '!=', True]]}">
+                            <div class="alert alert-info text-center pt-4 pb-4" role="alert">
+                                You made a change to the ZPL label design. In order to apply them
+                                to your Odoo instance, you need to click “Update Published Label“ button.
+                            </div>
+                        </group>
+
+                        <group col="3">
+                            <group>
+                                <field name="name" />
+                                <field name="view_id" invisible="1" />
+                                <field name="is_modified" invisible="1" />
+
+                                <field name="print_report_name" groups="base.group_no_one" />
+                                <field name="print_report_name_preview" groups="base.group_no_one" />
+                            </group>
+                            <group>
+                                <field name="model_id" options="{'no_create': True, 'no_edit': True, 'no_open': True}" attrs="{'readonly': [('id', '!=', False)]}" />
+                            </group>
+                            <group>
+                                <field name="orientation" />
+                            </group>
+                        </group>
+                        <group col="3">
+                            <group>
+                                <field name="width" />
+                            </group>
+                            <group>
+                                <field name="height" />
+                            </group>
+                            <group>
+                                <field name="dpi" />
+                            </group>
+                        </group>
+
+                        <group string="Editor" attrs="{'invisible': [['id', '=', False]]}">
+                            <field name="blob" widget="zld_label_editor" nolabel="1" />
+                        </group>
+
+                        <div attrs="{'invisible': ['|', '|', ['id', '=', False], ['preview', '=', False], ['preview', '=', '']]}">
+                            <group string="Preview">
+                                <div class="label-container">
+                                    <field name="preview" nolabel="1" readonly="1" widget="zld_preview" class="w-100" />
+                                </div>
+                            </group>
+                            <div>
+                                <small>Preview provided by <a href="http://labelary.com/" target="_blank">Labelary</a></small>
+                            </div>
+                        </div>
+
+                        <group attrs="{'invisible': [['id', '!=', False]]}">
+                            <div class="alert alert-info text-center pt-4 pb-4" role="alert">
+                                <h1>Please save the record before editing a label</h1>
+                            </div>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="zpl_label_designer_label_tree" model="ir.ui.view">
+            <field name="name">zld.label.view</field>
+            <field name="model">zld.label</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name" />
+                    <field name="model_id" />
+                    <field name="is_published" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="zld_label_action" model="ir.actions.act_window">
+            <field name="name">Labels</field>
+            <field name="res_model">zld.label</field>
+            <field name="view_mode">tree,form</field>
+
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Creating labels is very easy and convenient. Try it using the create button!
+                </p>
+            </field>
+        </record>
+
+        <menuitem
+            id="menu_zld_labels"
+            name="Labels"
+            parent="menu_zld"
+            sequence="1"
+            action="zld_label_action"
+        />
+
+    </data>
+</odoo>
