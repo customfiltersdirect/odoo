@@ -163,6 +163,18 @@ class SaleOrder(models.Model):
         self.sync_so_goflow(lastcall_delay,goflow_state)
         self.update_so_status(lastcall_delay)
 
+    def api_call_for_sync_orders_ready_to_pick(self):
+        cron_job_id = self.env.ref('delivery_goflow.sync_order_ready_to_pick_from_goflow_ir_cron')
+
+        lastcall = cron_job_id.lastcall
+        if lastcall:
+            lastcall_delay = lastcall
+        else:
+            lastcall_delay = False
+        goflow_state ='ready_to_pick'
+        self.sync_so_goflow(lastcall_delay,goflow_state)
+        self.update_so_status(lastcall_delay)
+
     def convert_iso_to_utc(self, date):
         if date:
             if '.' in date:
