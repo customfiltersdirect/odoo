@@ -9,7 +9,7 @@ class IrActionsReport(models.Model):
         """
         :rtype: bytes
         """
-        if data.get('is_zld_product_label', False):
+        if data and data.get('is_zld_product_label', False):
             docids = self._get_docids_for_zld_product_label(data)
 
         return super()._render_qweb_text(docids, data)
