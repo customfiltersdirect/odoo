@@ -13,7 +13,7 @@
             <field name="active" eval="True"/>
 
         </record>
-  <record id="sync_order_ready_to_pick_from_goflow_ir_cron" model="ir.cron">
+        <record id="sync_order_ready_to_pick_from_goflow_ir_cron" model="ir.cron">
             <field name="name">Sync Goflow Orders Ready to Pick</field>
             <field name="model_id" ref="sale.model_sale_order"/>
             <field name="state">code</field>
@@ -89,7 +89,10 @@
             <field name="numbercall">-1</field>
             <field name="doall" eval="False"/>
             <field name="active" eval="True"/>
+        </record>
 
+        <record id="print_node_demo_partner" model="res.partner">
+            <field name="name">Print Node Demo Partner</field>
         </record>
 
 
