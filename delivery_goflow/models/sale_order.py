@@ -97,7 +97,7 @@ class SaleOrder(models.Model):
     def create_invoice_delivery(self):
         goflow_order_status = self.goflow_order_status or ''
         order_state = self.state
-        if goflow_order_status in ('in_picking','in_packing','ready_to_pick'):
+        if goflow_order_status in ('in_picking', 'in_packing', 'ready_to_pick'):
             if order_state == 'draft':
                 self.action_confirm()
             if self.picking_ids:
@@ -150,7 +150,7 @@ class SaleOrder(models.Model):
         else:
             lastcall_delay = False
         goflow_state ='shipped'
-        self.sync_so_goflow(lastcall_delay,goflow_state)
+        self.sync_so_goflow(lastcall_delay, goflow_state)
         self.update_so_status(lastcall_delay)
 
     def api_call_for_sync_orders_in_packing(self):
@@ -373,7 +373,6 @@ class SaleOrder(models.Model):
             orders.extend(goflow_api["data"])
         # print(len(orders))
         for order in orders:
-            print(len(order))
             goflow_store_id = order["store"]["id"]
             goflow_store_obj = self.env['goflow.store'].search([('goflow_id', '=', goflow_store_id)], limit=1)
             goflow_store_obj_partner_id, goflow_store_obj_id = goflow_store_obj.partner_id.id, goflow_store_obj.id
@@ -396,6 +395,7 @@ class SaleOrder(models.Model):
             warehouse_obj_id = warehouse_obj.id
             tracking_line_list = []
             check_if_order_exists = self.search([('goflow_id', '=', goflow_id)], limit=1)
+            order_array = order
             if check_if_order_exists:
                 order = check_if_order_exists
                 if order.warehouse_id != warehouse_obj:
@@ -403,7 +403,7 @@ class SaleOrder(models.Model):
                     order.action_draft()
                     order.warehouse_id = warehouse_obj_id
                     order.action_confirm()
-                order.write(self._prepare_edit_order_values(order))
+                order.write(self._prepare_edit_order_values(order_array))
 
                 for line in tracking_line_list:
                     goflow_line_id = line['order_line_id']
@@ -411,7 +411,6 @@ class SaleOrder(models.Model):
                     if line_obj:
                         line_obj.goflow_tracking_number = line['tracking_number']
             if not check_if_order_exists:
-                start_time = perf_counter()
                 order_values = self._prepare_order_values(order)
                 so = self.env['sale.order'].create(order_values)
                 so.partner_id = goflow_store_obj_partner_id
@@ -420,8 +419,6 @@ class SaleOrder(models.Model):
                 so.goflow_id = order["id"]
                 so.goflow_store_id = goflow_store_obj_id
                 so.company_id = company_for_glow and company_for_glow.id or False
-                end_time = perf_counter()
-                print(f'It took {end_time - start_time: 0.2f} second(s) to complete.')
                 for line in order_lines:
                     self.env['sale.order.line'].create(self._prepare_order_lines(line, so, tracking_line_list,
                                                                                  company_for_glow))
