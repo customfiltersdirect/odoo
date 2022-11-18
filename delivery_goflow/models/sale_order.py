@@ -350,7 +350,7 @@ class SaleOrder(models.Model):
         }
         return values_order
 
-    def _prepare_order_values(self, order):
+    def _prepare_order_values(self, order, company_for_glow, warehouse_obj_id):
         order_date = self.convert_iso_to_utc(order["date"])
         goflow_shipped_at = self.convert_iso_to_utc(order["shipment"]["shipped_at"])
         goflow_store_latest_ship = self.convert_iso_to_utc(order["ship_dates"]["store_provided_latest_ship"])
@@ -370,6 +370,8 @@ class SaleOrder(models.Model):
             'goflow_store_latest_ship': goflow_store_latest_ship,
             'goflow_store_latest_delivery': goflow_store_latest_delivery,
             'goflow_pick_list_number': order["pick_list_number"],
+            'company_id': company_for_glow and company_for_glow.id or False,
+            'warehouse_id': warehouse_obj_id,
         }
 
     def _prepare_order_lines(self, line, so, tracking_line_list, company_for_glow):
@@ -487,14 +489,14 @@ class SaleOrder(models.Model):
                     if line_obj:
                         line_obj.goflow_tracking_number = line['tracking_number']
             if not check_if_order_exists:
-                order_values = self._prepare_order_values(order)
+                order_values = self._prepare_order_values(order, company_for_glow, warehouse_obj_id)
                 so = self.env['sale.order'].create(order_values)
                 so.partner_id = goflow_store_obj_partner_id
                 so.partner_shipping_id = partner_ship_obj.id or goflow_store_obj_partner_id
                 so.goflow_id = order["id"]
                 so.goflow_store_id = goflow_store_obj_id
-                so.company_id = company_for_glow and company_for_glow.id or False
-                so.warehouse_id = warehouse_obj_id
+                # so.company_id = company_for_glow and company_for_glow.id or False
+                # so.warehouse_id = warehouse_obj_id
                 for line in order_lines:
                     self.env['sale.order.line'].create(self._prepare_order_lines(line, so, tracking_line_list,
                                                                                  company_for_glow))
