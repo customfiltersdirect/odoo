@@ -1,0 +1,60 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+<!--
+    <record model="ir.ui.view" id="stock_batch_customization.list">
+      <field name="name">stock_batch_customization list</field>
+      <field name="model">stock_batch_customization.stock_batch_customization</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name"/>
+          <field name="value"/>
+          <field name="value2"/>
+        </tree>
+      </field>
+    </record>
+-->
+
+    <!-- actions opening views on models -->
+<!--
+    <record model="ir.actions.act_window" id="stock_batch_customization.action_window">
+      <field name="name">stock_batch_customization window</field>
+      <field name="res_model">stock_batch_customization.stock_batch_customization</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+-->
+
+    <!-- server action to the one above -->
+<!--
+    <record model="ir.actions.server" id="stock_batch_customization.action_server">
+      <field name="name">stock_batch_customization server</field>
+      <field name="model_id" ref="model_stock_batch_customization_stock_batch_customization"/>
+      <field name="state">code</field>
+      <field name="code">
+        action = {
+          "type": "ir.actions.act_window",
+          "view_mode": "tree,form",
+          "res_model": model._name,
+        }
+      </field>
+    </record>
+-->
+
+    <!-- Top menu item -->
+<!--
+    <menuitem name="stock_batch_customization" id="stock_batch_customization.menu_root"/>
+-->
+    <!-- menu categories -->
+<!--
+    <menuitem name="Menu 1" id="stock_batch_customization.menu_1" parent="stock_batch_customization.menu_root"/>
+    <menuitem name="Menu 2" id="stock_batch_customization.menu_2" parent="stock_batch_customization.menu_root"/>
+-->
+    <!-- actions -->
+<!--
+    <menuitem name="List" id="stock_batch_customization.menu_1_list" parent="stock_batch_customization.menu_1"
+              action="stock_batch_customization.action_window"/>
+    <menuitem name="Server to list" id="stock_batch_customization" parent="stock_batch_customization.menu_2"
+              action="stock_batch_customization.action_server"/>
+-->
+  </data>
+</odoo>

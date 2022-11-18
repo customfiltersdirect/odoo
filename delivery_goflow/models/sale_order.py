@@ -74,6 +74,7 @@ class SaleOrder(models.Model):
     goflow_order_no = fields.Char('Goflow Order Number')
     goflow_order_date = fields.Date('Goflow Order Date')
     goflow_order_status = fields.Char('Goflow Order Status')
+    goflow_pick_list_number = fields.Char('Goflow Pick List Number')
     goflow_store_id = fields.Many2one('goflow.store', 'Store')
     goflow_invoice_no = fields.Char('Goflow Invoice No')
     goflow_po_no = fields.Char('Goflow PO No')
@@ -84,11 +85,75 @@ class SaleOrder(models.Model):
     goflow_store_latest_ship = fields.Date('Goflow Store Latest Ship')
     goflow_store_latest_delivery = fields.Date('Goflow Store Latest Delivery')
 
+    def _create_batch_transfers(self, in_picking_orders):
+        in_picking_orders = in_picking_orders.search([('goflow_pick_list_number', '!=', False)], order='goflow_pick_list_number ASC')
+        pick_list_number = in_picking_orders[0].goflow_pick_list_number
+        picking_ids = []
+        for order in in_picking_orders:
+            if order.id == in_picking_orders[len(in_picking_orders) - 1].id:
+                print(order)
+            if order.goflow_pick_list_number != pick_list_number:
+                if not picking_ids:
+                    pickings = order.picking_ids.filtered(lambda e: e.picking_type_id.code in ['incoming', 'internal'])
+                    for picking in pickings:
+                        picking_ids.append(picking.id)
+                if picking_ids:
+                    old_batch = self.env['stock.picking.batch'].search([('goflow_pick_list_number', '=', pick_list_number)])
+                    if old_batch:
+                        link_pickings = []
+                        for picking in picking_ids:
+                            link_pickings.append((4, picking))
+                        if link_pickings:
+                            old_batch.write({'picking_ids': link_pickings})
+                    else:
+                        batch = self.env['stock.picking.batch'].create({
+                            'user_id': order.user_id.id or self.env.user.id,
+                            'company_id': order.company_id.id or self.env.company.id,
+                            'picking_type_id': self.env['stock.picking'].browse(picking_ids[0]).picking_type_id.id,
+                            'picking_ids': picking_ids,
+                            'goflow_pick_list_number': pick_list_number
+                        })
+                        batch.action_confirm()
+                pick_list_number = order.goflow_pick_list_number
+                picking_ids = []
+                pickings = order.picking_ids.filtered(lambda e: e.picking_type_id.code in ['incoming', 'internal'])
+                for picking in pickings:
+                    picking_ids.append(picking.id)
+            else:
+                pickings = order.picking_ids.filtered(lambda e: e.picking_type_id.code in ['incoming', 'internal'])
+                for picking in pickings:
+                    picking_ids.append(picking.id)
+        if picking_ids:
+            old_batch = self.env['stock.picking.batch'].search([('goflow_pick_list_number', '=', pick_list_number)])
+            if old_batch:
+                link_pickings = []
+                for picking in picking_ids:
+                    link_pickings.append((4, picking))
+                if link_pickings:
+                    old_batch.write({'picking_ids': link_pickings})
+            else:
+                batch = self.env['stock.picking.batch'].create({
+                    'user_id': in_picking_orders[0].user_id.id or self.env.user.id,
+                    'company_id': in_picking_orders[0].company_id.id or self.env.company.id,
+                    'picking_type_id': self.env['stock.picking'].browse(picking_ids[0]).picking_type_id.id,
+                    'picking_ids': picking_ids,
+                    'goflow_pick_list_number': pick_list_number
+                })
+                batch.action_confirm()
+
     def update_so_status(self, lastcall):
         if lastcall:
             find_updated_orders = self.search(['|', ('write_date', '>=', lastcall), ('create_date', '>=', lastcall)])
+            i = 1
             for order in find_updated_orders:
+                i += 1
+                print(i)
                 order.create_invoice_delivery()
+            in_picking_orders = find_updated_orders.filtered(lambda o: o.goflow_order_status == 'in_picking')
+            if in_picking_orders:
+                self._create_batch_transfers(in_picking_orders)
+            pass
+            print(in_picking_orders)
         else:
             find_all_orders = self.search([])
             for order in find_all_orders:
@@ -97,7 +162,10 @@ class SaleOrder(models.Model):
     def create_invoice_delivery(self):
         goflow_order_status = self.goflow_order_status or ''
         order_state = self.state
-        if goflow_order_status in ('in_picking', 'in_packing', 'ready_to_pick'):
+        # if goflow_order_status == 'in_packing':
+        #     if order_state == 'draft':
+        #         self.action_confirm()
+        if goflow_order_status == 'in_picking':
             if order_state == 'draft':
                 self.action_confirm()
             if self.picking_ids:
@@ -129,6 +197,9 @@ class SaleOrder(models.Model):
                         invoice.goflow_invoice_no = self.goflow_invoice_no
                         invoice.action_post()
 
+    def _prepare_batch_values(self):
+        return {}
+
     def api_call_for_sync_orders_in_picking(self):
         cron_job_id = self.env.ref('delivery_goflow.sync_order_in_picking_from_goflow_ir_cron')
 
@@ -138,7 +209,7 @@ class SaleOrder(models.Model):
         else:
             lastcall_delay = False
         goflow_state ='in_picking'
-        self.sync_so_goflow(lastcall_delay,goflow_state)
+        self.sync_so_goflow(lastcall_delay, goflow_state)
         self.update_so_status(lastcall_delay)
 
     def api_call_for_sync_orders_shipped(self):
@@ -174,7 +245,7 @@ class SaleOrder(models.Model):
         else:
             lastcall_delay = False
         goflow_state ='ready_to_pick'
-        self.sync_so_goflow(lastcall_delay,goflow_state)
+        self.sync_so_goflow(lastcall_delay, goflow_state)
         self.update_so_status(lastcall_delay)
 
     def convert_iso_to_utc(self, date):
@@ -275,6 +346,7 @@ class SaleOrder(models.Model):
             'goflow_store_latest_ship': goflow_store_latest_ship,
             'goflow_store_latest_delivery': goflow_store_latest_delivery,
             'goflow_order_date': order_date,
+            'goflow_pick_list_number': order["pick_list_number"],
         }
         return values_order
 
@@ -297,6 +369,7 @@ class SaleOrder(models.Model):
             'goflow_shipped_at': goflow_shipped_at,
             'goflow_store_latest_ship': goflow_store_latest_ship,
             'goflow_store_latest_delivery': goflow_store_latest_delivery,
+            'goflow_pick_list_number': order["pick_list_number"],
         }
 
     def _prepare_order_lines(self, line, so, tracking_line_list, company_for_glow):
@@ -372,7 +445,10 @@ class SaleOrder(models.Model):
             goflow_api = requests.get(goflow_api["next"], auth=BearerAuth(goflow_token), headers=headers).json()
             orders.extend(goflow_api["data"])
         # print(len(orders))
+        i = 1
         for order in orders:
+            i += 1
+            print(i)
             goflow_store_id = order["store"]["id"]
             goflow_store_obj = self.env['goflow.store'].search([('goflow_id', '=', goflow_store_id)], limit=1)
             goflow_store_obj_partner_id, goflow_store_obj_id = goflow_store_obj.partner_id.id, goflow_store_obj.id
@@ -398,11 +474,11 @@ class SaleOrder(models.Model):
             order_array = order
             if check_if_order_exists:
                 order = check_if_order_exists
-                if order.warehouse_id != warehouse_obj:
-                    order.action_cancel()
-                    order.action_draft()
-                    order.warehouse_id = warehouse_obj_id
-                    order.action_confirm()
+                # if order.warehouse_id != warehouse_obj:
+                #     order.action_cancel()
+                #     order.action_draft()
+                #     order.warehouse_id = warehouse_obj_id
+                #     order.action_confirm()
                 order.write(self._prepare_edit_order_values(order_array))
 
                 for line in tracking_line_list:

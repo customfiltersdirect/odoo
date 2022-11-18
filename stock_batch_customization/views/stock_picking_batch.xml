@@ -1,0 +1,30 @@
+<odoo>
+    <data>
+        <!-- included reject button in sale order form -->
+        <record id="delivery_goflow_stock_picking_batch_form_inherit" model="ir.ui.view">
+            <field name="name">delivery.goflow.stock.picking.batch.form.inherit</field>
+            <field name="model">stock.picking.batch</field>
+            <field name="inherit_id" ref="stock_picking_batch.stock_picking_batch_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_open_label_layout']" position="after">
+                    <button name="action_grouped_transfer" string="Group Transfers"
+                            type="object" title="Group Transfers"/>
+                </xpath>
+                <xpath expr="//notebook[last()]" position="inside">
+                    <page string="Grouped Transfers" name="grouped_transfers">
+                        <field name="grouped_transfer_ids">
+                            <tree>
+                                <field name="product_id"/>
+                                <field name="location_id"/>
+                                <field name="location_dest_id"/>
+                                <field name="product_uom_qty"/>
+                                <field name="product_uom_id"/>
+                                <field name="qty_done"/>
+                            </tree>
+                        </field>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
