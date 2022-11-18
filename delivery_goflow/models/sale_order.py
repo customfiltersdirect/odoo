@@ -491,10 +491,10 @@ class SaleOrder(models.Model):
                 so = self.env['sale.order'].create(order_values)
                 so.partner_id = goflow_store_obj_partner_id
                 so.partner_shipping_id = partner_ship_obj.id or goflow_store_obj_partner_id
-                so.company_id = company_for_glow and company_for_glow.id or False
-                so.warehouse_id = warehouse_obj_id
                 so.goflow_id = order["id"]
                 so.goflow_store_id = goflow_store_obj_id
+                so.company_id = company_for_glow and company_for_glow.id or False
+                so.warehouse_id = warehouse_obj_id
                 for line in order_lines:
                     self.env['sale.order.line'].create(self._prepare_order_lines(line, so, tracking_line_list,
                                                                                  company_for_glow))
