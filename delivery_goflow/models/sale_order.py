@@ -208,7 +208,7 @@ class SaleOrder(models.Model):
             lastcall_delay = lastcall
         else:
             lastcall_delay = False
-        goflow_state ='in_picking'
+        goflow_state = 'in_picking'
         self.sync_so_goflow(lastcall_delay, goflow_state)
         self.update_so_status(lastcall_delay)
 
@@ -438,7 +438,7 @@ class SaleOrder(models.Model):
             'X-Beta-Contact': self.env.user.partner_id.email
         }
         url = self._preparing_url(lastcall, company_for_glow, goflow_state)
-        result = requests.get(url, auth=BearerAuth(goflow_token), headers=headers, verify=False)
+        result = requests.get(url, auth=BearerAuth(goflow_token), headers=headers, verify=True)
         goflow_api = result.json()
         orders = goflow_api["data"]
         while goflow_api["next"]:
