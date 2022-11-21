@@ -86,12 +86,10 @@ class SaleOrder(models.Model):
     goflow_store_latest_delivery = fields.Date('Goflow Store Latest Delivery')
 
     def _create_batch_transfers(self, in_picking_orders):
-        in_picking_orders = in_picking_orders.search([('goflow_pick_list_number', '!=', False)], order='goflow_pick_list_number ASC')
+        in_picking_orders = in_picking_orders.filtered(lambda rin_o: rin_o.goflow_pick_list_number).sorted(key=lambda rin_o: rin_o.goflow_pick_list_number)
         pick_list_number = in_picking_orders[0].goflow_pick_list_number
         picking_ids = []
         for order in in_picking_orders:
-            if order.id == in_picking_orders[len(in_picking_orders) - 1].id:
-                print(order)
             if order.goflow_pick_list_number != pick_list_number:
                 if not picking_ids:
                     pickings = order.picking_ids.filtered(lambda e: e.picking_type_id.code in ['incoming', 'internal'])
@@ -152,8 +150,6 @@ class SaleOrder(models.Model):
             in_picking_orders = find_updated_orders.filtered(lambda o: o.goflow_order_status == 'in_picking')
             if in_picking_orders:
                 self._create_batch_transfers(in_picking_orders)
-            pass
-            print(in_picking_orders)
         else:
             find_all_orders = self.search([])
             for order in find_all_orders:

@@ -22,7 +22,7 @@ class StockPickingBatch(models.Model):
             qty_done = 0
             for line in line_ids:
                 qty_done += line.qty_done
-            if move_line.product_id.id not in product_ids and move_line.location_id.id not in location_ids:
+            if move_line.product_id.id not in product_ids or move_line.location_id.id not in location_ids:
                 self.env['group.move.line'].create({
                     'product_id': move_line.product_id.id,
                     'product_uom_qty': qty,
