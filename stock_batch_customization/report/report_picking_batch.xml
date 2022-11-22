@@ -9,6 +9,7 @@
                     <t t-set="has_serial_number" t-value="grouped_transfer_ids.filtered('lot_id')" groups="stock.group_production_lot"/>
                     <t t-set="has_barcode" t-value="grouped_transfer_ids.mapped('product_id').filtered('barcode')"/>
                     <t t-set="has_location_barcode" t-value="grouped_transfer_ids.mapped('location_id').filtered('barcode')"/>
+                    <t t-set="has_location_dest_barcode" t-value="grouped_transfer_ids.mapped('location_dest_id').filtered('barcode')"/>
                     <t t-set="locations" t-value="grouped_transfer_ids.mapped('location_id').sorted(lambda location: location.complete_name)"/>
                     <t t-call="web.external_layout">
                         <div class="page">
@@ -63,7 +64,10 @@
                                             <strong>Lot/Serial Number</strong>
                                         </th>
                                         <th t-if="has_location_barcode" width="15%" class="text-center">
-                                            <strong>Location Barcode</strong>
+                                            <strong>From Barcode</strong>
+                                        </th>
+                                        <th t-if="has_location_dest_barcode" width="15%" class="text-center">
+                                            <strong>To Barcode</strong>
                                         </th>
                                         <th t-if="has_barcode" width="15%" class="text-center">
                                             <strong>Product Barcode</strong>
@@ -105,6 +109,13 @@
 <!--                                                        <div style="text-align: center; font-size: 7px"><span t-esc="move_operation.location_id.name"/></div>-->
 <!--                                                        <div t-if="move_operation.location_id.barcode" t-field="move_operation.location_id.barcode" t-options="{'widget': 'barcode', 'symbology': 'auto', 'width': 600, 'height': 100, 'img_style': 'width:100%;height:35px;'}"/>-->
                                                         <div t-field="move_operation.location_id.barcode" t-options="{'widget': 'barcode', 'symbology': 'auto', 'width': 600, 'height': 100, 'img_style': 'width:100%;height:35px;'}"/>
+                                                    </span>
+                                                </td>
+                                                <td width="15%" class="text-center" t-if="has_location_dest_barcode">
+                                                    <span t-if="move_operation.location_dest_id and move_operation.location_dest_id.barcode">
+<!--                                                        <div style="text-align: center; font-size: 7px"><span t-esc="move_operation.location_id.name"/></div>-->
+<!--                                                        <div t-if="move_operation.location_id.barcode" t-field="move_operation.location_id.barcode" t-options="{'widget': 'barcode', 'symbology': 'auto', 'width': 600, 'height': 100, 'img_style': 'width:100%;height:35px;'}"/>-->
+                                                        <div t-field="move_operation.location_dest_id.barcode" t-options="{'widget': 'barcode', 'symbology': 'auto', 'width': 600, 'height': 100, 'img_style': 'width:100%;height:35px;'}"/>
                                                     </span>
                                                 </td>
                                                 <td width="15%" class="text-center" t-if="has_barcode">
