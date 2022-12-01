@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, api, _
+from odoo import fields, models, api
 import requests
 from .res_config_settings import BearerAuth
-from datetime import datetime, timedelta
+from datetime import datetime
 import dateutil.parser
-from time import sleep, perf_counter
-from threading import Thread
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class AccountMove(models.Model):
@@ -84,6 +84,8 @@ class SaleOrder(models.Model):
     goflow_shipped_at = fields.Datetime('Goflow Shipped At')
     goflow_store_latest_ship = fields.Date('Goflow Store Latest Ship')
     goflow_store_latest_delivery = fields.Date('Goflow Store Latest Delivery')
+    goflow_shipped_last_call_check = fields.Boolean('Goflow Last Call check', index=True)
+    goflow_full_invoiced = fields.Boolean('Goflow Total invoiced', index=True)
 
     def _create_batch_transfers(self, in_picking_orders):
         in_picking_orders = in_picking_orders.filtered(lambda rin_o: rin_o.goflow_pick_list_number).sorted(key=lambda rin_o: rin_o.goflow_pick_list_number)
@@ -146,6 +148,7 @@ class SaleOrder(models.Model):
             for order in find_updated_orders:
                 i += 1
                 print(i)
+                print(order.id)
                 order.create_invoice_delivery()
             in_picking_orders = find_updated_orders.filtered(lambda o: o.goflow_order_status == 'in_picking')
             if in_picking_orders:
@@ -186,12 +189,12 @@ class SaleOrder(models.Model):
 
                 if not self.invoice_ids:
                     self._create_invoices()
-
                 if self.invoice_ids:
                     for invoice in self.invoice_ids.filtered(lambda x: x.state == 'draft'):
                         ## copy goflow invoice no to invoice in odoo
                         invoice.goflow_invoice_no = self.goflow_invoice_no
                         invoice.action_post()
+                    self.goflow_full_invoiced = True
 
     def _prepare_batch_values(self):
         return {}
@@ -218,7 +221,13 @@ class SaleOrder(models.Model):
             lastcall_delay = False
         goflow_state ='shipped'
         self.sync_so_goflow(lastcall_delay, goflow_state)
-        self.update_so_status(lastcall_delay)
+        # self.update_so_status(lastcall_delay)
+
+    def api_call_for_sync_orders_shipped_invoice(self):
+        find_updated_orders = self.search([('goflow_shipped_last_call_check', '=', True), ('goflow_full_invoiced', '=', False)], limit=400)
+        for order in find_updated_orders:
+            _logger.warning("Order# %s:", order.name)
+            order.create_invoice_delivery()
 
     def api_call_for_sync_orders_in_packing(self):
         cron_job_id = self.env.ref('delivery_goflow.sync_order_in_packing_from_goflow_ir_cron')
@@ -338,6 +347,7 @@ class SaleOrder(models.Model):
             'goflow_shipping_method': order["shipment"]["shipping_method"],
             'goflow_scac': order["shipment"]["scac"],
             'goflow_order_status': order["status"],
+            'goflow_shipped_last_call_check': True if order["status"] == 'shipped' else False,
             'goflow_shipped_at': goflow_shipped_at,
             'goflow_store_latest_ship': goflow_store_latest_ship,
             'goflow_store_latest_delivery': goflow_store_latest_delivery,
@@ -357,6 +367,7 @@ class SaleOrder(models.Model):
             'goflow_order_no': order["order_number"],
             'goflow_order_date': order_date,
             'goflow_order_status': order["status"],
+            'goflow_shipped_last_call_check': True if order["status"] == 'shipped' else False,
             'goflow_invoice_no': order["invoice_number"],
             'goflow_po_no': order["purchase_order_number"],
             'goflow_carrier': order["shipment"]["carrier"],
