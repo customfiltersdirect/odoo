@@ -226,7 +226,7 @@ class SaleOrder(models.Model):
     def api_call_for_sync_orders_shipped_invoice(self):
         find_updated_orders = self.search([('goflow_shipped_last_call_check', '=', True), ('goflow_full_invoiced', '=', False)], limit=400)
         for order in find_updated_orders:
-            _logger.warning("Order# %s:", order.name)
+            # _logger.warning("Order# %s:", order.name)
             order.create_invoice_delivery()
 
     def api_call_for_sync_orders_in_packing(self):
