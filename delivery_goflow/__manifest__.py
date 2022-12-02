@@ -8,6 +8,7 @@
     'data':[
         'security/ir.model.access.csv',
         "data/api_call_data.xml",
+        "data/invoice_cron.xml",
         "views/res_config_settings.xml",
         "views/sale_order_view.xml",
         "views/store_view.xml",
