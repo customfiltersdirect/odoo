@@ -179,13 +179,25 @@ class SaleOrder(models.Model):
                 for picking in self.picking_ids.filtered(lambda x: x.state != 'cancel'):
                     if picking.state in ('waiting', 'confirmed'):
                         picking.action_assign()
-                    # picking.action_confirm()
-                    for mv in picking.move_ids_without_package:
-                        if mv.product_uom_qty != 0.0:
-                            mv.quantity_done = mv.product_uom_qty
+                    picking.action_set_quantities_to_reservation()
+                    # for mv in picking.move_ids_without_package:
+                    #     if mv.product_uom_qty != 0.0:
+                    #         mv.quantity_done = mv.product_uom_qty
 
                     if picking.state != 'done':
-                        picking.button_validate()
+                        try:
+                            picking.button_validate()
+                        except:
+                            print("Except")
+                            if not self.invoice_ids:
+                                self._create_invoices()
+                            if self.invoice_ids:
+                                for invoice in self.invoice_ids.filtered(lambda x: x.state == 'draft'):
+                                    ## copy goflow invoice no to invoice in odoo
+                                    invoice.goflow_invoice_no = self.goflow_invoice_no
+                                    invoice.action_post()
+                                self.goflow_full_invoiced = True
+                                print("Invoiced")
 
                 if not self.invoice_ids:
                     self._create_invoices()
@@ -195,6 +207,7 @@ class SaleOrder(models.Model):
                         invoice.goflow_invoice_no = self.goflow_invoice_no
                         invoice.action_post()
                     self.goflow_full_invoiced = True
+                    print("Invoiced")
 
     def _prepare_batch_values(self):
         return {}
@@ -221,6 +234,7 @@ class SaleOrder(models.Model):
             lastcall_delay = False
         goflow_state ='shipped'
         self.sync_so_goflow(lastcall_delay, goflow_state)
+        self.update_shipped_so_status()
         # self.update_so_status(lastcall_delay)
 
     def api_call_for_sync_orders_shipped_invoice(self):
@@ -228,6 +242,15 @@ class SaleOrder(models.Model):
         for order in find_updated_orders:
             _logger.warning("Order# %s:", order.name)
             order.create_invoice_delivery()
+
+    def update_shipped_so_status(self):
+        find_updated_orders = self.search([('goflow_shipped_last_call_check', '=', True), ('goflow_full_invoiced', '=', False)])
+        i = 1
+        for order in find_updated_orders:
+            if order.state == 'draft':
+                i += 1
+                order.action_confirm()
+                print("Confirmed" + str(i))
 
     def api_call_for_sync_orders_in_packing(self):
         cron_job_id = self.env.ref('delivery_goflow.sync_order_in_packing_from_goflow_ir_cron')
