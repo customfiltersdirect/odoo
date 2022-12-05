@@ -261,8 +261,8 @@ class SaleOrder(models.Model):
         else:
             lastcall_delay = False
         goflow_state ='in_packing'
-        self.sync_so_goflow(lastcall_delay,goflow_state)
-        self.update_so_status(lastcall_delay)
+        # self.sync_so_goflow(lastcall_delay,goflow_state)
+        # self.update_so_status(lastcall_delay)
 
     def api_call_for_sync_orders_ready_to_pick(self):
         cron_job_id = self.env.ref('delivery_goflow.sync_order_ready_to_pick_from_goflow_ir_cron')
