@@ -57,6 +57,8 @@ class StockPicking(models.Model):
 
             # Print packages
             self.print_scenarios(action='print_packages_label_on_transfer')
+            if self.package_ids:
+                self.print_scenarios(action='print_package_on_put_in_pack', packages_to_print=self.package_ids)
 
         return res
 
