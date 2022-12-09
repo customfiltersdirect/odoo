@@ -94,7 +94,8 @@ class SaleOrder(models.Model):
         for order in in_picking_orders:
             if order.goflow_pick_list_number != pick_list_number:
                 if not picking_ids:
-                    pickings = order.picking_ids.filtered(lambda e: e.picking_type_id.code in ['incoming', 'internal'])
+                    # pickings = order.picking_ids.filtered(lambda e: e.picking_type_id.code in ['incoming', 'internal'])
+                    pickings = order.picking_ids.filtered(lambda e: e.picking_type_id.is_creating_batch)
                     for picking in pickings:
                         picking_ids.append(picking.id)
                 if picking_ids:
@@ -111,16 +112,18 @@ class SaleOrder(models.Model):
                             'company_id': order.company_id.id or self.env.company.id,
                             'picking_type_id': self.env['stock.picking'].browse(picking_ids[0]).picking_type_id.id,
                             'picking_ids': picking_ids,
-                            'goflow_pick_list_number': pick_list_number
+                            'goflow_pick_list_number': pick_list_number if pick_list_number else 'Nope'
                         })
                         batch.action_confirm()
                 pick_list_number = order.goflow_pick_list_number
                 picking_ids = []
-                pickings = order.picking_ids.filtered(lambda e: e.picking_type_id.code in ['incoming', 'internal'])
+                # pickings = order.picking_ids.filtered(lambda e: e.picking_type_id.code in ['incoming', 'internal'])
+                pickings = order.picking_ids.filtered(lambda e: e.picking_type_id.is_creating_batch)
                 for picking in pickings:
                     picking_ids.append(picking.id)
             else:
-                pickings = order.picking_ids.filtered(lambda e: e.picking_type_id.code in ['incoming', 'internal'])
+                # pickings = order.picking_ids.filtered(lambda e: e.picking_type_id.code in ['incoming', 'internal'])
+                pickings = order.picking_ids.filtered(lambda e: e.picking_type_id.is_creating_batch)
                 for picking in pickings:
                     picking_ids.append(picking.id)
         if picking_ids:
@@ -137,7 +140,7 @@ class SaleOrder(models.Model):
                     'company_id': in_picking_orders[0].company_id.id or self.env.company.id,
                     'picking_type_id': self.env['stock.picking'].browse(picking_ids[0]).picking_type_id.id,
                     'picking_ids': picking_ids,
-                    'goflow_pick_list_number': pick_list_number
+                    'goflow_pick_list_number': pick_list_number if pick_list_number else 'Nope'
                 })
                 batch.action_confirm()
 
