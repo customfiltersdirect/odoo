@@ -6,3 +6,4 @@ from . import company
 from . import warehouse
 from . import res_partner
 from . import stock_picking_batch
+from . import stock_picking_type
