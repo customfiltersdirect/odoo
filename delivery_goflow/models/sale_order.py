@@ -115,6 +115,10 @@ class SaleOrder(models.Model):
                             'flag': True,
                             'goflow_pick_list_number': pick_list_number if pick_list_number else 'Nope'
                         })
+                        p_names = []
+                        for p in batch.picking_ids:
+                            p_names.append(p.name)
+                        _logger.warning("Batch Created with these pickings %s ", ' '.join(p_names))
                         batch.action_confirm()
                 pick_list_number = order.goflow_pick_list_number
                 picking_ids = []
@@ -144,6 +148,10 @@ class SaleOrder(models.Model):
                     'flag': True,
                     'goflow_pick_list_number': pick_list_number if pick_list_number else 'Nope'
                 })
+                p_names = []
+                for p in batch.picking_ids:
+                    p_names.append(p.name)
+                _logger.warning("Batch Created with these pickings %s ", ' '.join(p_names))
                 batch.action_confirm()
 
     def update_so_status(self, lastcall):
@@ -153,7 +161,8 @@ class SaleOrder(models.Model):
             for order in find_updated_orders:
                 i += 1
                 print(i)
-                print(order.id)
+                print(order.name)
+                _logger.warning("Changing Orders Status and Id is %s - %s : ", order.id, i)
                 order.create_invoice_delivery()
             in_picking_orders = find_updated_orders.filtered(lambda o: o.goflow_order_status == 'in_picking')
             if in_picking_orders:
@@ -486,6 +495,7 @@ class SaleOrder(models.Model):
         for order in orders:
             i += 1
             print(i)
+            _logger.warning("Creating Orders and # is %s: ", i)
             goflow_store_id = order["store"]["id"]
             goflow_store_obj = self.env['goflow.store'].search([('goflow_id', '=', goflow_store_id)], limit=1)
             goflow_store_obj_partner_id, goflow_store_obj_id = goflow_store_obj.partner_id.id, goflow_store_obj.id
