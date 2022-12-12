@@ -112,6 +112,7 @@ class SaleOrder(models.Model):
                             'company_id': order.company_id.id or self.env.company.id,
                             'picking_type_id': self.env['stock.picking'].browse(picking_ids[0]).picking_type_id.id,
                             'picking_ids': picking_ids,
+                            'flag': True,
                             'goflow_pick_list_number': pick_list_number if pick_list_number else 'Nope'
                         })
                         batch.action_confirm()
@@ -140,6 +141,7 @@ class SaleOrder(models.Model):
                     'company_id': in_picking_orders[0].company_id.id or self.env.company.id,
                     'picking_type_id': self.env['stock.picking'].browse(picking_ids[0]).picking_type_id.id,
                     'picking_ids': picking_ids,
+                    'flag': True,
                     'goflow_pick_list_number': pick_list_number if pick_list_number else 'Nope'
                 })
                 batch.action_confirm()

@@ -10,6 +10,9 @@
                     <button name="action_grouped_transfer" string="Group Transfers"
                             type="object" title="Group Transfers"/>
                 </xpath>
+                <xpath expr="//field[@name='company_id']" position="after">
+                    <field name="flag"/>
+                </xpath>
                 <xpath expr="//notebook[last()]" position="inside">
                     <page string="Grouped Transfers" name="grouped_transfers">
                         <field name="grouped_transfer_ids">
