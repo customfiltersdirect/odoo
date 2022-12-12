@@ -9,6 +9,7 @@ class StockPickingBatch(models.Model):
     _inherit = 'stock.picking.batch'
 
     grouped_transfer_ids = fields.One2many('group.move.line', 'batch_id', string='Stock move lines')
+    flag = fields.Boolean(string="Test")
 
     def action_grouped_transfer(self):
         self.grouped_transfer_ids = [(5, 0, 0)]  # Remove all previous groups
