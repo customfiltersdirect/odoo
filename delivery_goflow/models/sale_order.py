@@ -162,7 +162,7 @@ class SaleOrder(models.Model):
                 i += 1
                 print(i)
                 print(order.name)
-                _logger.warning("Changing Orders Status and Id is %s - %s : ", order.id, i)
+                # _logger.warning("Changing Orders Status and Id is %s - %s : ", order.id, i)
                 order.create_invoice_delivery()
             in_picking_orders = find_updated_orders.filtered(lambda o: o.goflow_order_status == 'in_picking')
             if in_picking_orders:
