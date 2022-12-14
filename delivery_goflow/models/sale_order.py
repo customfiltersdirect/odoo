@@ -112,8 +112,7 @@ class SaleOrder(models.Model):
                             'company_id': order.company_id.id or self.env.company.id,
                             'picking_type_id': self.env['stock.picking'].browse(picking_ids[0]).picking_type_id.id,
                             'picking_ids': picking_ids,
-                            'flag': True,
-                            'goflow_pick_list_number': pick_list_number if pick_list_number else 'Nope'
+                            'goflow_pick_list_number': pick_list_number
                         })
                         p_names = []
                         for p in batch.picking_ids:
@@ -145,8 +144,7 @@ class SaleOrder(models.Model):
                     'company_id': in_picking_orders[0].company_id.id or self.env.company.id,
                     'picking_type_id': self.env['stock.picking'].browse(picking_ids[0]).picking_type_id.id,
                     'picking_ids': picking_ids,
-                    'flag': True,
-                    'goflow_pick_list_number': pick_list_number if pick_list_number else 'Nope'
+                    'goflow_pick_list_number': pick_list_number
                 })
                 p_names = []
                 for p in batch.picking_ids:
@@ -162,7 +160,6 @@ class SaleOrder(models.Model):
                 i += 1
                 print(i)
                 print(order.name)
-                # _logger.warning("Changing Orders Status and Id is %s - %s : ", order.id, i)
                 order.create_invoice_delivery()
             in_picking_orders = find_updated_orders.filtered(lambda o: o.goflow_order_status == 'in_picking')
             if in_picking_orders:
@@ -181,11 +178,10 @@ class SaleOrder(models.Model):
         if goflow_order_status == 'in_picking':
             if order_state == 'draft':
                 self.action_confirm()
-            # This above code caused issue of validation error while batch creation
-            # if self.picking_ids:
-            #     for picking in self.picking_ids.filtered(lambda x: x.state != 'cancel'):
-            #         if picking.state in ('waiting', 'confirmed'):
-            #             picking.action_assign()
+            if self.picking_ids:
+                for picking in self.picking_ids.filtered(lambda x: x.state != 'cancel'):
+                    if picking.state in ('waiting', 'confirmed'):
+                        picking.action_assign()
         if goflow_order_status == 'shipped':
             if order_state == 'draft':
                 self.action_confirm()
@@ -255,7 +251,6 @@ class SaleOrder(models.Model):
     def api_call_for_sync_orders_shipped_invoice(self):
         find_updated_orders = self.search([('goflow_shipped_last_call_check', '=', True), ('goflow_full_invoiced', '=', False)], limit=400)
         for order in find_updated_orders:
-            _logger.warning("Order# %s:", order.name)
             order.create_invoice_delivery()
 
     def update_shipped_so_status(self):
@@ -496,7 +491,6 @@ class SaleOrder(models.Model):
         for order in orders:
             i += 1
             print(i)
-            _logger.warning("Creating Orders and # is %s: ", i)
             goflow_store_id = order["store"]["id"]
             goflow_store_obj = self.env['goflow.store'].search([('goflow_id', '=', goflow_store_id)], limit=1)
             goflow_store_obj_partner_id, goflow_store_obj_id = goflow_store_obj.partner_id.id, goflow_store_obj.id
