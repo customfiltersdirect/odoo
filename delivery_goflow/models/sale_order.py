@@ -181,10 +181,11 @@ class SaleOrder(models.Model):
         if goflow_order_status == 'in_picking':
             if order_state == 'draft':
                 self.action_confirm()
-            if self.picking_ids:
-                for picking in self.picking_ids.filtered(lambda x: x.state != 'cancel'):
-                    if picking.state in ('waiting', 'confirmed'):
-                        picking.action_assign()
+            # This above code caused issue of validation error while batch creation
+            # if self.picking_ids:
+            #     for picking in self.picking_ids.filtered(lambda x: x.state != 'cancel'):
+            #         if picking.state in ('waiting', 'confirmed'):
+            #             picking.action_assign()
         if goflow_order_status == 'shipped':
             if order_state == 'draft':
                 self.action_confirm()
