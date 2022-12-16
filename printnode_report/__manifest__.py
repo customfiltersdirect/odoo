@@ -31,6 +31,7 @@
     "data": [
 
         'report/order_label_mo_report.xml',
+        'report/asin_upc_label_mrp_production.xml',
     ],
     'license': 'LGPL-3',
     'installable': True,

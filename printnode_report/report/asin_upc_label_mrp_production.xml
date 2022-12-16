@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_asin_upc">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-if="quantity" t-set="qtys" t-value="[int(q) for q in quantity.split(',')]"/>
+                <t t-else="" t-set="qtys" t-value="[1 for q in range(len(docs))]"/>
+                <t t-call="web.basic_layout">
+                    <div class="page">
+                        <t t-foreach="range(len(docs))" t-as="index">
+                            <t t-set="mo" t-value="docs[index]"/>
+                            <t t-set="qty" t-value="qtys[index]"/>
+                            <t t-foreach="range(int(mo.qty_producing))" t-as="j">
+                                <div class="o_label_page text-center align-middle">
+                                    <div style="font-size: 10px" t-esc="mo.name"/>
+                                    <div class="font-weight-bold" style="font-size: 10px" t-esc="mo.product_id.display_name"/>
+                                </div>
+                                <t t-if="mo.product_id.tracking == 'none'">
+                                    <tr>
+                                        <td class="text-center align-middle" style="height: 6rem;">
+                                            <t t-if="mo.product_id.barcode">
+                                                <div t-field="mo.product_id.barcode" t-options="{'widget': 'barcode', 'width': 600, 'height': 150, 'img_style': 'width:100%;'}"/>
+                                                <div style="font-size: 10px" class="text-center align-middle" t-esc="mo.product_id.barcode"/>
+                                            </t>
+                                            <t t-else="">
+                                                <span class="text-muted">No barcode available</span>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </t>
+
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <record id="paperformat_report_asin_upc" model="report.paperformat">
+        <field name="name">ASIN UPC (Label)</field>
+        <field name="default" eval="True" />
+        <field name="format">custom</field>
+        <field name="page_height">40</field>
+        <field name="page_width">100</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">0</field>
+        <field name="margin_bottom">0</field>
+        <field name="margin_left">0</field>
+        <field name="margin_right">0</field>
+        <field name="disable_shrinking" eval="True"/>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_report_asin_upc" model="ir.actions.report">
+        <field name="name">ASIN UPC (Label)</field>
+        <field name="model">mrp.production</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">printnode_report.report_asin_upc</field>
+        <field name="report_file">printnode_report.report_asin_upc</field>
+        <field name="print_report_name">'Package Slip - %s' % object.name</field>
+        <field name="paperformat_id" ref="printnode_report.paperformat_report_asin_upc"/>
+        <field name="binding_model_id" ref="mrp.model_mrp_production"/>
+        <field name="binding_type">report</field>
+    </record>
+
+</odoo>
