@@ -197,7 +197,8 @@ class SaleOrder(models.Model):
 
                     if picking.state != 'done':
                         try:
-                            picking.button_validate()
+                            if picking.picking_type_id.code == 'outgoing':
+                                picking.button_validate()
                         except:
                             print("Except")
                             if not self.invoice_ids:
