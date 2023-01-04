@@ -533,6 +533,7 @@ class SaleOrder(models.Model):
                 order_values = self._prepare_order_values(order, company_for_glow, warehouse_obj_id)
                 so = self.env['sale.order'].create(order_values)
                 so.partner_id = goflow_store_obj_partner_id
+                so.partner_invoice_id = goflow_store_obj_partner_id
                 so.partner_shipping_id = partner_ship_obj.id or goflow_store_obj_partner_id
                 so.goflow_id = order["id"]
                 so.goflow_store_id = goflow_store_obj_id
