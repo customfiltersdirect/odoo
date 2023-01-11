@@ -24,7 +24,7 @@ class StockPickingBatch(models.Model):
                 qty_done += line.qty_done
             groups = self.grouped_transfer_ids.filtered(lambda x: x.product_id == move_line.product_id and x.location_id == move_line.location_id)
             # if move_line.product_id.id not in product_ids or move_line.location_id.id not in location_ids:
-            if groups:
+            if not groups:
                 self.env['group.move.line'].create({
                     'product_id': move_line.product_id.id,
                     'product_uom_qty': qty,
