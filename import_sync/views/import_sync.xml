@@ -1,0 +1,137 @@
+<?xml version = "1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="picking_server_action" model="ir.actions.server">
+        <field name="name">Run Scheduled Actions</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = env.ref('delivery_goflow.sync_order_in_picking_from_goflow_ir_cron').sudo().method_direct_trigger()
+        </field>
+    </record>
+
+    <record id="ready_to_pick" model="ir.actions.server">
+        <field name="name">Run Sync Goflow Orders Ready to Pick</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="state">code</field>
+        <field name="code">
+<!--            action = env['ir.cron'].browse(28).method_direct_trigger()-->
+            action = env.ref('delivery_goflow.sync_order_ready_to_pick_from_goflow_ir_cron').sudo().method_direct_trigger()
+        </field>
+    </record>
+
+    <record id="orders_shipped" model="ir.actions.server">
+        <field name="name">Run Sync Goflow Orders Shipped</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = env.ref('delivery_goflow.sync_order_shipped_from_goflow_ir_cron').sudo().method_direct_trigger()
+        </field>
+    </record>
+
+     <record id="sync_goflow_products" model="ir.actions.server">
+        <field name="name">Run Sync Goflow Products</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = env.ref('delivery_goflow.sync_product_from_goflow_ir_cron_new').sudo().method_direct_trigger()
+        </field>
+    </record>
+
+     <record id="sync_goflow_stores" model="ir.actions.server">
+        <field name="name">Run Sync Goflow Stores</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = env.ref('delivery_goflow.sync_stores_from_goflow_ir_cron_new').sudo().method_direct_trigger()
+        </field>
+    </record>
+
+     <record id="sync_goflow_tags" model="ir.actions.server">
+        <field name="name">Run Sync Goflow Tags</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = env.ref('delivery_goflow.sync_tags_from_goflow_ir_cron_new').sudo().method_direct_trigger()
+        </field>
+    </record>
+
+    <record id="account_journal_online_sync" model="ir.actions.server">
+        <field name="name">Run Account: Journal online sync</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = env.ref('account_online_synchronization.online_sync_cron').sudo().method_direct_trigger()
+        </field>
+    </record>
+
+
+      <menuitem id="import_sync_main_menu"
+              name="Import Sync"
+              parent="sale.sale_menu_root"
+              sequence="2"/>
+
+    <menuitem id="sync_import_orders"
+              parent="import_sync_main_menu"
+              sequence="2"
+              name="Orders"/>
+
+    <menuitem id="menu_sync_import_picking"
+              name="Picking"
+              parent="import_sync.sync_import_orders"
+              action="import_sync.picking_server_action"
+              sequence="2"/>
+
+    <menuitem id="menu_sync_import_ready_to_pick"
+              name="Ready to Pick"
+              parent="import_sync.sync_import_orders"
+              action="import_sync.ready_to_pick"
+              sequence="4"/>
+
+    <menuitem id="menu_sync_import_orders_shipped"
+              name="Shipped"
+              parent="import_sync.sync_import_orders"
+              action="import_sync.orders_shipped"
+              sequence="6"/>
+
+    <menuitem id="sync_import_others"
+              parent="import_sync_main_menu"
+              sequence="4"
+              name="Others"/>
+
+    <menuitem id="menu_sync_import_products"
+              name="Products"
+              parent="import_sync.sync_import_others"
+              action="import_sync.sync_goflow_products"
+              sequence="8"
+           />
+
+    <menuitem id="menu_sync_import_stores"
+              name="Stores"
+              parent="import_sync.sync_import_others"
+              action="import_sync.sync_goflow_stores"
+              sequence="9"
+          />
+
+    <menuitem id="menu_sync_import_tags"
+              name="Tags"
+              parent="import_sync.sync_import_others"
+              action="import_sync.sync_goflow_tags"
+              sequence="10"
+      />
+
+    <menuitem id="menu_sync_import_journal"
+              name="Journal"
+              parent="import_sync.sync_import_others"
+              action="import_sync.account_journal_online_sync"
+              sequence="11"/>
+
+
+</odoo>
