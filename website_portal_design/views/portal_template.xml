@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<template id="portal_layout_inherited" inherit_id="portal.portal_layout">
+		<xpath expr="//div[hasclass('row')]/div[@t-attf-class='col-12 col-md col-lg-6']" position="attributes">
+            <attribute name="t-attf-class">col-12 col-md-12 col-lg-9</attribute>
+        </xpath>
+        <xpath expr="//div[@id='o_my_sidebar']" position="attributes">
+            <attribute name="class">col-lg-3 o_my_sidebar </attribute>
+        </xpath>
+	</template>
+
+	<template id="portal_home_inherited" inherit_id="portal.portal_my_home">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="attributes">
+            <attribute name="class" add="biz_portal mt16 mb16" separator=" "></attribute>
+        </xpath>
+    </template>
+
+    <template id="portal_docs_entry_inherited" inherit_id="portal.portal_docs_entry">
+        <xpath expr="//span[@t-esc='count']" position="attributes">
+            <attribute name="class">text-white bg-transparent badge-pill</attribute>
+        </xpath>
+    </template>
+    
+      <template id="portal_frontend_user" inherit_id="website.template_header_default">
+        <xpath expr="//t[@t-set='_user_name']" position="before">
+            <t t-set="_avatar" t-value="true"/>
+        </xpath>
+    </template>
+    
+    <template id="update_user_image" name="User Image">
+        <span t-field="user_id.image_1920" id="user_image_load"
+            t-options="{'widget': 'image'}"
+            class="d-flex h-100 justify-content-center align-items-center"/>
+    </template>	
+
+    <template id="portal_my_details_inherit" inherit_id="portal.portal_my_details">
+        <xpath expr="//div[hasclass('o_portal_details')]" position="inside">
+             <div class="col-lg-4 mt64">
+                <div t-attf-class="form-group col-xl-8">
+                    <span t-field="user_id.image_1920" id="user_image_load"
+                    t-options="{'widget': 'image'}"
+                    class="d-flex h-100 justify-content-center align-items-center"/>
+                    <input type="file" class="input-text listify-file-upload image_loaded mt16 mb16" data-file_types="jpg|jpeg|gif|png" name="" id="" placeholder=" Upload Image"></input>
+                </div>
+                <a role="button" class="btn btn-primary mt16" id="add_new_address" href="/address-view"><i class="fa fa-plus"/>
+                Add Address</a>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="add_address">
+        <t t-set="no_footer">1</t>
+        <t t-call="website.layout">
+            <div id="wrap">
+                <div class="container oe_portal_address py-2">
+                    <div class="row">
+                        <div class="col-12 col-xl address-xl-1">
+                            <form action="/add-address" method="post" class="checkout_autoformat">
+                                <div class="form-row">
+                                    <div class="col-md-12">
+                                        
+                                      <div t-if="error_message" class="alert alert-danger" role="alert">
+                                          <t t-esc="error_message"/><br />
+                                      </div>
+                                    </div>
+
+                                    <div t-attf-class="form-group col-lg-12 div_name">
+                                        <label class="col-form-label" for="name">Name</label>
+                                        <input type="text" name="name"  t-attf-class="form-control o_website_form_input #{'name' in required_fields and 'is-invalid' or ''}"  t-att-value="predefine_data and 'name' in predefine_data and predefine_data['name'] or partner_id and 'name' in partner_id and partner_id['name']" />
+                                    </div>
+                                    <div t-attf-class="form-group col-lg-12 email">
+                                        <label class="col-form-label" for="email">Email</label>
+                                        <input type="text" name="email" t-attf-class="form-control" t-att-value="predefine_data and 'email' in predefine_data and predefine_data['email'] or partner_id and 'email' in partner_id and partner_id['email']"/>
+                                    </div>
+                                    <div t-attf-class="form-group col-lg-12 phone">
+                                        <label class="col-form-label" for="phone">Phone</label>
+                                        <input type="text" name="phone" t-attf-class="form-control o_website_form_input #{'phone' in required_fields and 'is-invalid' or ''}"  t-att-value="predefine_data and 'phone' in predefine_data and predefine_data['phone'] or partner_id and 'phone' in partner_id and partner_id['phone']"/>
+                                    </div>
+
+                                    <div t-attf-class="form-group col-lg-12 street">
+                                         <label class="col-form-label" for="street">Street <span class="d-none d-md-inline"> and Number</span></label>
+                                        <input type="text" name="street" t-attf-class="form-control o_website_form_input #{'street' in required_fields and 'is-invalid' or ''}" t-att-value="predefine_data and 'street' in predefine_data and predefine_data['street'] or partner_id and 'street' in partner_id and partner_id['street']"/>
+                                    </div>
+
+                                     <div t-attf-class="form-group col-lg-12 div_street2">
+                                        <label class="col-form-label label-optional" for="street2">Street 2</label>
+                                        <input type="text" name="street2" t-attf-class="form-control" t-att-value="predefine_data and 'street2' in predefine_data and predefine_data['street2'] or partner_id and 'street2' in partner_id and partner_id['street2']"/>
+                                    </div>
+                                     <div t-attf-class="form-group col-md-4 div_zip">
+                                        <label class="col-form-label label-optional" for="zip">Zip Code</label>
+                                        <input type="text" name="zip" t-attf-class="form-control"  t-att-value="predefine_data and 'zip' in predefine_data and predefine_data['zip'] or partner_id and 'zip' in partner_id and partner_id['zip']"/>
+                                    </div>
+
+
+                                    <div t-attf-class="form-group col-md-8 div_city">
+                                        <label class="col-form-label" for="city">City</label>
+                                        <input type="text" name="city" t-attf-class="form-control o_website_form_input #{'city' in required_fields and 'is-invalid' or ''}" t-att-value="predefine_data and 'city' in predefine_data and predefine_data['city'] or partner_id and 'city' in partner_id and partner_id['city']"/>
+                                    </div>
+
+                                     <div t-attf-class="form-group col-lg-6 div_country">
+                                        <label class="col-form-label" for="country_id">Country</label>
+                                        <select id="country_id" name="country_id" t-attf-class="form-control">
+                                            <option value="">Country...</option>
+                                            <t t-foreach="countries" t-as="c">
+                                                <option t-att-value="c.id" t-att-selected="predefine_data and 'country_id' in predefine_data and predefine_data['country_id'] and int(predefine_data['country_id']) == c.id or partner_id and 'country_id' in partner_id and int(partner_id['country_id']) == c.id">
+                                                    <t t-esc="c.name" />
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </div>
+
+                                    <div t-attf-class="form-group col-lg-6 div_state">
+                                        <label class="col-form-label" for="state_id">State / Province</label>
+                                        <select name="state_id" t-attf-class="form-control #{'state_id' in required_fields and 'is-invalid' or ''}">
+                                            <option value="">State / Province...</option>
+                                            <t t-foreach="state_ids" t-as="s">
+                                                <option t-att-value="s.id"  t-att-selected="predefine_data and 'state_id' in predefine_data and predefine_data['state_id'] and int(predefine_data['state_id']) == s.id or partner_id and 'state_id' in partner_id and int(partner_id['state_id']) == s.id">
+                                                    <t t-esc="s.name" />
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+                                    <input type="hidden" name="submitted" value="1" />
+                                    <input type="hidden" name="partner_id" t-att-value="partner_id or predefine_data and 'partner_id' in predefine_data and predefine_data['partner_id']" />
+                                    <input type="hidden" name="mode" t-att-value="mode or predefine_data and 'mode' in predefine_data and predefine_data['mode']"/>
+                                </div>
+                                <div class="d-flex justify-content-between">
+
+                                    <a role="button" href="/address-view" class="btn btn-secondary mb32 float-left"><span class="fa fa-chevron-left" /> Back</a>
+                                    <button type="submit" id="form_submit" class="btn btn-primary float-right mb32 o_job_post_submit">
+                                        Confirm
+                                    </button>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="address_list">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Address Detail</t>
+            <t t-set="no_footer">1</t>
+            <div id="wrap">
+                <div class="container oe_address_list">                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row all_shipping">
+                                <div class="col-lg-12">
+                                    <div class="row mt8">
+                                        <div class="col-lg-12">
+                                            <h3 class="o_page_header mt8">Billing Address</h3>
+                                        </div>
+                                        <t t-foreach="billing" t-as="bill">
+                                            <div class="form-group col-md-4">
+                                                <div class="card border border-primary">
+                                                    <div class="card-body" style="min-height: 130px;">
+                                                        <t t-esc="bill" t-options="dict(widget='contact', fields=['name', 'address'], no_marker=True)"/>      
+                                                    </div>
+                                                    <div class="card-footer">
+                                                        <a  role="button" t-attf-href="/add-address?edit-mode=#{bill.id}"  class="edit_address float-left">Edit</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="row mt8">
+                                        <div class="col-lg-12">
+                                            <h3 class="o_page_header mt8">Shipping Address</h3>
+                                        </div>
+                                        <div class="col-md-12 col-lg-12 one_kanban">
+                                            <a role="button" href="/add-address?new-address=1" class='a-submit btn btn-secondary mb16 btn-block'>
+                                                <i class="fa fa-plus-square"/>
+                                                <span>Add an address</span>
+                                            </a>
+                                        </div>                                        
+                                        <t t-foreach="shippings" t-as="ship">
+                                            <div class="form-group col-md-4">
+
+                                                <div class="card border border-primary">
+                                                    <div class="card-body" style="min-height: 130px;">
+                                                        <t t-esc="ship" t-options="dict(widget='contact', fields=['name', 'address'], no_marker=True)"/>      
+                                                    </div>
+                                                    
+                                                    <t t-if="ship.id == request.env.user.partner_id.default_shipping_id.id">
+                                                        <div class="card-footer" style="background-color:#cef1ce;"> 
+                                                             <a  role="button" t-attf-href="/update-addres/#{ship.id}" class="float-right set_default_address">Set Default</a>
+
+                                                             
+                                                            <a  role="button"  style="margin-left: 80px;" t-attf-href="/delete-address/#{ship.id}" class="">Remove</a>
+                                                            <a  role="button" t-attf-href="/add-address?edit-mode=#{ship.id}"  class="edit_address float-left">Edit</a>
+                                                        </div>
+                                                    </t>
+                                                    <t t-else="">
+                                                         <div class="card-footer"> 
+                                                            <a  role="button" t-attf-href="/update-addres/#{ship.id}" class="float-right set_default_address">Set Default</a>
+
+                                                             
+                                                            <a  role="button" style="margin-left: 80px;" t-attf-href="/delete-address/#{ship.id}" class="">Remove</a>
+                                                            <a  role="button" t-attf-href="/add-address?edit-mode=#{ship.id}"  class="edit_address float-left">Edit</a>
+                                                        </div>
+                                                    </t>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    <template id="biz_portal_table_inherit" inherit_id="portal.portal_table">
+        <xpath expr="//table[hasclass('o_portal_my_doc_table')]" position="attributes">
+            <attribute name="class" add="table-striped table-hover biz_table" separator=" "/>
+        </xpath>
+    </template>
+</odoo>
