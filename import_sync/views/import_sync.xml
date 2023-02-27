@@ -62,21 +62,22 @@
         </field>
     </record>
 
-    <record id="account_journal_online_sync" model="ir.actions.server">
-        <field name="name">Run Account: Journal online sync</field>
-        <field name="type">ir.actions.server</field>
-        <field name="model_id" ref="sale.model_sale_order"/>
-        <field name="state">code</field>
-        <field name="code">
-            action = env.ref('account_online_synchronization.online_sync_cron').sudo().method_direct_trigger()
-        </field>
-    </record>
+<!--    <record id="account_journal_online_sync" model="ir.actions.server">-->
+<!--        <field name="name">Run Account: Journal online sync</field>-->
+<!--        <field name="type">ir.actions.server</field>-->
+<!--        <field name="model_id" ref="sale.model_sale_order"/>-->
+<!--        <field name="state">code</field>-->
+<!--        <field name="code">-->
+<!--            action = env.ref('account_online_synchronization.online_sync_cron').sudo().method_direct_trigger()-->
+<!--        </field>-->
+<!--    </record>-->
 
 
       <menuitem id="import_sync_main_menu"
-              name="Import Sync"
+              name="Import Goflow"
               parent="sale.sale_menu_root"
-              sequence="2"/>
+              sequence="2"
+      />
 
     <menuitem id="sync_import_orders"
               parent="import_sync_main_menu"
@@ -84,19 +85,19 @@
               name="Orders"/>
 
     <menuitem id="menu_sync_import_picking"
-              name="Picking"
+              name="Import Picklist"
               parent="import_sync.sync_import_orders"
               action="import_sync.picking_server_action"
               sequence="2"/>
 
     <menuitem id="menu_sync_import_ready_to_pick"
-              name="Ready to Pick"
+              name="Import New Orders"
               parent="import_sync.sync_import_orders"
               action="import_sync.ready_to_pick"
               sequence="4"/>
 
     <menuitem id="menu_sync_import_orders_shipped"
-              name="Shipped"
+              name="Import Shipped Orders"
               parent="import_sync.sync_import_orders"
               action="import_sync.orders_shipped"
               sequence="6"/>
@@ -104,34 +105,34 @@
     <menuitem id="sync_import_others"
               parent="import_sync_main_menu"
               sequence="4"
-              name="Others"/>
+              name="Goflow Settings"/>
 
     <menuitem id="menu_sync_import_products"
-              name="Products"
+              name="Import Products"
               parent="import_sync.sync_import_others"
               action="import_sync.sync_goflow_products"
               sequence="8"
            />
 
     <menuitem id="menu_sync_import_stores"
-              name="Stores"
+              name="Import Stores"
               parent="import_sync.sync_import_others"
               action="import_sync.sync_goflow_stores"
               sequence="9"
           />
 
     <menuitem id="menu_sync_import_tags"
-              name="Tags"
+              name="Import Tags"
               parent="import_sync.sync_import_others"
               action="import_sync.sync_goflow_tags"
               sequence="10"
       />
 
-    <menuitem id="menu_sync_import_journal"
-              name="Journal"
-              parent="import_sync.sync_import_others"
-              action="import_sync.account_journal_online_sync"
-              sequence="11"/>
+<!--    <menuitem id="menu_sync_import_journal"-->
+<!--              name="Journal"-->
+<!--              parent="import_sync.sync_import_others"-->
+<!--              action="import_sync.account_journal_online_sync"-->
+<!--              sequence="11"/>-->
 
 
 </odoo>

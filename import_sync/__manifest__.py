@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 {
     'name':"Import sync",
-    'description': "Sale orders picking are auto batched",
-    'category': 'Inventory/Delivery',
+    'description': "",
+    'category': 'Sale',
     'version':'1.0',
     'depends': ['sale','delivery_goflow'],
     'data':[
         "views/import_sync.xml",
 
     ],
-    'auto_install': True,
+    'installable': True,
+    'application': True,
+    'auto_install': False,
     'license': 'OEEL-1',
 
 }
