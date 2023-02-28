@@ -7,7 +7,7 @@
         <field name="model_id" ref="sale.model_sale_order"/>
         <field name="state">code</field>
         <field name="code">
-            action = env.ref('delivery_goflow.sync_order_in_picking_from_goflow_ir_cron').sudo().method_direct_trigger()
+            env.ref('delivery_goflow.sync_order_in_picking_from_goflow_ir_cron').sudo().method_direct_trigger()
         </field>
     </record>
 
@@ -18,7 +18,7 @@
         <field name="state">code</field>
         <field name="code">
 <!--            action = env['ir.cron'].browse(28).method_direct_trigger()-->
-            action = env.ref('delivery_goflow.sync_order_ready_to_pick_from_goflow_ir_cron').sudo().method_direct_trigger()
+            env.ref('delivery_goflow.sync_order_ready_to_pick_from_goflow_ir_cron').sudo().method_direct_trigger()
         </field>
     </record>
 
@@ -28,7 +28,7 @@
         <field name="model_id" ref="sale.model_sale_order"/>
         <field name="state">code</field>
         <field name="code">
-            action = env.ref('delivery_goflow.sync_order_shipped_from_goflow_ir_cron').sudo().method_direct_trigger()
+            env.ref('delivery_goflow.sync_order_shipped_from_goflow_ir_cron').sudo().method_direct_trigger()
         </field>
     </record>
 
@@ -38,7 +38,7 @@
         <field name="model_id" ref="sale.model_sale_order"/>
         <field name="state">code</field>
         <field name="code">
-            action = env.ref('delivery_goflow.sync_product_from_goflow_ir_cron_new').sudo().method_direct_trigger()
+            env.ref('delivery_goflow.sync_product_from_goflow_ir_cron_new').sudo().method_direct_trigger()
         </field>
     </record>
 
@@ -48,7 +48,7 @@
         <field name="model_id" ref="sale.model_sale_order"/>
         <field name="state">code</field>
         <field name="code">
-            action = env.ref('delivery_goflow.sync_stores_from_goflow_ir_cron_new').sudo().method_direct_trigger()
+            env.ref('delivery_goflow.sync_stores_from_goflow_ir_cron_new').sudo().method_direct_trigger()
         </field>
     </record>
 
@@ -58,7 +58,7 @@
         <field name="model_id" ref="sale.model_sale_order"/>
         <field name="state">code</field>
         <field name="code">
-            action = env.ref('delivery_goflow.sync_tags_from_goflow_ir_cron_new').sudo().method_direct_trigger()
+            env.ref('delivery_goflow.sync_tags_from_goflow_ir_cron_new').sudo().method_direct_trigger()
         </field>
     </record>
 
