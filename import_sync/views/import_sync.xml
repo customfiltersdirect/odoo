@@ -14,7 +14,7 @@
     <record id="ready_to_pick" model="ir.actions.server">
         <field name="name">Run Sync Goflow Orders Ready to Pick</field>
         <field name="type">ir.actions.server</field>
-        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="model_id" ref="delivery_goflow.model_sale_order"/>
         <field name="state">code</field>
         <field name="code">
             action = records.api_call_for_sync_orders_ready_to_pick()
