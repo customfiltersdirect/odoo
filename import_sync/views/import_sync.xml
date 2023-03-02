@@ -17,7 +17,7 @@
         <field name="model_id" ref="delivery_goflow.model_sale_order"/>
         <field name="state">code</field>
         <field name="code">
-            action = records.api_call_for_sync_orders_ready_to_pick()
+            action = model.sudo().api_call_for_sync_orders_ready_to_pick()
 <!--            action = env['ir.cron'].browse(28).method_direct_trigger()-->
 <!--            env.ref('delivery_goflow.sync_order_ready_to_pick_from_goflow_ir_cron').sudo().method_direct_trigger()-->
         </field>
