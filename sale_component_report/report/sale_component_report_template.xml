@@ -1,0 +1,29 @@
+<odoo>
+    <record id="action_report_sale_component" model="ir.actions.report">
+        <field name="name">Sale Component Report</field>
+        <field name="model">sale.component.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sale_component_report.report_sale_component_template</field>
+        <field name="report_file">sale_component_report.report_sale_component_template</field>
+    </record>
+    <template id="report_sale_component_template">
+        <t t-call="web.html_container">
+            <t t-call="web.internal_layout">
+            <t t-if="data">
+                <table class="table table-bordered">
+                    <t t-foreach="data" t-as="product">
+                        <tr><td colspan="3" style="background:grey;"><t t-esc="product['product_name']"/></td></tr>
+                        <t t-foreach="product['components']" t-as="cmp">
+                            <tr>
+                                <td></td>
+                                <td><t t-esc="cmp['component_name']"/></td>
+                                <td><t t-esc="cmp['component_qty']"/></td>
+                            </tr>
+                        </t>
+                    </t>
+                </table>
+            </t>
+        </t>
+        </t>
+    </template>
+</odoo>
