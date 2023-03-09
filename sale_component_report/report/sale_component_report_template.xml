@@ -11,15 +11,15 @@
             <t t-call="web.internal_layout">
             <t t-if="data">
                 <table class="table table-bordered">
+                    <tr style="background:grey;">
+                        <td>Product</td>
+                        <td>Total Sold</td>
+                    </tr>
                     <t t-foreach="data" t-as="product">
-                        <tr><td colspan="3" style="background:grey;"><t t-esc="product['product_name']"/></td></tr>
-                        <t t-foreach="product['components']" t-as="cmp">
-                            <tr>
-                                <td></td>
-                                <td><t t-esc="cmp['component_name']"/></td>
-                                <td><t t-esc="cmp['component_qty']"/></td>
-                            </tr>
-                        </t>
+                        <tr>
+                            <td><t t-esc="product"/></td>
+                            <td><t t-esc="data[product]"/></td>
+                        </tr>
                     </t>
                 </table>
             </t>

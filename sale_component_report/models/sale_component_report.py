@@ -20,22 +20,24 @@ class SaleComponentReport(models.TransientModel):
         for group in self.env['sale.report'].read_group(domain, ['product_id', 'product_uom_qty'], ['product_id']):
             r[group['product_id'][0]] = group['product_uom_qty']
         for pro in r.keys():
-            print(pro)
             if self.env['product.product'].browse(pro).bom_ids:
-                component = []
                 for line in self.env['product.product'].browse(pro).bom_ids[0].bom_line_ids:
-                    component.append({
+                    product_bom.append({
+                        'component_id': line.product_id.id,
                         'component_name': line.product_id.name,
                         'component_qty': line.product_qty * r[pro]
                     })
-                product_bom.append({
-                    'product_name': self.env['product.product'].browse(pro).name,
-                    'components': component
-                })
+        dct = {}
+        for rec in product_bom:
+            if rec['component_name'] in dct:
+                dct[rec['component_name']] = int(dct[rec['component_name']]) + int(rec['component_qty'])
+            else:
+                dct[rec['component_name']] = []
+                dct[rec['component_name']] = rec['component_qty']
         data = {
-            'data': product_bom
+            'data': dct
         }
-        print('data', data)
+        print(dct)
         return self.env.ref('sale_component_report.action_report_sale_component').report_action(
             self,
             data=data)
