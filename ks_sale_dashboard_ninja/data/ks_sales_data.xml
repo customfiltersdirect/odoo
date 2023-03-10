@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="ks_sales" model="ks_dashboard_ninja.board_template">
+            <field name="name">Sales</field>
+            <field name="ks_gridstack_config">[
+                {"item_id":"ks_sale_dashboard_ninja.ks_sales_item_1", "data": {"x": 4, "y": 2, "w": 2, "h":
+                2}},
+                {"item_id":"ks_sale_dashboard_ninja.ks_sales_item_2", "data": {"x": 4, "y": 0, "w": 2, "h":
+                2}},
+                {"item_id":"ks_sale_dashboard_ninja.ks_sales_item_3", "data": {"x": 6, "y": 0, "w": 2, "h":
+                2}},
+                {"item_id":"ks_sale_dashboard_ninja.ks_sales_item_4", "data": {"x": 2, "y": 0, "w": 2, "h":
+                2}},
+                {"item_id":"ks_sale_dashboard_ninja.ks_sales_item_5", "data": {"x": 8, "y": 0, "w": 4, "h":
+                2}},
+                {"item_id":"ks_sale_dashboard_ninja.ks_sales_item_6", "data": {"x": 8, "y": 2, "w": 4, "h":
+                2}},
+                {"item_id":"ks_sale_dashboard_ninja.ks_sales_item_7", "data": {"x": 0, "y": 4, "w": 4, "h":
+                5}},
+                {"item_id":"ks_sale_dashboard_ninja.ks_sales_item_8", "data": {"x": 4, "y": 26, "w": 8, "h":
+                5}},
+                {"item_id":"ks_sale_dashboard_ninja.ks_sales_item_9", "data": {"x": 4, "y": 4, "w": 8, "h":
+                5}},
+                {"item_id":"ks_sale_dashboard_ninja.ks_sales_item_10", "data": {"x": 0, "y": 9, "w": 4, "h":
+                6}},
+                {"item_id":"ks_sale_dashboard_ninja.ks_sales_item_11", "data": {"x": 4, "y": 15, "w": 8, "h":
+                6}},
+                {"item_id":"ks_sale_dashboard_ninja.ks_sales_item_12", "data": {"x": 2, "y": 2, "w": 2, "h":
+                2}},
+                {"item_id":"ks_sale_dashboard_ninja.ks_sales_item_13", "data": {"x": 6, "y": 2, "w": 2, "h":
+                2}},
+                {"item_id":"ks_sale_dashboard_ninja.ks_sales_item_14", "data": {"x": 0, "y": 2, "w": 2, "h":
+                2}},
+                {"item_id":"ks_sale_dashboard_ninja.ks_sales_item_15", "data": {"x": 0, "y": 0, "w": 2, "h":
+                2}},
+                {"item_id":"ks_sale_dashboard_ninja.ks_sales_item_17", "data": {"x": 4, "y": 21, "w": 8, "h":
+                5}},
+                {"item_id":"ks_sale_dashboard_ninja.ks_sales_item_18", "data": {"x": 0, "y": 21, "w": 4, "h":
+                5}},
+                {"item_id":"ks_sale_dashboard_ninja.ks_sales_item_19", "data": {"x": 4, "y": 9, "w": 8, "h":
+                6}},
+                {"item_id":"ks_sale_dashboard_ninja.ks_sales_item_20", "data": {"x": 0, "y": 15, "w": 4, "h":
+                6}},
+                {"item_id":"ks_sale_dashboard_ninja.ks_sales_item_21", "data": {"x": 0, "y": 26, "w": 4, "h":
+                5}}
+                ]
+            </field>
+            <field name="ks_item_count">11</field>
+        </record>
+
+        <record id="ks_sales_item_1" model="ks_dashboard_ninja.item">
+            <field name="name">Quotations</field>
+            <field name="ks_dashboard_item_type">ks_tile</field>
+            <field name="ks_record_count_type">count</field>
+            <field name="ks_model_id" eval="ref('sale.model_sale_order')"/>
+            <field name="ks_domain">[["state","=","draft"]]</field>
+            <field name="ks_default_icon">book</field>
+            <field name="ks_dashboard_item_theme">blue</field>
+            <field name="ks_background_color">#337ab7,0.99</field>
+            <field name="ks_font_color">#ffffff,0.99</field>
+            <field name="ks_default_icon_color">#ffffff,0.99</field>
+            <field name="ks_layout">layout3</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_sales_item_2" model="ks_dashboard_ninja.item">
+            <field name="name">Sale Orders</field>
+            <field name="ks_dashboard_item_type">ks_tile</field>
+            <field name="ks_record_count_type">count</field>
+            <field name="ks_model_id" eval="ref('sale.model_sale_order')"/>
+            <field name="ks_domain">[["state","=","sale"]]</field>
+            <field name="ks_default_icon">shopping-cart</field>
+            <field name="ks_dashboard_item_theme">yellow</field>
+            <field name="ks_background_color">#f0ad4e,0.99</field>
+            <field name="ks_font_color">#ffffff,0.99</field>
+            <field name="ks_default_icon_color">#ffffff,0.99</field>
+            <field name="ks_layout">layout3</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_sales_item_3" model="ks_dashboard_ninja.item">
+            <field name="name">Customers</field>
+            <field name="ks_dashboard_item_type">ks_tile</field>
+            <field name="ks_record_count_type">count</field>
+            <field name="ks_model_id" eval="ref('base.model_res_partner')"/>
+            <field name="ks_domain">["&amp;",["partner_share","!=",False],["sale_order_ids","!=",False]]</field>
+            <field name="ks_default_icon">address-book-o</field>
+            <field name="ks_dashboard_item_theme">red</field>
+            <field name="ks_background_color">#d9534f,0.99</field>
+            <field name="ks_font_color">#ffffff,0.99</field>
+            <field name="ks_default_icon_color">#ffffff,0.99</field>
+            <field name="ks_layout">layout3</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_sales_item_4" model="ks_dashboard_ninja.item">
+            <field name="name">Partners</field>
+            <field name="ks_dashboard_item_type">ks_tile</field>
+            <field name="ks_record_count_type">count</field>
+            <field name="ks_model_id" eval="ref('base.model_res_partner')"/>
+            <field name="ks_domain">[["partner_share","=",True]]</field>
+            <field name="ks_default_icon">users</field>
+            <field name="ks_dashboard_item_theme">green</field>
+            <field name="ks_background_color">#4ccacc,0.99</field>
+            <field name="ks_font_color">#ffffff,0.99</field>
+            <field name="ks_default_icon_color">#ffffff,0.99</field>
+            <field name="ks_layout">layout3</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_sales_item_5" model="ks_dashboard_ninja.item">
+            <field name="name">To Be Invoiced</field>
+            <field name="ks_dashboard_item_type">ks_tile</field>
+            <field name="ks_record_count_type">count</field>
+            <field name="ks_model_id" eval="ref('account.model_account_move')"/>
+            <field name="ks_domain">[["state","=","draft"]]</field>
+            <field name="ks_default_icon">shopping-cart</field>
+            <field name="ks_dashboard_item_theme">blue</field>
+            <field name="ks_background_color">#925bc8,0.99</field>
+            <field name="ks_font_color">#925bc8,0.99</field>
+            <field name="ks_default_icon_color">#ffffff,0.99</field>
+            <field name="ks_layout">layout4</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_sales_item_6" model="ks_dashboard_ninja.item">
+            <field name="name">Total Amount Invoiced</field>
+            <field name="ks_dashboard_item_type">ks_tile</field>
+            <field name="ks_record_count_type">sum</field>
+            <field name="ks_record_field" eval="ref('account.field_account_move__amount_total')"/>
+            <field name="ks_model_id" eval="ref('account.model_account_move')"/>
+            <field name="ks_domain">[["invoice_payment_state","=","paid"]]</field>
+            <field name="ks_default_icon">money</field>
+            <field name="ks_dashboard_item_theme">green</field>
+            <field name="ks_background_color">#5cb85c,0.99</field>
+            <field name="ks_font_color">#5cb85c,0.99</field>
+            <field name="ks_default_icon_color">#ffffff,0.99</field>
+            <field name="ks_layout">layout4</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+
+        <record id="ks_sales_item_7" model="ks_dashboard_ninja.item">
+            <field name="name">Top Customers</field>
+            <field name="ks_dashboard_item_type">ks_bar_chart</field>
+            <field name="ks_model_id" eval="ref('sale.model_sale_order')"/>
+            <field name="ks_chart_data_count_type">sum</field>
+            <field name="ks_chart_groupby_type">relational_type</field>
+            <field name="ks_chart_measure_field"
+                   eval="[(6, 0, [ref('sale.field_sale_order__amount_total'),ref('sale.field_sale_order__amount_tax'),ref('sale.field_sale_order__amount_untaxed')])]"/>
+            <field name="ks_chart_relation_groupby" eval="ref('sale.field_sale_order__partner_id')"/>
+            <field name="ks_chart_item_color">cool</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_sales_item_8" model="ks_dashboard_ninja.item">
+            <field name="name">Top 10 Sold Products</field>
+            <field name="ks_dashboard_item_type">ks_pie_chart</field>
+            <field name="ks_model_id" eval="ref('sale.model_sale_order_line')"/>
+            <field name="ks_chart_data_count_type">sum</field>
+            <field name="ks_chart_groupby_type">relational_type</field>
+            <field name="ks_chart_measure_field" eval="[(6, 0, [ref('sale.field_sale_order_line__product_uom_qty')])]"/>
+            <field name="ks_chart_relation_groupby" eval="ref('sale.field_sale_order_line__product_id')"/>
+            <field name="ks_chart_item_color">neon</field>
+            <field name="ks_record_data_limit">10</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_sales_item_9" model="ks_dashboard_ninja.item">
+            <field name="name">Top Sales Team</field>
+            <field name="ks_dashboard_item_type">ks_doughnut_chart</field>
+            <field name="ks_model_id" eval="ref('sale.model_sale_order')"/>
+            <field name="ks_chart_data_count_type">sum</field>
+            <field name="ks_chart_groupby_type">relational_type</field>
+            <field name="ks_chart_measure_field"
+                   eval="[(6, 0, [ref('sale.field_sale_order__amount_total'),ref('sale.field_sale_order__amount_tax'),ref('sale.field_sale_order__amount_untaxed')])]"/>
+            <field name="ks_chart_relation_groupby" eval="ref('sale.field_sale_order__team_id')"/>
+            <field name="ks_chart_item_color">default</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_sales_item_10" model="ks_dashboard_ninja.item">
+            <field name="name">Last 5 Month Sales</field>
+            <field name="ks_dashboard_item_type">ks_bar_chart</field>
+            <field name="ks_model_id" eval="ref('sale.model_sale_order')"/>
+            <field name="ks_chart_data_count_type">sum</field>
+            <field name="ks_chart_groupby_type">date_type</field>
+            <field name="ks_chart_measure_field"
+                   eval="[(6, 0, [ref('sale.field_sale_order__amount_total'),ref('sale.field_sale_order__amount_tax'),ref('sale.field_sale_order__amount_untaxed')])]"/>
+            <field name="ks_chart_relation_groupby" eval="ref('sale.field_sale_order__create_date')"/>
+            <field name="ks_chart_date_groupby">month</field>
+            <field name="ks_sort_by_order">DESC</field>
+            <field name="ks_sort_by_field" eval="ref('sale.field_sale_order__create_date')"/>
+            <field name="ks_record_data_limit">5</field>
+            <field name="ks_chart_item_color">warm</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_sales_item_11" model="ks_dashboard_ninja.item">
+            <field name="name">Top 10 Sold Orders</field>
+            <field name="ks_dashboard_item_type">ks_list_view</field>
+            <field name="ks_model_id" eval="ref('sale.model_sale_order')"/>
+            <field name="ks_list_view_fields"
+                   eval="[(6, 0, [ref('sale.field_sale_order__name'),ref('sale.field_sale_order__amount_total'),ref('sale.field_sale_order__create_date'),ref('sale.field_sale_order__partner_id')])]"/>
+            <field name="ks_sort_by_order">DESC</field>
+            <field name="ks_sort_by_field" eval="ref('sale.field_sale_order__amount_total')"/>
+            <field name="ks_record_data_limit">10</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_sales_item_12" model="ks_dashboard_ninja.item">
+            <field name="name">Sale Order Draft : Total amount </field>
+            <field name="ks_dashboard_item_type">ks_kpi</field>
+            <field name="ks_record_count_type">count</field>
+            <field name="ks_record_count_type_2">sum</field>
+            <field name="ks_model_id" eval="ref('sale.model_sale_order')"/>
+            <field name="ks_model_id_2" eval="ref('sale.model_sale_order')"/>
+            <field name="ks_record_field_2" eval="ref('sale.field_sale_order__amount_total')"/>
+            <field name="ks_domain">[["state","=","draft"]]</field>
+            <field name="ks_data_comparison">Ratio</field>
+            <field name="ks_domain">[["id","&lt;",100]]</field>
+            <field name="ks_domain_2">[["id","&lt;",100]]</field>
+            <field name="ks_default_icon">user</field>
+            <field name="ks_dashboard_item_theme">blue</field>
+            <field name="ks_background_color">#C79381,0.99</field>
+            <field name="ks_font_color">#ffffff,0.99</field>
+            <field name="ks_default_icon_color">#ffffff,0.99</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_sales_item_13" model="ks_dashboard_ninja.item">
+            <field name="name">Partner/sale order </field>
+            <field name="ks_dashboard_item_type">ks_kpi</field>
+            <field name="ks_record_count_type">count</field>
+            <field name="ks_record_count_type_2">count</field>
+            <field name="ks_model_id" eval="ref('base.model_res_partner')"/>
+            <field name="ks_model_id_2" eval="ref('sale.model_sale_order')"/>
+            <field name="ks_data_comparison">Percentage</field>
+            <field name="ks_default_icon">paper-plane</field>
+            <field name="ks_dashboard_item_theme">red</field>
+            <field name="ks_background_color">#E1A563,0.99</field>
+            <field name="ks_font_color">#ffffff,0.99</field>
+            <field name="ks_default_icon_color">#ffffff,0.99</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+        <record id="ks_sales_item_14" model="ks_dashboard_ninja.item">
+            <field name="name">Due amount invoice</field>
+            <field name="ks_dashboard_item_type">ks_kpi</field>
+            <field name="ks_record_count_type">count</field>
+            <field name="ks_record_count_type_2">sum</field>
+            <field name="ks_model_id" eval="ref('account.model_account_move')"/>
+            <field name="ks_model_id_2" eval="ref('account.model_account_move')"/>
+            <field name="ks_record_field_2" eval="ref('account.field_account_move__amount_residual')"/>
+            <field name="ks_data_comparison">Sum</field>
+            <field name="ks_default_icon">calendar-times-o</field>
+            <field name="ks_dashboard_item_theme">white</field>
+            <field name="ks_background_color">#F88C8C,0.71</field>
+            <field name="ks_font_color">#ffffff,0.99</field>
+            <field name="ks_default_icon_color">#ffffff,0.99</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+        <record id="ks_sales_item_15" model="ks_dashboard_ninja.item">
+            <field name="name">last week sale order</field>
+            <field name="ks_dashboard_item_type">ks_kpi</field>
+            <field name="ks_record_count_type">count</field>
+            <field name="ks_model_id" eval="ref('sale.model_sale_order')"/>
+            <field name="ks_previous_period">1</field>
+            <field name="ks_date_filter_selection">t_week</field>
+            <field name="ks_default_icon">money</field>
+            <field name="ks_dashboard_item_theme">green</field>
+            <field name="ks_background_color">#BB29C1,0.43</field>
+            <field name="ks_font_color">#ffffff,0.99</field>
+            <field name="ks_default_icon_color">#ffffff,0.99</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+        <!--        <record id="ks_sales_item_16" model="ks_dashboard_ninja.item">-->
+        <!--            <field name="name">Kpi (Average)</field>-->
+        <!--            <field name="ks_dashboard_item_type">ks_kpi</field>-->
+        <!--            <field name="ks_record_field" eval="ref('sale.model_sale_order')"/>-->
+        <!--            <field name="ks_data_format">indian</field>-->
+        <!--            <field name="ks_record_count_type">count</field>-->
+        <!--            <field name="ks_model_id" eval="ref('sale.model_sale_order')"/>-->
+        <!--            <field name="ks_target_view">Progress Bar</field>-->
+        <!--            <field name="ks_goal_enable">1</field>-->
+        <!--            <field name="ks_domain">[["id","&lt;",100]]</field>-->
+        <!--            <field name="ks_default_icon">money</field>-->
+        <!--            <field name="ks_dashboard_item_theme">blue</field>-->
+        <!--            <field name="ks_background_color">#2DC9B3,0.99</field>-->
+        <!--            <field name="ks_font_color">#000000,0.99</field>-->
+        <!--            <field name="ks_default_icon_color">#000000,0.99</field>-->
+        <!--            <field name="ks_company_id" eval="0"/>-->
+        <!--        </record>-->
+
+        <record id="ks_sales_item_17" model="ks_dashboard_ninja.item">
+            <field name="name">Top 10 Partner Amount Total</field>
+            <field name="ks_chart_data_count_type">sum</field>
+            <field name="ks_chart_groupby_type">relational_type</field>
+            <field name="ks_model_id" eval="ref('sale.model_sale_order')"/>
+            <field name="ks_chart_measure_field"
+                   eval="[(6, 0, [ref('sale.field_sale_order__amount_total'),ref('sale.field_sale_order__amount_tax'),ref('sale.field_sale_order__amount_untaxed')])]"/>
+            <field name="ks_bar_chart_stacked">1</field>
+            <field name="ks_chart_relation_groupby" eval="ref('sale.field_sale_order__amount_total')"/>
+            <field name="ks_chart_relation_sub_groupby" eval="ref('sale.field_sale_order__partner_id')"/>
+            <field name="ks_chart_measure_field"
+                   eval="[(6, 0, [ref('sale.field_sale_order__amount_total'),ref('sale.field_sale_order__amount_tax'),ref('sale.field_sale_order__amount_untaxed')])]"/>
+            <field name="ks_chart_measure_field_2"
+                   eval="[(6, 0, [ref('sale.field_sale_order__amount_total'),ref('sale.field_sale_order__amount_tax'),ref('sale.field_sale_order__amount_untaxed')])]"/>
+            <field name="ks_domain">[["id","&lt;",11]]</field>
+            <field name="ks_chart_item_color">default</field>
+            <field name="ks_dashboard_item_type">ks_bar_chart</field>
+            <field name="ks_show_data_value">1</field>
+            <field name="ks_unit_selection">monetary</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+        <record id="ks_sales_item_18" model="ks_dashboard_ninja.item">
+            <field name="name">Polar Area</field>
+            <field name="ks_chart_data_count_type">sum</field>
+            <field name="ks_chart_groupby_type">relational_type</field>
+            <field name="ks_model_id" eval="ref('sale.model_sale_order')"/>
+            <field name="ks_chart_measure_field" eval="[(6, 0, [ref('sale.field_sale_order__amount_untaxed')])]"/>
+            <field name="ks_chart_relation_groupby" eval="ref('sale.field_sale_order__amount_total')"/>
+            <field name="ks_chart_relation_sub_groupby" eval="ref('sale.field_sale_order__amount_total')"/>
+            <field name="ks_domain">[["id","&lt;",10]]</field>
+            <field name="ks_chart_item_color">cool</field>
+            <field name="ks_dashboard_item_type">ks_polarArea_chart</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+        <record id="ks_sales_item_19" model="ks_dashboard_ninja.item">
+            <field name="name">Top 5 Product sold</field>
+            <field name="ks_dashboard_item_type">ks_pie_chart</field>
+            <field name="ks_semi_circle_chart">1</field>
+            <field name="ks_model_id" eval="ref('sale.model_sale_order_line')"/>
+            <field name="ks_chart_data_count_type">sum</field>
+            <field name="ks_chart_groupby_type">relational_type</field>
+            <field name="ks_chart_measure_field" eval="[(6, 0, [ref('sale.field_sale_order_line__product_uom_qty')])]"/>
+            <field name="ks_chart_relation_groupby" eval="ref('sale.field_sale_order_line__product_id')"/>
+            <field name="ks_chart_item_color">default</field>
+            <field name="ks_record_data_limit">5</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+        <record id="ks_sales_item_20" model="ks_dashboard_ninja.item">
+            <field name="name">Top 10 Sold Orders</field>
+            <field name="ks_dashboard_item_type">ks_list_view</field>
+            <field name="ks_model_id" eval="ref('sale.model_sale_order')"/>
+            <field name="ks_list_view_type">grouped</field>
+            <field name="ks_list_view_group_fields" eval="[(6, 0, [ref('sale.field_sale_order__amount_total')])]"/>
+            <field name="ks_sort_by_order">DESC</field>
+            <field name="ks_sort_by_field" eval="ref('sale.field_sale_order__amount_total')"/>
+            <field name="ks_chart_relation_groupby" eval="ref('sale.field_sale_order__amount_untaxed')"/>
+            <field name="ks_record_data_limit">10</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+        <record id="ks_sales_item_21" model="ks_dashboard_ninja.item">
+            <field name="name">Sale Order Amount Total</field>
+            <field name="ks_chart_data_count_type">sum</field>
+            <field name="ks_chart_groupby_type">relational_type</field>
+            <field name="ks_model_id" eval="ref('sale.model_sale_order')"/>
+            <field name="ks_chart_measure_field"
+                   eval="[(6, 0, [ref('sale.field_sale_order__amount_total'),ref('sale.field_sale_order__amount_untaxed')])]"/>
+            <field name="ks_chart_relation_groupby" eval="ref('sale.field_sale_order__amount_total')"/>
+            <field name="ks_domain">[["id","&lt;",11]]</field>
+            <field name="ks_chart_item_color">neon</field>
+            <field name="ks_dashboard_item_type">ks_horizontalBar_chart</field>
+            <field name="ks_company_id" eval="0"/>
+            <!--            <field name="ks_actions" eval="ref('sale.field_sale_order__quotations')"/>-->
+        </record>
+        <record id="ks_sale_item_21_action" model="ks_dashboard_ninja.item_action">
+            <field name="ks_dashboard_item_id" ref="ks_sales_item_21"/>
+            <field name="ks_chart_type">ks_pie_chart</field>
+            <field name="ks_item_action_field" ref='sale.field_sale_order__amount_total'/>
+        </record>
+        <record id="ks_sale_item_21_action1" model="ks_dashboard_ninja.item_action">
+            <field name="ks_dashboard_item_id" ref="ks_sales_item_21"/>
+            <field name="ks_chart_type">ks_line_chart</field>
+            <field name="ks_item_action_field" ref='sale.field_sale_order__amount_untaxed'/>
+        </record>
+        <record id="ks_sale_item_10_action" model="ks_dashboard_ninja.item_action">
+            <field name="ks_dashboard_item_id" ref="ks_sales_item_10"/>
+            <field name="ks_chart_type">ks_pie_chart</field>
+            <field name="ks_item_action_field" ref='sale.field_sale_order__amount_total'/>
+        </record>
+        <record id="ks_sale_item_10_action1" model="ks_dashboard_ninja.item_action">
+            <field name="ks_dashboard_item_id" ref="ks_sales_item_10"/>
+            <field name="ks_chart_type">ks_line_chart</field>
+            <field name="ks_item_action_field" ref='sale.field_sale_order__amount_untaxed'/>
+        </record>
+        <!--        <function model="ks_dashboard_ninja.item" name="" eval="[[ref('ks_sales_item_10')]]"/>-->
+        <!-- Single Sales Demo Dashboard Templates-->
+
+        <record id="demo_sales_dashboard" model="ks_dashboard_ninja.board">
+            <field name="name">Sales Dashboard</field>
+            <field name="ks_dashboard_menu_name">Sales Dashboard</field>
+            <field name="ks_dashboard_top_menu_id" eval="ref('sale.sale_menu_root')"/>
+            <field name="ks_dashboard_default_template" eval="ref('ks_sale_dashboard_ninja.ks_sales')"/>
+            <field name="ks_dashboard_active">1</field>
+            <field name="ks_dashboard_group_access" eval="False"/>
+            <field name="ks_dashboard_menu_sequence" eval="1"/>
+        </record>
+
+    </data>
+
+</odoo>

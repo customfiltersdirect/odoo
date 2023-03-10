@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="ks_inventory" model="ks_dashboard_ninja.board_template">
+            <field name="name">Inventory</field>
+            <field name="ks_gridstack_config">[
+                {"item_id":"ks_inventory_dashboard.ks_inventory_item_1", "data": {"x": 0, "y": 6, "w": 6, "h": 4}},
+                {"item_id":"ks_inventory_dashboard.ks_inventory_item_2", "data": {"x": 6, "y": 6, "w": 6, "h": 4}},
+                {"item_id":"ks_inventory_dashboard.ks_inventory_item_3", "data": {"x": 0, "y": 2, "w": 6, "h": 4}},
+                {"item_id":"ks_inventory_dashboard.ks_inventory_item_4", "data": {"x": 6, "y": 2, "w": 6, "h": 4}},
+                {"item_id":"ks_inventory_dashboard.ks_inventory_item_5", "data": {"x": 0, "y": 10, "w": 4, "h": 5}},
+                {"item_id":"ks_inventory_dashboard.ks_inventory_item_6", "data": {"x": 8, "y": 10, "w": 4, "h": 5}},
+                {"item_id":"ks_inventory_dashboard.ks_inventory_item_8", "data": {"x": 4, "y": 10, "w": 4, "h": 5}},
+                {"item_id":"ks_inventory_dashboard.ks_inventory_item_9", "data": {"x": 0, "y": 15, "w": 8, "h": 5}},
+                {"item_id":"ks_inventory_dashboard.ks_inventory_item_10", "data": {"x": 8, "y": 15, "w": 4, "h": 5}},
+                {"item_id":"ks_inventory_dashboard.ks_inventory_item_11", "data": {"x": 0, "y": 20, "w": 12, "h": 5}},
+                {"item_id":"ks_inventory_dashboard.ks_inventory_item_12", "data": {"x": 0, "y": 0, "w": 3, "h": 2}},
+                {"item_id":"ks_inventory_dashboard.ks_inventory_item_13", "data": {"x": 3, "y": 0, "w": 3, "h": 2}},
+                {"item_id":"ks_inventory_dashboard.ks_inventory_item_14", "data": {"x": 6, "y": 0, "w": 3, "h": 2}},
+                {"item_id":"ks_inventory_dashboard.ks_inventory_item_15", "data": {"x": 9, "y": 0, "w": 3, "h": 2}}
+                ]
+            </field>
+            <field name="ks_item_count">15</field>
+        </record>
+
+        <record id="ks_inventory_item_1" model="ks_dashboard_ninja.item">
+            <field name="name">Inventory Reports</field>
+            <field name="ks_dashboard_item_type">ks_bar_chart</field>
+            <field name="ks_chart_data_count_type">sum</field>
+            <field name="ks_model_id" eval="ref('stock.model_stock_quant')"/>
+            <field name="ks_domain">[["location_id.usage","=","internal"],["quantity","!=",0]]</field>
+            <field name="ks_chart_groupby_type">relational_type</field>
+            <field name="ks_bar_chart_stacked" eval="1"/>
+            <field name="ks_chart_measure_field"
+                   eval="[(6, 0, [ref('stock.field_stock_quant__quantity')])]"/>
+            <field name="ks_chart_relation_groupby" eval="ref('stock.field_stock_quant__product_id')"/>
+            <field name="ks_chart_relation_sub_groupby" eval="ref('stock.field_stock_quant__location_id')"/>
+            <field name="ks_chart_item_color">default</field>
+            <field name="ks_show_data_value">1</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_inventory_item_2" model="ks_dashboard_ninja.item">
+            <field name="name">Inventory Ageing Reports</field>
+            <field name="ks_dashboard_item_type">ks_line_chart</field>
+            <field name="ks_chart_data_count_type">sum</field>
+            <field name="ks_model_id" eval="ref('stock.model_stock_quant')"/>
+            <field name="ks_domain">[["location_id.usage","=","internal"],["quantity","!=",0]]</field>
+            <field name="ks_chart_groupby_type">relational_type</field>
+            <field name="ks_chart_measure_field"
+                   eval="[(6, 0, [ref('stock.field_stock_quant__quantity')])]"/>
+            <field name="ks_chart_relation_groupby" eval="ref('stock.field_stock_quant__product_id')"/>
+            <field name="ks_chart_relation_sub_groupby" eval="ref('stock.field_stock_quant__in_date')"/>
+            <field name="ks_chart_date_sub_groupby">month</field>
+            <field name="ks_date_filter_field" eval="ref('stock.field_stock_quant__in_date')"/>
+            <field name="ks_sort_by_field" eval="ref('stock.field_stock_quant__in_date')"/>
+            <field name="ks_sort_by_order">ASC</field>
+            <field name="ks_show_data_value">1</field>
+            <field name="ks_chart_item_color">neon</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_inventory_item_3" model="ks_dashboard_ninja.item">
+            <field name="name">Open Outward</field>
+            <field name="ks_dashboard_item_type">ks_pie_chart</field>
+            <field name="ks_chart_data_count_type">sum</field>
+            <field name="ks_model_id" eval="ref('stock.model_stock_move')"/>
+            <field name="ks_domain">[["state","!=","done"],["state","!=","cancel"],["location_id.usage","=","internal"],["state","!=","draft"]]</field>
+            <field name="ks_chart_groupby_type">relational_type</field>
+            <field name="ks_chart_measure_field"
+                   eval="[(6, 0, [ref('stock.field_stock_move__product_qty')])]"/>
+            <field name="ks_chart_relation_groupby" eval="ref('stock.field_stock_move__product_id')"/>
+            <field name="ks_date_filter_field" eval="ref('stock.field_stock_move__create_date')"/>
+            <field name="ks_chart_item_color">warm</field>
+            <field name="ks_show_data_value">1</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_inventory_item_4" model="ks_dashboard_ninja.item">
+            <field name="name">Open Inwards</field>
+            <field name="ks_dashboard_item_type">ks_doughnut_chart</field>
+            <field name="ks_chart_data_count_type">sum</field>
+            <field name="ks_model_id" eval="ref('stock.model_stock_move')"/>
+            <field name="ks_domain">[["location_dest_id.usage","=","internal"],["state","!=","cancel"],["state","!=","done"],["state","!=","draft"]]</field>
+            <field name="ks_chart_groupby_type">relational_type</field>
+            <field name="ks_chart_measure_field"
+                   eval="[(6, 0, [ref('stock.field_stock_move__product_qty')])]"/>
+            <field name="ks_chart_relation_groupby" eval="ref('stock.field_stock_move__product_id')"/>
+            <field name="ks_date_filter_field" eval="ref('stock.field_stock_move__create_date')"/>
+            <field name="ks_chart_item_color">neon</field>
+            <field name="ks_show_data_value">1</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_inventory_item_5" model="ks_dashboard_ninja.item">
+            <field name="name">Product Moves</field>
+            <field name="ks_dashboard_item_type">ks_area_chart</field>
+            <field name="ks_chart_data_count_type">sum</field>
+            <field name="ks_model_id" eval="ref('stock.model_stock_move_line')"/>
+            <field name="ks_chart_groupby_type">relational_type</field>
+            <field name="ks_domain">[["state","=","done"]]</field>
+            <field name="ks_chart_measure_field"
+                   eval="[(6, 0, [ref('stock.field_stock_move_line__qty_done')])]"/>
+            <field name="ks_chart_relation_groupby" eval="ref('stock.field_stock_move_line__product_id')"/>
+            <field name="ks_date_filter_field" eval="ref('stock.field_stock_move_line__create_date')"/>
+            <field name="ks_chart_item_color">default</field>
+            <field name="ks_show_data_value">1</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_inventory_item_6" model="ks_dashboard_ninja.item">
+            <field name="name">Stock Moves</field>
+            <field name="ks_dashboard_item_type">ks_horizontalBar_chart</field>
+            <field name="ks_chart_data_count_type">sum</field>
+            <field name="ks_model_id" eval="ref('stock.model_stock_move')"/>
+            <field name="ks_chart_groupby_type">relational_type</field>
+            <field name="ks_chart_measure_field"
+                   eval="[(6, 0, [ref('stock.field_stock_move__product_uom_qty')])]"/>
+            <field name="ks_chart_relation_groupby" eval="ref('stock.field_stock_move__location_id')"/>
+            <field name="ks_domain">[["state","=","done"]]</field>
+            <field name="ks_date_filter_field" eval="ref('stock.field_stock_move_line__create_date')"/>
+            <field name="ks_chart_item_color">cool</field>
+            <field name="ks_show_data_value">1</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+<!--        <record id="ks_inventory_item_7" model="ks_dashboard_ninja.item">-->
+<!--            <field name="name">Inventory Valuation</field>-->
+<!--            <field name="ks_dashboard_item_type">ks_bar_chart</field>-->
+<!--            <field name="ks_chart_data_count_type">sum</field>-->
+<!--            <field name="ks_model_id" eval="ref('ks_inventory_dashboard.model_inventory_board_ks_inventory')"/>-->
+<!--            <field name="ks_chart_groupby_type">relational_type</field>-->
+<!--            <field name="ks_chart_measure_field"-->
+<!--                   eval="[(6, 0, [ref('ks_inventory_dashboard.field_inventory_board_ks_inventory__total')])]"/>-->
+<!--            <field name="ks_chart_relation_groupby" eval="ref('ks_inventory_dashboard.field_inventory_board_ks_inventory__product_id')"/>-->
+<!--            <field name="ks_sort_by_field" eval="ref('ks_inventory_dashboard.field_inventory_board_ks_inventory__total')"/>-->
+<!--            <field name="ks_sort_by_order">DESC</field>-->
+<!--            <field name="ks_show_data_value">1</field>-->
+<!--            <field name="ks_chart_item_color">warm</field>-->
+<!--            <field name="ks_company_id" eval="0"/>-->
+<!--        </record>-->
+
+        <record id="ks_inventory_item_8" model="ks_dashboard_ninja.item">
+            <field name="name">Total Inventory Quantities</field>
+            <field name="ks_dashboard_item_type">ks_line_chart</field>
+            <field name="ks_chart_data_count_type">sum</field>
+            <field name="ks_model_id" eval="ref('stock.model_stock_quant')"/>
+            <field name="ks_chart_groupby_type">relational_type</field>
+            <field name="ks_chart_measure_field"
+                   eval="[(6, 0, [ref('stock.field_stock_quant__quantity')])]"/>
+            <field name="ks_chart_relation_groupby" eval="ref('stock.field_stock_quant__product_id')"/>
+            <field name="ks_domain">[["location_id.usage","=","internal"],["quantity","!=",0]]</field>
+            <field name="ks_date_filter_field" eval="ref('stock.field_stock_quant__create_date')"/>
+            <field name="ks_chart_item_color">neon</field>
+            <field name="ks_show_data_value">1</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_inventory_item_9" model="ks_dashboard_ninja.item">
+            <field name="name">Stock per Location</field>
+            <field name="ks_dashboard_item_type">ks_area_chart</field>
+            <field name="ks_chart_data_count_type">sum</field>
+            <field name="ks_model_id" eval="ref('stock.model_stock_quant')"/>
+            <field name="ks_chart_groupby_type">relational_type</field>
+            <field name="ks_chart_measure_field"
+                   eval="[(6, 0, [ref('stock.field_stock_quant__quantity')])]"/>
+            <field name="ks_chart_relation_groupby" eval="ref('stock.field_stock_quant__location_id')"/>
+            <field name="ks_date_filter_field" eval="ref('stock.field_stock_quant__create_date')"/>
+            <field name="ks_chart_item_color">cool</field>
+            <field name="ks_show_data_value">1</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_inventory_item_10" model="ks_dashboard_ninja.item">
+            <field name="name">Total Reserved Stock</field>
+            <field name="ks_dashboard_item_type">ks_bar_chart</field>
+            <field name="ks_chart_data_count_type">sum</field>
+            <field name="ks_model_id" eval="ref('stock.model_stock_move_line')"/>
+            <field name="ks_chart_groupby_type">relational_type</field>
+            <field name="ks_domain">["|",["state","=","assigned"],["state","=","partially_available"]]</field>
+            <field name="ks_chart_measure_field"
+                   eval="[(6, 0, [ref('stock.field_stock_move_line__product_uom_qty')])]"/>
+            <field name="ks_chart_relation_groupby" eval="ref('stock.field_stock_move_line__product_id')"/>
+            <field name="ks_date_filter_field" eval="ref('stock.field_stock_move_line__create_date')"/>
+            <field name="ks_chart_item_color">default</field>
+            <field name="ks_show_data_value">1</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_inventory_item_11" model="ks_dashboard_ninja.item">
+            <field name="name">Top 10 selling items</field>
+            <field name="ks_dashboard_item_type">ks_list_view</field>
+            <field name="ks_model_id" eval="ref('stock.model_stock_move')"/>
+            <field name="ks_list_view_type">grouped</field>
+            <field name="ks_list_view_group_fields"
+                   eval="[(6, 0, [ref('stock.field_stock_move__product_qty')])]"/>
+            <field name="ks_chart_relation_groupby" eval="ref('stock.field_stock_move__product_id')"/>
+            <field name="ks_sort_by_field" eval="ref('stock.field_stock_move__product_qty')"/>
+            <field name="ks_sort_by_order">DESC</field>
+            <field name="ks_record_data_limit">10</field>
+            <field name="ks_domain">[["location_id.usage","=","internal"],["state","!=","cancel"],["state","!=","draft"]]</field>
+            <field name="ks_date_filter_field" eval="ref('stock.field_stock_move__create_date')"/>
+            <field name="ks_chart_item_color">warm</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_inventory_item_12" model="ks_dashboard_ninja.item">
+            <field name="name">Internal Transfer</field>
+            <field name="ks_dashboard_item_type">ks_tile</field>
+            <field name="ks_record_count_type">count</field>
+            <field name="ks_model_id" eval="ref('stock.model_stock_move_line')"/>
+            <field name="ks_domain">[["location_id.usage","=","internal"],["location_dest_id.usage","=","internal"],["state","!=","cancel"]]</field>
+            <field name="ks_date_filter_field" eval="ref('stock.field_stock_move_line__create_date')"/>
+            <field name="ks_default_icon">money</field>
+            <field name="ks_dashboard_item_theme">yellow</field>
+            <field name="ks_background_color">#f0ad4e,0.99</field>
+            <field name="ks_font_color">#ffffff,0.99</field>
+            <field name="ks_default_icon_color">#ffffff,0.99</field>
+            <field name="ks_layout">layout3</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_inventory_item_13" model="ks_dashboard_ninja.item">
+            <field name="name">Delivery Orders</field>
+            <field name="ks_dashboard_item_type">ks_tile</field>
+            <field name="ks_record_count_type">count</field>
+            <field name="ks_model_id" eval="ref('stock.model_stock_picking')"/>
+            <field name="ks_domain">[["picking_type_id.code","=","outgoing"],["state","=","done"]]</field>
+            <field name="ks_date_filter_field" eval="ref('stock.field_stock_picking__create_date')"/>
+            <field name="ks_default_icon">money</field>
+            <field name="ks_dashboard_item_theme">red</field>
+            <field name="ks_background_color">#d9534f,0.99</field>
+            <field name="ks_font_color">#ffffff,0.99</field>
+            <field name="ks_default_icon_color">#ffffff,0.99</field>
+            <field name="ks_layout">layout3</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_inventory_item_14" model="ks_dashboard_ninja.item">
+            <field name="name">Inventory Receipts</field>
+            <field name="ks_dashboard_item_type">ks_tile</field>
+            <field name="ks_record_count_type">count</field>
+            <field name="ks_model_id" eval="ref('stock.model_stock_picking')"/>
+            <field name="ks_domain">[["picking_type_id.code","=","incoming"],["state","=","done"]]</field>
+            <field name="ks_date_filter_field" eval="ref('stock.field_stock_picking__create_date')"/>
+            <field name="ks_default_icon">money</field>
+            <field name="ks_dashboard_item_theme">green</field>
+            <field name="ks_background_color">#5cb85c,0.99</field>
+            <field name="ks_font_color">#5cb85c,0.99</field>
+            <field name="ks_default_icon_color">#ffffff,0.99</field>
+            <field name="ks_layout">layout4</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <record id="ks_inventory_item_15" model="ks_dashboard_ninja.item">
+            <field name="name">Alert Expiry</field>
+            <field name="ks_dashboard_item_type">ks_tile</field>
+            <field name="ks_record_count_type">count</field>
+            <field name="ks_model_id" eval="ref('stock.model_stock_production_lot')"/>
+            <field name="ks_date_filter_field" eval="ref('product_expiry.field_stock_production_lot__alert_date')"/>
+            <field name="ks_date_filter_selection">t_month</field>
+            <field name="ks_default_icon">money</field>
+            <field name="ks_dashboard_item_theme">blue</field>
+            <field name="ks_background_color">#337ab7,0.99</field>
+            <field name="ks_font_color">#ffffff,0.99</field>
+            <field name="ks_default_icon_color">#ffffff,0.99</field>
+            <field name="ks_layout">layout3</field>
+            <field name="ks_company_id" eval="0"/>
+        </record>
+
+        <!-- Single Inventory Demo Dashboard Templates-->
+
+        <record id="demo_inventory_dashboard" model="ks_dashboard_ninja.board">
+            <field name="name">Inventory Dashboard</field>
+            <field name="ks_dashboard_menu_name">Inventory Dashboard</field>
+            <field name="ks_dashboard_top_menu_id" eval="ref('stock.menu_stock_root')"/>
+            <field name="ks_dashboard_default_template" eval="ref('ks_inventory_dashboard.ks_inventory')"/>
+            <field name="ks_dashboard_active">1</field>
+            <field name="ks_dashboard_group_access" eval="False"/>
+            <field name="ks_dashboard_menu_sequence" eval="-1"/>
+        </record>
+
+    </data>
+</odoo>
