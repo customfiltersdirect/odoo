@@ -1,0 +1,1 @@
+from . import ks_inventory
