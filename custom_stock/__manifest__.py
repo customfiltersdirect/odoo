@@ -32,6 +32,7 @@
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
     "data": [
+        'views/product_template.xml'
     ],
     'depends': ['base', 'stock', 'product'],
     'license': 'OPL-1',
