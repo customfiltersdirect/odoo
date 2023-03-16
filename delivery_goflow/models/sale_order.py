@@ -451,12 +451,15 @@ class SaleOrder(models.Model):
         store_args = self.get_store_param()
         warehouse_args = self.get_warehouse_param(company_for_glow)
         if lastcall:
+            # print(lastcall)
             ll = lastcall.replace(hour=0, minute=0, second=0, microsecond=0)
             goflow_lastcall = ll.strftime('%Y-%m-%dT%H:%M:%SZ ')
             # Convert the start of the day datetime object to a string
+            print(goflow_lastcall)
             # goflow_lastcall = yesterday_str
             url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s&filters[date:gte]=%s' % (
             goflow_subdomain, goflow_state, str(goflow_lastcall))
+            print('url',url)
             if store_args:
                 url = url.rstrip()
                 url += '&' + store_args
@@ -486,6 +489,7 @@ class SaleOrder(models.Model):
         }
         url = self._preparing_url(lastcall, company_for_glow, goflow_state)
         result = requests.get(url, auth=BearerAuth(goflow_token), headers=headers, verify=True)
+        print(result.json())
         goflow_api = result.json()
         orders = goflow_api["data"]
         while goflow_api["next"]:
