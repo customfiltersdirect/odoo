@@ -7,6 +7,7 @@ from .res_config_settings import BearerAuth
 from datetime import datetime
 import dateutil.parser
 import logging
+import datetime
 _logger = logging.getLogger(__name__)
 
 
@@ -450,8 +451,11 @@ class SaleOrder(models.Model):
         store_args = self.get_store_param()
         warehouse_args = self.get_warehouse_param(company_for_glow)
         if lastcall:
-            goflow_lastcall = lastcall.strftime('%Y-%m-%dT%H:%M:%SZ ')
-            url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s&filters[status_updated_at:gte]=%s' % (
+            ll = lastcall.replace(hour=0, minute=0, second=0, microsecond=0)
+            goflow_lastcall = ll.strftime('%Y-%m-%dT%H:%M:%SZ ')
+            # Convert the start of the day datetime object to a string
+            # goflow_lastcall = yesterday_str
+            url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s&filters[date:gte]=%s' % (
             goflow_subdomain, goflow_state, str(goflow_lastcall))
             if store_args:
                 url = url.rstrip()
@@ -514,6 +518,7 @@ class SaleOrder(models.Model):
             warehouse_obj_id = warehouse_obj.id
             tracking_line_list = []
             check_if_order_exists = self.search([('goflow_id', '=', goflow_id)], limit=1)
+            print('check_if_order_exists',check_if_order_exists)
             order_array = order
             if check_if_order_exists:
                 order = check_if_order_exists
