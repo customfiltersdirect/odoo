@@ -1,0 +1,40 @@
+.sale_comp_main .o_cp_bottom .o_cp_bottom_right{
+    flex-direction: column;
+}
+#date_from{
+    bottom:3px
+}
+#period{
+    border:1px solid #e9ebee;
+    padding:9px;
+    color:#017e84;
+    font-weight: bold;
+    border-radius:2px;
+}
+.header_sale_comp{
+    display: inline-flex;
+    width: 100%;
+}
+.table_view_tb thead{
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+.header_sale_comp .filter_section{
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    float: right;
+    margin-left: auto;
+    width: 100%;
+}
+.header_sale_comp .filter_section .form-outline{
+    width: 75%;
+}
+.header_sale_comp .filter_section #date_from{
+    margin-top: 3px;
+}
+.sale_com_head_name{
+    width: 100%;
+    padding-left:5px;
+}

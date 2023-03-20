@@ -1,0 +1,87 @@
+<templates>
+    <t t-name="SaleComponentReport">
+        <div class="sale_comp_main">
+            <div class="header_sale_comp">
+                <div class="sale_com_head_name">
+                    <h1>Sale Component Report</h1>
+                    <button type="button" class="btn btn-primary" id="print-pdf">PDF</button>
+                </div>
+                <div class="filter_section">
+                    <div class="row">
+                        <div class="col">
+                            <select class="form-select" id="period" aria-label="Default select example">-->
+                                <option value="none" class="selected">Date Filter</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="year">This Year</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                        <div class="col custom_date_from" style="display:none;">
+                            <div class="input-group date" id="date_from" data-target-input="nearest">
+                                <input type="text" name="date_from" id="input-date-from" class="form-control datetimepicker-input"
+                                       data-target="#date_from" t-att-name="prefix" value="2023-03-14"/>
+                                <div class="input-group-append" data-target="#date_from"
+                                     data-toggle="datetimepicker">
+                                    <span class="input-group-text">
+                                        <span class="fa fa-calendar" role="img" aria-label="Calendar"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col custom_date_to" style="display:none;">
+                            <div class="input-group date" id="date_to" data-target-input="nearest">
+                                <input type="text" name="date_to" id="input-date-to" class="form-control datetimepicker-input"
+                                       data-target="#date_to" t-att-name="prefix"/>
+                                <div class="input-group-append" data-target="#date_to"
+                                     data-toggle="datetimepicker">
+                                    <span class="input-group-text">
+                                        <span class="fa fa-calendar" role="img" aria-label="Calendar"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col custom_date_button1" style="display:none;">
+                            <button type="button" class="btn btn-primary" id="custom-date-filter">Apply</button>
+                            <button type="button" class="btn btn-primary" id="clear">Clear</button>
+                        </div>
+                        <div class="col">
+                            <div class="input-group">
+                                <div class="form-outline">
+                                    <input type="search" id="ProductInput" class="form-control"/>
+                                </div>
+                                <button type="button" class="btn btn-primary" id="ProductSearch">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br/>
+            <br/>
+            <div class="table_view_tb" style="overflow:scroll;max-height:80vh;"/>
+        </div>
+    </t>
+    <t t-name="SaleComponentTable">
+        <table class="table table-bordered">
+            <thead>
+                <tr style="background:grey;">
+                    <th>Product</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr t-foreach="report_lines" t-as="product">
+                    <td>
+                        <t t-esc="product"/>
+                    </td>
+                    <td>
+                        <t t-esc="report_lines[product]"/>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </t>
+</templates>

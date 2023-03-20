@@ -1,4 +1,5 @@
-from odoo import fields, models
+from odoo import fields, models, api
+from datetime import datetime, date
 
 
 class SaleComponentReport(models.TransientModel):
@@ -7,26 +8,39 @@ class SaleComponentReport(models.TransientModel):
     date_from = fields.Date()
     date_to = fields.Date()
 
-    def action_confirm(self):
+    @api.model
+    def load_data(self, dates):
+        print("$$$$$$$$$$$$$$$$$$$$$$$$$$",dates)
         r = {}
         product_bom = []
         done_states = self.env['sale.report']._get_done_states()
         domain = [
             ('state', 'in', done_states),
             ('product_id', '=', self.env['product.product'].search([]).ids),
-            ('date', '>=', self.date_from),
-            ('date', '<=', self.date_to)
+            ('date', '>=', dates['date_from']),
+            ('date', '<=', dates['date_to'])
         ]
+        print(self.env['sale.report'].read_group(domain, ['product_id', 'product_uom_qty'], ['product_id']))
         for group in self.env['sale.report'].read_group(domain, ['product_id', 'product_uom_qty'], ['product_id']):
             r[group['product_id'][0]] = group['product_uom_qty']
         for pro in r.keys():
             if self.env['product.product'].browse(pro).bom_ids:
                 for line in self.env['product.product'].browse(pro).bom_ids[0].bom_line_ids:
-                    product_bom.append({
-                        'component_id': line.product_id.id,
-                        'component_name': line.product_id.name,
-                        'component_qty': line.product_qty * r[pro]
-                    })
+                    if dates['product'] != 'all':
+                        if dates['product'] in line.product_id.name:
+                            product_bom.append({
+                                'component_id': line.product_id.id,
+                                'component_name': line.product_id.name,
+                                'component_qty': line.product_qty * r[pro]
+                            })
+                        else:
+                            continue
+                    else:
+                        product_bom.append({
+                            'component_id': line.product_id.id,
+                            'component_name': line.product_id.name,
+                            'component_qty': line.product_qty * r[pro]
+                        })
         dct = {}
         for rec in product_bom:
             if rec['component_name'] in dct:
@@ -34,10 +48,4 @@ class SaleComponentReport(models.TransientModel):
             else:
                 dct[rec['component_name']] = []
                 dct[rec['component_name']] = rec['component_qty']
-        data = {
-            'data': dct
-        }
-        print(dct)
-        return self.env.ref('sale_component_report.action_report_sale_component').report_action(
-            self,
-            data=data)
+        return dct

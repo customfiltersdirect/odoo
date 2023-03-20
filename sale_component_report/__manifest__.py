@@ -37,6 +37,15 @@
         'report/sale_component_report_template.xml'
     ],
     'depends': ['base', 'web', 'mrp', 'sale_management'],
+    'assets': {
+        'web.assets_backend': [
+            'sale_component_report/static/src/js/sale_component_report.js',
+            'sale_component_report/static/src/css/main.css'
+        ],
+        'web.assets_qweb': [
+            'sale_component_report/static/src/xml/sale_component_report_view.xml'
+        ],
+    },
     'license': 'OPL-1',
     'installable': True,
     'auto_install': False,
