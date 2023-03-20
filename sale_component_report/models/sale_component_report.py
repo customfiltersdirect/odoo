@@ -16,13 +16,13 @@ class SaleComponentReport(models.TransientModel):
         done_states = self.env['sale.report']._get_done_states()
         domain = [
             ('state', 'in', done_states),
-            ('product_id', '=', self.env['product.product'].search([]).ids),
+            ('product_id', 'in', self.env['product.product'].search([]).ids),
             ('date', '>=', dates['date_from']),
             ('date', '<=', dates['date_to'])
         ]
-        print(self.env['sale.report'].read_group(domain, ['product_id', 'product_uom_qty'], ['product_id']))
         for group in self.env['sale.report'].read_group(domain, ['product_id', 'product_uom_qty'], ['product_id']):
             r[group['product_id'][0]] = group['product_uom_qty']
+        print(r)
         for pro in r.keys():
             if self.env['product.product'].browse(pro).bom_ids:
                 for line in self.env['product.product'].browse(pro).bom_ids[0].bom_line_ids:

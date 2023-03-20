@@ -157,12 +157,12 @@ odoo.define('sale_component_report.sale_component_report', function(require){
             var string = $('#ProductInput').val()
             var date_from
             var date_to
-            var dates = this.GetDate($('#period :selected').val());
             if ($('#period :selected').val() == 'custom'){
                 date_from = new Date($('#date_from input').val())
                 date_to = new Date($('#date_to input').val())
             }
             else{
+                var dates = this.GetDate($('#period :selected').val());
                 date_from = dates['date_from']
                 date_to = dates['date_to']
             }
