@@ -8,6 +8,7 @@ from datetime import datetime
 import dateutil.parser
 import logging
 import datetime
+from datetime import datetime, timedelta
 _logger = logging.getLogger(__name__)
 
 
@@ -234,8 +235,9 @@ class SaleOrder(models.Model):
         else:
             lastcall_delay = False
         goflow_state = 'in_picking'
-        self.sync_so_goflow(lastcall_delay, goflow_state)
-        self.update_so_status(lastcall_delay)
+        lastcall_delay_new = lastcall_delay - timedelta(days=10)
+        self.sync_so_goflow(lastcall_delay_new, goflow_state)
+        self.update_so_status(lastcall_delay_new)
 
     def api_call_for_sync_orders_shipped(self):
         cron_job_id = self.env.ref('delivery_goflow.sync_order_shipped_from_goflow_ir_cron')
