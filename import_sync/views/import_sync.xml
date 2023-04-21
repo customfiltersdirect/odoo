@@ -7,7 +7,7 @@
         <field name="model_id" ref="sale.model_sale_order"/>
         <field name="state">code</field>
         <field name="code">
-            env.ref('delivery_goflow.sync_order_in_picking_from_goflow_ir_cron').sudo().method_direct_trigger()
+            action = model.sudo().api_call_for_sync_orders_in_picking(call_for_index=True)
         </field>
     </record>
 
@@ -17,9 +17,37 @@
         <field name="model_id" ref="delivery_goflow.model_sale_order"/>
         <field name="state">code</field>
         <field name="code">
-            action = model.sudo().api_call_for_sync_orders_ready_to_pick()
-<!--            action = env['ir.cron'].browse(28).method_direct_trigger()-->
-<!--            env.ref('delivery_goflow.sync_order_ready_to_pick_from_goflow_ir_cron').sudo().method_direct_trigger()-->
+            action = model.sudo().api_call_for_sync_orders_ready_to_pick(call_for_index=True)
+        </field>
+    </record>
+
+    <record id="action_update_sp_invoice_delivery" model="ir.actions.server">
+        <field name="name">Run Sync Goflow Orders Update Invoice Delivery</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="delivery_goflow.model_sale_order"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.sudo().update_so_invoice_delivery()
+        </field>
+    </record>
+
+    <record id="action_update_so_batch_transfers" model="ir.actions.server">
+        <field name="name">Run Sync Goflow Orders Update Batch Transfers</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="delivery_goflow.model_sale_order"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.sudo().update_so_batch_transfers()
+        </field>
+    </record>
+
+    <record id="action_update_shipped_so_status" model="ir.actions.server">
+        <field name="name">Run Sync Goflow Orders Update SO Shipped Status</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="delivery_goflow.model_sale_order"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.sudo().update_shipped_so_status()
         </field>
     </record>
 
@@ -29,7 +57,7 @@
         <field name="model_id" ref="sale.model_sale_order"/>
         <field name="state">code</field>
         <field name="code">
-            env.ref('delivery_goflow.sync_order_shipped_from_goflow_ir_cron').sudo().method_direct_trigger()
+            action = model.sudo().api_call_for_sync_orders_shipped(call_for_index=True)
         </field>
     </record>
 
@@ -97,11 +125,30 @@
               action="import_sync.ready_to_pick"
               sequence="4"/>
 
+
     <menuitem id="menu_sync_import_orders_shipped"
               name="Import Shipped Orders"
               parent="import_sync.sync_import_orders"
               action="import_sync.orders_shipped"
-              sequence="6"/>
+              sequence="5"/>
+
+    <menuitem id="menu_sync_invoice_delivery"
+          name="--> Invoice Delivery"
+          parent="import_sync.sync_import_orders"
+          action="import_sync.action_update_sp_invoice_delivery"
+          sequence="6"/>
+
+    <menuitem id="menu_sync_batch_transfers"
+          name="--> Batch Transfers"
+          parent="import_sync.sync_import_orders"
+          action="import_sync.action_update_so_batch_transfers"
+          sequence="7"/>
+
+    <menuitem id="menu_sync_shipped_status"
+          name="--> Update Shipped"
+          parent="import_sync.sync_import_orders"
+          action="import_sync.action_update_shipped_so_status"
+          sequence="8"/>
 
     <menuitem id="sync_import_others"
               parent="import_sync_main_menu"
