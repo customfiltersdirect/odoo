@@ -1,3 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 delivery_goflow.access_goflow_store,access_goflow_store,delivery_goflow.model_goflow_store,base.group_user,1,1,1,1
 delivery_goflow.access_goflow_product_tag,access_goflow_product_tag,delivery_goflow.model_goflow_product_tag,base.group_user,1,1,1,1
+delivery_goflow.access_goflow_sync_index,access_goflow_sync_index,delivery_goflow.model_goflow_sync_index,base.group_user,1,1,1,1
