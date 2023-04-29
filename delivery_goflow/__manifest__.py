@@ -18,6 +18,7 @@
         "views/invoice_view.xml",
         "views/stock_picking_batch.xml",
         "views/stock_picking_type.xml",
+        "wizard/goflow_order_search.xml",
 
     ],
     'auto_install': True,

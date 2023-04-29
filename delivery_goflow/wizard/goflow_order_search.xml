@@ -1,0 +1,37 @@
+<odoo>
+    <data>
+         <record id="goflow_order_search_wizard_view" model="ir.ui.view">
+        <field name="name">Goflow Orders</field>
+        <field name="model">goflow.order.search.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group>
+                            <field name="goflow_invoice_number"/>
+                        <field name="show_continue_button" invisible="1"/>
+                        </group>
+                    <group>
+                        <field name="not_found" attrs="{'invisible': [('show_continue_button', '=', False)]}"/>
+                    </group>
+                </group>
+
+                <footer>
+                    <button name="action_search_goflow_orders" class="btn-primary" string="Submit" type="object" />
+                     <button name="action_continue_anyway" string="Continue Anyway" type="object" class="btn-danger" attrs="{'invisible': [('show_continue_button', '=', False)]}"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+        <record id="action_goflow_order_search_wizard" model="ir.actions.act_window">
+            <field name="name">Goflow Invoices</field>
+            <field name="res_model">goflow.order.search.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="context">{}</field>
+            <field name="target">new</field>
+        </record>
+
+
+        <menuitem id="goflow_orders_menu" name="Goflow Invoices" parent="account.menu_finance_receivables" groups="account.group_account_invoice"
+                action="action_goflow_order_search_wizard" sequence="1"/>
+    </data>
+</odoo>
