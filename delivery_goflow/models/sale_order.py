@@ -9,6 +9,9 @@ import dateutil.parser
 import logging
 import datetime
 from datetime import datetime, timedelta
+from pytz import timezone
+import pytz
+
 _logger = logging.getLogger(__name__)
 
 
@@ -30,7 +33,6 @@ class AccountMove(models.Model):
         for rec in self:
             order_id = self.env['sale.order'].search([('goflow_invoice_no', '=', rec.goflow_invoice_no)])
             if order_id:
-                print(order_id.filtered(lambda l: l.goflow_order_no).mapped('goflow_order_no'))
                 rec.goflow_order_no_ = " , ".join(order_id.filtered(lambda l: l.goflow_order_no).mapped('goflow_order_no'))
             else:
                 rec.goflow_order_no_ = False
@@ -323,7 +325,7 @@ class SaleOrder(models.Model):
             lastcall_delay = lastcall
         else:
             lastcall_delay = False
-        goflow_state ='in_packing'
+        goflow_state = 'in_packing'
         # self.sync_so_goflow(lastcall_delay,goflow_state)
         # self.update_so_status(lastcall_delay)
 
@@ -432,7 +434,6 @@ class SaleOrder(models.Model):
         goflow_store_latest_ship = self.convert_iso_to_utc(order["ship_dates"]["store_provided_latest_ship"])
         goflow_store_latest_delivery = self.convert_iso_to_utc(order["ship_dates"]["store_provided_latest_delivery"])
         values_order = {
-            'date_order': goflow_shipped_at,
             'goflow_invoice_no': order["invoice_number"],
             'goflow_po_no': order["purchase_order_number"],
             'goflow_carrier': order["shipment"]["carrier"],
@@ -453,8 +454,19 @@ class SaleOrder(models.Model):
         goflow_shipped_at = self.convert_iso_to_utc(order["shipment"]["shipped_at"])
         goflow_store_latest_ship = self.convert_iso_to_utc(order["ship_dates"]["store_provided_latest_ship"])
         goflow_store_latest_delivery = self.convert_iso_to_utc(order["ship_dates"]["store_provided_latest_delivery"])
+
+
+        # Convert the original datetime to the UTC timezone
+        o_date = fields.Datetime.from_string(order_date)
+        local_tz = timezone(self.env.user.tz or 'UTC')
+        original_datetime_local = local_tz.localize(o_date)
+        utc_datetime = original_datetime_local.astimezone(pytz.utc)
+
+        # Format the UTC datetime as a string
+        utc_datetime = utc_datetime.strftime('%Y-%m-%d %H:%M:%S')
+
         return {
-            'date_order': goflow_shipped_at,
+            'date_order': utc_datetime,
             'partner_id': self.env.ref('delivery_goflow.print_node_demo_partner').id,
             'goflow_order_no': order["order_number"],
             'goflow_order_date': order_date,
@@ -477,10 +489,10 @@ class SaleOrder(models.Model):
         goflow_product_id = line["product"]["id"]
         product_obj = self.env["product.product"].search([('goflow_id', '=', goflow_product_id)], limit=1)
         if not product_obj:
-            product_obj = self.env['product.product'].create(
-                {'name': line["product"]["description"], 'goflow_id': goflow_product_id,
-                 'goflow_item_no': line["product"]["item_number"],
-                 'company_id': company_for_glow and company_for_glow.id or False})
+            product_vals = {'name': line["product"]["description"], 'goflow_id': goflow_product_id,
+                            'goflow_item_no': line["product"]["item_number"], 'detailed_type': 'product',
+                            'company_id': company_for_glow and company_for_glow.id or False}
+            product_obj = self.env['product.product'].create(product_vals)
         try:
             product_price = line["charges"][0]["amount"]
         except:
@@ -525,7 +537,7 @@ class SaleOrder(models.Model):
                 url += '&' + warehouse_args
             return url
         else:
-            #datetime_obj = datetime.strptime(goflow_cutoff_date, '%Y-%m-%d %H:%M:%S')
+            # datetime_obj = datetime.strptime(goflow_cutoff_date, '%Y-%m-%d %H:%M:%S')
             # goflow_cutoff = datetime_obj.strftime('%Y-%m-%dT%H:%M:%SZ ')
             # url = 'https://%s.api.goflow.com/v1/orders?filters[status]=ready_to_pick&filters[date:gte]=%s'  % (goflow_subdomain,str(goflow_cutoff))
             url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s' % (goflow_subdomain, goflow_state)
@@ -546,7 +558,7 @@ class SaleOrder(models.Model):
 
         company_for_glow = self.env['res.company'].search([('use_for_goflow_api', '=', True)], limit=1)
         goflow_token = self.env['ir.config_parameter'].get_param('delivery_goflow.token_goflow')
-        #goflow_cutoff_date = self.env['ir.config_parameter'].get_param('delivery_goflow.goflow_cutoff_date')
+        # goflow_cutoff_date = self.env['ir.config_parameter'].get_param('delivery_goflow.goflow_cutoff_date')
         headers = {
             'X-Beta-Contact': self.env.user.partner_id.email
         }
