@@ -13,7 +13,10 @@ class GoflowOrderSearchWizard(models.TransientModel):
         if self.goflow_invoice_number:
             goflow_list=set(self.goflow_invoice_number.split())
             # invoice_records = self.env['account.move'].search([]).filtered(lambda r: r.goflow_invoice_no).mapped('goflow_invoice_no')
-            found_goflow=self.env['account.move'].search([('goflow_invoice_no', 'in', self.goflow_invoice_number.split())])
+            found_goflow=self.env['account.move'].search([
+                '|', ('goflow_invoice_no', 'in', self.goflow_invoice_number.split()),
+                ('goflow_order_no_', 'in', self.goflow_invoice_number.split())
+            ])
             self.found_invoices_data = found_goflow.ids
 
             not_found= list(goflow_list - set(found_goflow.mapped('goflow_invoice_no')))

@@ -17,7 +17,17 @@ class AccountMove(models.Model):
 
     ## Add goflow invoice id to odoo invoice
     goflow_invoice_no = fields.Char('Goflow Invoice No')
+    goflow_order_no_ = fields.Char(string="Goflow Order Number", compute="compute_goflow_order_no")
 
+    @api.depends('goflow_invoice_no')
+    def compute_goflow_order_no(self):
+        for rec in self:
+            order_id = self.env['sale.order'].search([('goflow_invoice_no', '=', rec.goflow_invoice_no)])
+            if order_id:
+                print(order_id.filtered(lambda l: l.goflow_order_no).mapped('goflow_order_no'))
+                rec.goflow_order_no_ = " , ".join(order_id.filtered(lambda l: l.goflow_order_no).mapped('goflow_order_no'))
+            else:
+                rec.goflow_order_no_ = False
 
 class goflow_store(models.Model):
     _name = 'goflow.store'
@@ -416,6 +426,7 @@ class SaleOrder(models.Model):
         goflow_store_latest_ship = self.convert_iso_to_utc(order["ship_dates"]["store_provided_latest_ship"])
         goflow_store_latest_delivery = self.convert_iso_to_utc(order["ship_dates"]["store_provided_latest_delivery"])
         values_order = {
+            'date_order': goflow_shipped_at,
             'goflow_invoice_no': order["invoice_number"],
             'goflow_po_no': order["purchase_order_number"],
             'goflow_carrier': order["shipment"]["carrier"],
@@ -437,7 +448,7 @@ class SaleOrder(models.Model):
         goflow_store_latest_ship = self.convert_iso_to_utc(order["ship_dates"]["store_provided_latest_ship"])
         goflow_store_latest_delivery = self.convert_iso_to_utc(order["ship_dates"]["store_provided_latest_delivery"])
         return {
-            'date_order': order_date,
+            'date_order': goflow_shipped_at,
             'partner_id': self.env.ref('delivery_goflow.print_node_demo_partner').id,
             'goflow_order_no': order["order_number"],
             'goflow_order_date': order_date,
