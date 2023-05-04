@@ -11,6 +11,7 @@
                         <group name="goflow_details" string="Goflow Details">
                             <group>
                                 <field name="goflow_invoice_no"/>
+                                <field name="goflow_order_no_"/>
                             </group>
 
                         </group>
