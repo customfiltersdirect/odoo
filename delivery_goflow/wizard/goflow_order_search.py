@@ -3,6 +3,7 @@ from odoo import api, fields, models, _
 class GoflowOrderSearchWizard(models.TransientModel):
     _name = "goflow.order.search.wizard"
     _description = "Sale Order Api Wizard By Internal ID"
+
     goflow_invoice_number = fields.Text()
     not_found = fields.Text()
     show_continue_button = fields.Boolean(string='Show Continue Anyway Button', default=False)
@@ -17,9 +18,11 @@ class GoflowOrderSearchWizard(models.TransientModel):
                 '|', ('goflow_invoice_no', 'in', self.goflow_invoice_number.split()),
                 ('goflow_order_no_', 'in', self.goflow_invoice_number.split())
             ])
-            self.found_invoices_data = found_goflow.ids
+            self.found_invoices_data = False
+            if found_goflow:
+                self.found_invoices_data = found_goflow.ids
 
-            not_found= list(goflow_list - set(found_goflow.mapped('goflow_invoice_no')))
+            not_found= list(goflow_list - set(found_goflow.mapped('goflow_invoice_no') + found_goflow.mapped('goflow_order_no_')))
             if not_found:
                 self.show_continue_button=True
                 self.not_found = ', '.join(not_found)
