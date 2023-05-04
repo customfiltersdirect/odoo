@@ -17,7 +17,7 @@ class AccountMove(models.Model):
 
     ## Add goflow invoice id to odoo invoice
     goflow_invoice_no = fields.Char('Goflow Invoice No')
-    goflow_order_no_ = fields.Char(string="Goflow Order Number", compute="compute_goflow_order_no", store=True)
+    goflow_order_no_ = fields.Char(string="Goflow Order Number", compute="compute_goflow_order_no")
 
     @api.depends('goflow_invoice_no')
     def compute_goflow_order_no(self):
