@@ -9,8 +9,7 @@ import dateutil.parser
 import logging
 import datetime
 from datetime import datetime, timedelta
-from pytz import timezone
-import pytz
+from pytz import timezone, utc
 
 _logger = logging.getLogger(__name__)
 
@@ -93,6 +92,8 @@ class SaleOrder(models.Model):
     goflow_id = fields.Char('Goflow ID')
     goflow_order_no = fields.Char('Goflow Order Number')
     goflow_order_date = fields.Date('Goflow Order Date')
+    goflow_order_datetime = fields.Char('Goflow Order DateTime')
+
     goflow_order_status = fields.Char('Goflow Order Status')
     goflow_pick_list_number = fields.Char('Goflow Pick List Number')
     goflow_store_id = fields.Many2one('goflow.store', 'Store')
@@ -268,8 +269,10 @@ class SaleOrder(models.Model):
         goflow_state = 'in_picking'
 
         if call_for_index:
-            lastcall_delay = self.env['goflow.sync.index'].sudo().search([('name', '=', goflow_state)], order='id desc', limit=1).sync_date
-            if not lastcall_delay:
+            lastcall_delay = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.last_inpicking_sync')
+            if lastcall_delay:
+                lastcall_delay = datetime.fromisoformat(lastcall_delay)
+            else:
                 lastcall_delay = cron_job_id.lastcall
         else:
             lastcall = cron_job_id.lastcall
@@ -280,6 +283,8 @@ class SaleOrder(models.Model):
 
         lastcall_delay_new = lastcall_delay - timedelta(days=10)
         self.sync_so_goflow(lastcall_delay_new, goflow_state, update_sync_index=True)
+        self.env['ir.config_parameter'].sudo().set_param('delivery_goflow.last_inpicking_sync', fields.Datetime.now())
+
         # self.update_so_status(lastcall_delay_new)
 
     def api_call_for_sync_orders_shipped(self, call_for_index=False):
@@ -287,8 +292,10 @@ class SaleOrder(models.Model):
         goflow_state = 'shipped'
 
         if call_for_index:
-            lastcall_delay = self.env['goflow.sync.index'].sudo().search([('name', '=', goflow_state)], order='id desc', limit=1).sync_date
-            if not lastcall_delay:
+            lastcall_delay = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.last_shipped_sync')
+            if lastcall_delay:
+                lastcall_delay = datetime.fromisoformat(lastcall_delay)
+            else:
                 lastcall_delay = cron_job_id.lastcall
         else:
             lastcall = cron_job_id.lastcall
@@ -297,6 +304,8 @@ class SaleOrder(models.Model):
             else:
                 lastcall_delay = False
         self.sync_so_goflow(lastcall_delay, goflow_state, update_sync_index=True)
+        self.env['ir.config_parameter'].sudo().set_param('delivery_goflow.last_shipped_sync', fields.Datetime.now())
+
         # self.update_shipped_so_status()
         # self.update_so_status(lastcall_delay)
 
@@ -334,8 +343,10 @@ class SaleOrder(models.Model):
         goflow_state = 'ready_to_pick'
 
         if call_for_index:
-            lastcall_delay = self.env['goflow.sync.index'].sudo().search([('name', '=', goflow_state)], order='id desc', limit=1).sync_date
-            if not lastcall_delay:
+            lastcall_delay = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.last_readytopick_sync')
+            if lastcall_delay:
+                lastcall_delay = datetime.fromisoformat(lastcall_delay)
+            else:
                 lastcall_delay = cron_job_id.lastcall
         else:
             lastcall = cron_job_id.lastcall
@@ -344,6 +355,8 @@ class SaleOrder(models.Model):
             else:
                 lastcall_delay = False
         self.sync_so_goflow(lastcall_delay, goflow_state, update_sync_index=True)
+        self.env['ir.config_parameter'].sudo().set_param('delivery_goflow.last_readytopick_sync', fields.Datetime.now())
+
         # self.update_so_status(lastcall_delay)
 
     def convert_iso_to_utc(self, date):
@@ -433,6 +446,7 @@ class SaleOrder(models.Model):
         goflow_shipped_at = self.convert_iso_to_utc(order["shipment"]["shipped_at"])
         goflow_store_latest_ship = self.convert_iso_to_utc(order["ship_dates"]["store_provided_latest_ship"])
         goflow_store_latest_delivery = self.convert_iso_to_utc(order["ship_dates"]["store_provided_latest_delivery"])
+
         values_order = {
             'goflow_invoice_no': order["invoice_number"],
             'goflow_po_no': order["purchase_order_number"],
@@ -445,6 +459,7 @@ class SaleOrder(models.Model):
             'goflow_store_latest_ship': goflow_store_latest_ship,
             'goflow_store_latest_delivery': goflow_store_latest_delivery,
             'goflow_order_date': order_date,
+            'goflow_order_datetime': order_date,
             'goflow_pick_list_number': order["pick_list_number"],
         }
         return values_order
@@ -455,21 +470,12 @@ class SaleOrder(models.Model):
         goflow_store_latest_ship = self.convert_iso_to_utc(order["ship_dates"]["store_provided_latest_ship"])
         goflow_store_latest_delivery = self.convert_iso_to_utc(order["ship_dates"]["store_provided_latest_delivery"])
 
-
-        # Convert the original datetime to the UTC timezone
-        o_date = fields.Datetime.from_string(order_date)
-        local_tz = timezone(self.env.user.tz or 'UTC')
-        original_datetime_local = local_tz.localize(o_date)
-        utc_datetime = original_datetime_local.astimezone(pytz.utc)
-
-        # Format the UTC datetime as a string
-        utc_datetime = utc_datetime.strftime('%Y-%m-%d %H:%M:%S')
-
         return {
-            'date_order': utc_datetime,
+            'date_order': order_date,
             'partner_id': self.env.ref('delivery_goflow.print_node_demo_partner').id,
             'goflow_order_no': order["order_number"],
             'goflow_order_date': order_date,
+            'goflow_order_datetime': order_date,
             'goflow_order_status': order["status"],
             'goflow_shipped_last_call_check': True if order["status"] == 'shipped' else False,
             'goflow_invoice_no': order["invoice_number"],
@@ -602,6 +608,9 @@ class SaleOrder(models.Model):
                 check_if_order_exists = self.search([('goflow_id', '=', goflow_id)], limit=1)
                 # print('check_if_order_exists', check_if_order_exists)
                 order_array = order
+
+                print("Processing order# %s | Date: %s" % (order["order_number"], order["date"]))
+
                 if check_if_order_exists:
                     order = check_if_order_exists
                     # if order.warehouse_id != warehouse_obj:
