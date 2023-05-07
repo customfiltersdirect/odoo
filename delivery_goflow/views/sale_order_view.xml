@@ -21,6 +21,12 @@
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
                 <data>
+
+                    <xpath expr="//field[@name='date_order']" position="after">
+                        <field name="goflow_order_date"/>
+
+                    </xpath>
+
                     <xpath expr="//field[@name='partner_shipping_id']" position="attributes">
                         <attribute name="context">
                             {'default_type':'delivery', 'show_name_wo_parent': 1}
@@ -39,6 +45,7 @@
                                     <field name="goflow_id"/>
                                     <field name="goflow_order_status"/>
                                     <field name="goflow_order_date"/>
+                                    <field name="goflow_order_datetime"/>
 
                                     <field name="goflow_store_id"/>
                                     <field name="goflow_shipped_at"/>
@@ -62,6 +69,32 @@
                         </page>
                     </xpath>
                 </data>
+            </field>
+        </record>
+
+        <record id="view_quotation_tree_with_onboarding_inherit" model="ir.ui.view">
+            <field name="name">view.quotation.tree.with.onboarding.inherit</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_quotation_tree_with_onboarding"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='create_date']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='create_date']" position="after">
+                    <field name="goflow_order_date"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="sale_order_view_search_inherit_quotation_inherit" model="ir.ui.view">
+            <field name="name">sale.order.view.search.inherit.quotation</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.sale_order_view_search_inherit_quotation"/>
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='filter_create_date']" position="after">
+                    <filter string="Goflow Order Date" name="filter_goflow_order_date" date="goflow_order_date"/>
+                    <filter string="Goflow Order Date" name="golfow_order_month" domain="[]" context="{'group_by': 'goflow_order_date'}"/>
+                </xpath>
             </field>
         </record>
     </data>
