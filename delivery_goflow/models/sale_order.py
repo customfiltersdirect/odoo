@@ -264,9 +264,11 @@ class SaleOrder(models.Model):
     def _prepare_batch_values(self):
         return {}
 
-    def api_call_for_sync_orders_in_picking(self, call_for_index=False):
+    def api_call_for_sync_orders_in_picking(self, call_for_index=False, date_range=False):
         cron_job_id = self.env.ref('delivery_goflow.sync_order_in_picking_from_goflow_ir_cron')
         goflow_state = 'in_picking'
+
+        calling_date_time = fields.Datetime.now()
 
         if call_for_index:
             lastcall_delay = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.last_inpicking_sync')
@@ -282,14 +284,17 @@ class SaleOrder(models.Model):
                 lastcall_delay = False
 
         lastcall_delay_new = lastcall_delay - timedelta(days=10)
-        self.sync_so_goflow(lastcall_delay_new, goflow_state, update_sync_index=True)
-        self.env['ir.config_parameter'].sudo().set_param('delivery_goflow.last_inpicking_sync', fields.Datetime.now())
+        self.sync_so_goflow(lastcall_delay_new, goflow_state, date_range, update_sync_index=True)
+        if not date_range:
+            self.env['ir.config_parameter'].sudo().set_param('delivery_goflow.last_inpicking_sync', calling_date_time)
 
         # self.update_so_status(lastcall_delay_new)
 
-    def api_call_for_sync_orders_shipped(self, call_for_index=False):
+    def api_call_for_sync_orders_shipped(self, call_for_index=False, date_range=False):
         cron_job_id = self.env.ref('delivery_goflow.sync_order_shipped_from_goflow_ir_cron')
         goflow_state = 'shipped'
+
+        calling_date_time = fields.Datetime.now()
 
         if call_for_index:
             lastcall_delay = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.last_shipped_sync')
@@ -303,8 +308,9 @@ class SaleOrder(models.Model):
                 lastcall_delay = lastcall
             else:
                 lastcall_delay = False
-        self.sync_so_goflow(lastcall_delay, goflow_state, update_sync_index=True)
-        self.env['ir.config_parameter'].sudo().set_param('delivery_goflow.last_shipped_sync', fields.Datetime.now())
+        self.sync_so_goflow(lastcall_delay, goflow_state, date_range, update_sync_index=True)
+        if not date_range:
+            self.env['ir.config_parameter'].sudo().set_param('delivery_goflow.last_shipped_sync', calling_date_time)
 
         # self.update_shipped_so_status()
         # self.update_so_status(lastcall_delay)
@@ -338,9 +344,11 @@ class SaleOrder(models.Model):
         # self.sync_so_goflow(lastcall_delay,goflow_state)
         # self.update_so_status(lastcall_delay)
 
-    def api_call_for_sync_orders_ready_to_pick(self, call_for_index=False):
+    def api_call_for_sync_orders_ready_to_pick(self, call_for_index=False, date_range=False):
         cron_job_id = self.env.ref('delivery_goflow.sync_order_ready_to_pick_from_goflow_ir_cron')
         goflow_state = 'ready_to_pick'
+
+        calling_date_time = fields.Datetime.now()
 
         if call_for_index:
             lastcall_delay = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.last_readytopick_sync')
@@ -354,8 +362,9 @@ class SaleOrder(models.Model):
                 lastcall_delay = lastcall
             else:
                 lastcall_delay = False
-        self.sync_so_goflow(lastcall_delay, goflow_state, update_sync_index=True)
-        self.env['ir.config_parameter'].sudo().set_param('delivery_goflow.last_readytopick_sync', fields.Datetime.now())
+        self.sync_so_goflow(lastcall_delay, goflow_state, date_range, update_sync_index=True)
+        if not date_range:
+            self.env['ir.config_parameter'].sudo().set_param('delivery_goflow.last_readytopick_sync', calling_date_time)
 
         # self.update_so_status(lastcall_delay)
 
@@ -521,11 +530,28 @@ class SaleOrder(models.Model):
             'goflow_tracking_number': tracking_number
         }
 
-    def _preparing_url(self, lastcall, company_for_glow, goflow_state):
+    def _preparing_url(self, lastcall, date_range, company_for_glow, goflow_state):
         goflow_subdomain = self.env['ir.config_parameter'].get_param('delivery_goflow.subdomain_goflow')
         store_args = self.get_store_param()
         warehouse_args = self.get_warehouse_param(company_for_glow)
-        if lastcall:
+        if date_range:
+            date_from = date_range.get('date_from')
+            date_to = date_range.get('date_to')
+            print(date_range)
+            date_from_str = date_from.strftime('%Y-%m-%dT%H:%M:%SZ')
+            date_to_str = date_to.strftime('%Y-%m-%dT23:59:59Z')
+
+            url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s&filters[date:gte]=%s&filters[date:lte]=%s' % (
+            goflow_subdomain, goflow_state, str(date_from_str), str(date_to_str))
+            # print('url',url)
+            if store_args:
+                url = url.rstrip()
+                url += '&' + store_args
+            if warehouse_args:
+                url = url.rstrip()
+                url += '&' + warehouse_args
+            return url
+        elif lastcall:
             # print(lastcall)
             ll = lastcall.replace(hour=0, minute=0, second=0, microsecond=0)
             goflow_lastcall = ll.strftime('%Y-%m-%dT%H:%M:%SZ ')
@@ -560,7 +586,7 @@ class SaleOrder(models.Model):
         for batch in tools.split_every(batch_size, ids):
             yield batch
 
-    def sync_so_goflow(self, lastcall, goflow_state, update_sync_index=False):
+    def sync_so_goflow(self, lastcall, goflow_state, date_range, update_sync_index=False):
 
         company_for_glow = self.env['res.company'].search([('use_for_goflow_api', '=', True)], limit=1)
         goflow_token = self.env['ir.config_parameter'].get_param('delivery_goflow.token_goflow')
@@ -568,7 +594,7 @@ class SaleOrder(models.Model):
         headers = {
             'X-Beta-Contact': self.env.user.partner_id.email
         }
-        url = self._preparing_url(lastcall, company_for_glow, goflow_state)
+        url = self._preparing_url(lastcall, date_range, company_for_glow, goflow_state)
         result = requests.get(url, auth=BearerAuth(goflow_token), headers=headers, verify=True)
         # print(result.json())
         goflow_api = result.json()

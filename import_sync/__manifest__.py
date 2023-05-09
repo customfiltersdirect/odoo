@@ -6,6 +6,9 @@
     'version':'1.0',
     'depends': ['sale','delivery_goflow'],
     'data':[
+        'security/ir.model.access.csv',
+        "wizard/goflow_order_sync_date.xml",
+
         "views/import_sync.xml",
 
     ],

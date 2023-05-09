@@ -116,13 +116,13 @@
     <menuitem id="menu_sync_import_picking"
               name="Import Picklist"
               parent="import_sync.sync_import_orders"
-              action="import_sync.picking_server_action"
+              action="action_goflow_sync_orders_date_wiz_in_picking"
               sequence="2"/>
 
     <menuitem id="menu_sync_import_ready_to_pick"
               name="Import New Orders"
               parent="import_sync.sync_import_orders"
-              action="import_sync.ready_to_pick"
+              action="action_goflow_sync_orders_date_wiz_ready_to_pick"
               sequence="4"/>
 
     <menuitem id="menu_sync_invoice_delivery"
@@ -140,7 +140,7 @@
     <menuitem id="menu_sync_import_orders_shipped"
               name="Import Shipped Orders"
               parent="import_sync.sync_import_orders"
-              action="import_sync.orders_shipped"
+              action="action_goflow_sync_orders_date_wiz_shipped"
               sequence="7"/>
 
 
