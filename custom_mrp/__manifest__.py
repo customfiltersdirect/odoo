@@ -33,7 +33,7 @@
     'maintainer': 'Cybrosys Techno Solutions',
     "data": [
     ],
-    'depends': ['base', 'mrp'],
+    'depends': ['base', 'mrp', 'stock'],
     'license': 'OPL-1',
     'installable': True,
     'auto_install': False,

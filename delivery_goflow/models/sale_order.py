@@ -308,7 +308,9 @@ class SaleOrder(models.Model):
                 lastcall_delay = lastcall
             else:
                 lastcall_delay = False
-        self.sync_so_goflow(lastcall_delay, goflow_state, date_range, update_sync_index=True)
+
+        lastcall_delay_new = lastcall_delay - timedelta(days=10)
+        self.sync_so_goflow(lastcall_delay_new, goflow_state, date_range, update_sync_index=True)
         if not date_range:
             self.env['ir.config_parameter'].sudo().set_param('delivery_goflow.last_shipped_sync', calling_date_time)
 
@@ -362,7 +364,9 @@ class SaleOrder(models.Model):
                 lastcall_delay = lastcall
             else:
                 lastcall_delay = False
-        self.sync_so_goflow(lastcall_delay, goflow_state, date_range, update_sync_index=True)
+
+        lastcall_delay_new = lastcall_delay - timedelta(days=10)
+        self.sync_so_goflow(lastcall_delay_new, goflow_state, date_range, update_sync_index=True)
         if not date_range:
             self.env['ir.config_parameter'].sudo().set_param('delivery_goflow.last_readytopick_sync', calling_date_time)
 
