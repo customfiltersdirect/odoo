@@ -1,0 +1,56 @@
+<odoo>
+    <data>
+        <record id="view_product_replenish_wizard" model="ir.ui.view">
+            <field name="name">Replenish</field>
+            <field name="model">product.replenish.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Replenish wizard">
+                    <p>
+                        Use this assistant to replenish your stock.
+                        Depending on your product configuration, launching a replenishment may trigger a request for
+                        quotation,
+                        a manufacturing order or a transfer.
+                    </p>
+                    <group>
+                        <field name="product_tmpl_id" invisible="1"/>
+                        <field name="product_has_variants" invisible="1"/>
+                        <field name="product_ids"/>
+                        <field name="product_uom_category_id" invisible="1"/>
+                        <label for="quantity"/>
+                        <div class="o_row">
+                            <field name="quantity"/>
+                            <field name="product_uom_id"/>
+                        </div>
+                        <field name="date_planned"/>
+                        <field name="warehouse_id"/>
+                        <field name="route_ids"
+                               widget="many2many_tags"/>
+                        <field name="company_id" invisible="1"/>
+                    </group>
+                    <footer>
+                        <button name="launch_replenishment"
+                                string="Confirm"
+                                type="object"
+                                data-hotkey="q"
+                                class="btn-primary"/>
+                        <button string="Discard"
+                                class="btn-secondary"
+                                special="cancel" data-hotkey="z"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="action_replenish_view" model="ir.actions.server">
+            <field name="name">Replenish</field>
+            <field name="type">ir.actions.server</field>
+            <field name="model_id" ref="product.model_product_template"/>
+            <field name="binding_model_id" ref="product.model_product_template"/>
+            <field name="state">code</field>
+            <field name="code">action=records.open_wizard()</field>
+            <field name="binding_view_types">list</field>
+        </record>
+
+    </data>
+</odoo>
