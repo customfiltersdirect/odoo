@@ -8,3 +8,4 @@ from . import res_partner
 from . import stock_picking_batch
 from . import stock_picking_type
 from . import goflow_sync_index
+from . import adjust_inventory
