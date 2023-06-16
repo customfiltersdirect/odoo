@@ -305,9 +305,10 @@ class SaleOrder(models.Model):
         # self.update_so_status(lastcall_delay)
 
     def api_call_for_sync_orders_shipped_invoice(self):
-        find_updated_orders = self.search([('goflow_shipped_last_call_check', '=', True), ('goflow_full_invoiced', '=', False)], limit=400)
-        for order in find_updated_orders:
-            order.create_invoice_delivery()
+        self.update_so_invoice_delivery()
+        # find_updated_orders = self.search([('goflow_shipped_last_call_check', '=', True), ('goflow_full_invoiced', '=', False)], limit=400)
+        # for order in find_updated_orders:
+        #     order.create_invoice_delivery()
 
     def update_shipped_so_status(self):
         sync_indexes = self.env['goflow.sync.index'].search([('synced_shipped', '=', False)])
