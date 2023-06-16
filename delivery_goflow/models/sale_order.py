@@ -270,18 +270,11 @@ class SaleOrder(models.Model):
 
         calling_date_time = fields.Datetime.now()
 
-        if call_for_index:
-            lastcall_delay = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.last_inpicking_sync')
-            if lastcall_delay:
-                lastcall_delay = datetime.fromisoformat(lastcall_delay)
-            else:
-                lastcall_delay = cron_job_id.lastcall
+        lastcall_delay = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.last_inpicking_sync')
+        if lastcall_delay:
+            lastcall_delay = datetime.fromisoformat(lastcall_delay)
         else:
-            lastcall = cron_job_id.lastcall
-            if lastcall:
-                lastcall_delay = lastcall
-            else:
-                lastcall_delay = False
+            lastcall_delay = cron_job_id.lastcall
 
         lastcall_delay_new = lastcall_delay - timedelta(days=10)
         self.sync_so_goflow(lastcall_delay_new, goflow_state, date_range, update_sync_index=True)
@@ -296,20 +289,14 @@ class SaleOrder(models.Model):
 
         calling_date_time = fields.Datetime.now()
 
-        if call_for_index:
-            lastcall_delay = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.last_shipped_sync')
-            if lastcall_delay:
-                lastcall_delay = datetime.fromisoformat(lastcall_delay)
-            else:
-                lastcall_delay = cron_job_id.lastcall
+        lastcall_delay = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.last_shipped_sync')
+        if lastcall_delay:
+            lastcall_delay = datetime.fromisoformat(lastcall_delay)
         else:
-            lastcall = cron_job_id.lastcall
-            if lastcall:
-                lastcall_delay = lastcall
-            else:
-                lastcall_delay = False
+            lastcall_delay = cron_job_id.lastcall
 
-        lastcall_delay_new = lastcall_delay - timedelta(days=4)
+
+        lastcall_delay_new = lastcall_delay - timedelta(days=10)
         self.sync_so_goflow(lastcall_delay_new, goflow_state, date_range, update_sync_index=True)
         if not date_range:
             self.env['ir.config_parameter'].sudo().set_param('delivery_goflow.last_shipped_sync', calling_date_time)
@@ -334,6 +321,12 @@ class SaleOrder(models.Model):
                     order.env.cr.commit()
             sync_index.synced_shipped = True
 
+    def update_shipped_so_order_status(self, order_id):
+        if not order_id.goflow_full_invoiced and order_id.state == 'draft':
+            order_id.action_confirm()
+            # order_id.env.cr.commit()
+
+
     def api_call_for_sync_orders_in_packing(self):
         cron_job_id = self.env.ref('delivery_goflow.sync_order_in_packing_from_goflow_ir_cron')
 
@@ -352,18 +345,11 @@ class SaleOrder(models.Model):
 
         calling_date_time = fields.Datetime.now()
 
-        if call_for_index:
-            lastcall_delay = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.last_readytopick_sync')
-            if lastcall_delay:
-                lastcall_delay = datetime.fromisoformat(lastcall_delay)
-            else:
-                lastcall_delay = cron_job_id.lastcall
+        lastcall_delay = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.last_readytopick_sync')
+        if lastcall_delay:
+            lastcall_delay = datetime.fromisoformat(lastcall_delay)
         else:
-            lastcall = cron_job_id.lastcall
-            if lastcall:
-                lastcall_delay = lastcall
-            else:
-                lastcall_delay = False
+            lastcall_delay = cron_job_id.lastcall
 
         lastcall_delay_new = lastcall_delay - timedelta(days=10)
         self.sync_so_goflow(lastcall_delay_new, goflow_state, date_range, update_sync_index=True)
@@ -544,9 +530,12 @@ class SaleOrder(models.Model):
             print(date_range)
             date_from_str = date_from.strftime('%Y-%m-%dT%H:%M:%SZ')
             date_to_str = date_to.strftime('%Y-%m-%dT23:59:59Z')
-
-            url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s&filters[date:gte]=%s&filters[date:lte]=%s' % (
+            if goflow_state=='shipped' :
+                url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s&filters[status_updated_at:gte]=%s&filters[date:lte]=%s' % (
             goflow_subdomain, goflow_state, str(date_from_str), str(date_to_str))
+            else:
+                url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s&filters[date:gte]=%s&filters[date:lte]=%s' % (
+                    goflow_subdomain, goflow_state, str(date_from_str), str(date_to_str))
             # print('url',url)
             if store_args:
                 url = url.rstrip()
@@ -562,8 +551,12 @@ class SaleOrder(models.Model):
             # Convert the start of the day datetime object to a string
             print(goflow_lastcall)
             # goflow_lastcall = yesterday_str
-            url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s&filters[date:gte]=%s' % (
+            if goflow_state == 'shipped':
+                url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s&filters[status_updated_at:gte]=%s' % (
             goflow_subdomain, goflow_state, str(goflow_lastcall))
+            else:
+                url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s&filters[date:gte]=%s' % (
+                    goflow_subdomain, goflow_state, str(goflow_lastcall))
             # print('url',url)
             if store_args:
                 url = url.rstrip()
@@ -670,6 +663,8 @@ class SaleOrder(models.Model):
                     for line in order_lines:
                         self.env['sale.order.line'].create(self._prepare_order_lines(line, so, tracking_line_list,
                                                                                      company_for_glow))
+                    self.update_shipped_so_order_status(so)
+
             self.env.cr.commit()
             if order_ids and update_sync_index:
                 self.env['goflow.sync.index'].sudo().create({'name': goflow_state, 'order_ids': order_ids})

@@ -51,6 +51,16 @@
         </field>
     </record>
 
+    <record id="action_export_product" model="ir.actions.server">
+        <field name="name">Run Sync Goflow adjust inventory product</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="delivery_goflow.model_product_product"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.sudo().adjust_inventory()
+        </field>
+    </record>
+
     <record id="orders_shipped" model="ir.actions.server">
         <field name="name">Run Sync Goflow Orders Shipped</field>
         <field name="type">ir.actions.server</field>
@@ -144,11 +154,19 @@
               sequence="7"/>
 
 
-    <menuitem id="menu_sync_shipped_status"
-          name="--> Validate Orders"
-          parent="import_sync.sync_import_orders"
-          action="import_sync.action_update_shipped_so_status"
-          sequence="8"/>
+<!--    <menuitem id="menu_sync_shipped_status"-->
+<!--          name="&ndash;&gt; Validate Orders"-->
+<!--          parent="import_sync.sync_import_orders"-->
+<!--          action="import_sync.action_update_shipped_so_status"-->
+<!--          sequence="8"/>-->
+
+    <menuitem id="menu_export_adjusment_inventory"
+              name="Export Inventory"
+              parent="import_sync.sync_import_orders"
+              action="import_sync.action_export_product"
+              sequence="50"/>
+
+
 
     <menuitem id="sync_import_others"
               parent="import_sync_main_menu"
