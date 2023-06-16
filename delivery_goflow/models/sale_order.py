@@ -270,18 +270,11 @@ class SaleOrder(models.Model):
 
         calling_date_time = fields.Datetime.now()
 
-        if call_for_index:
-            lastcall_delay = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.last_inpicking_sync')
-            if lastcall_delay:
-                lastcall_delay = datetime.fromisoformat(lastcall_delay)
-            else:
-                lastcall_delay = cron_job_id.lastcall
+        lastcall_delay = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.last_inpicking_sync')
+        if lastcall_delay:
+            lastcall_delay = datetime.fromisoformat(lastcall_delay)
         else:
-            lastcall = cron_job_id.lastcall
-            if lastcall:
-                lastcall_delay = lastcall
-            else:
-                lastcall_delay = False
+            lastcall_delay = cron_job_id.lastcall
 
         lastcall_delay_new = lastcall_delay - timedelta(days=10)
         self.sync_so_goflow(lastcall_delay_new, goflow_state, date_range, update_sync_index=True)
@@ -296,18 +289,12 @@ class SaleOrder(models.Model):
 
         calling_date_time = fields.Datetime.now()
 
-        if call_for_index:
-            lastcall_delay = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.last_shipped_sync')
-            if lastcall_delay:
-                lastcall_delay = datetime.fromisoformat(lastcall_delay)
-            else:
-                lastcall_delay = cron_job_id.lastcall
+        lastcall_delay = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.last_shipped_sync')
+        if lastcall_delay:
+            lastcall_delay = datetime.fromisoformat(lastcall_delay)
         else:
-            lastcall = cron_job_id.lastcall
-            if lastcall:
-                lastcall_delay = lastcall
-            else:
-                lastcall_delay = False
+            lastcall_delay = cron_job_id.lastcall
+
 
         lastcall_delay_new = lastcall_delay - timedelta(days=10)
         self.sync_so_goflow(lastcall_delay_new, goflow_state, date_range, update_sync_index=True)
@@ -358,18 +345,11 @@ class SaleOrder(models.Model):
 
         calling_date_time = fields.Datetime.now()
 
-        if call_for_index:
-            lastcall_delay = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.last_readytopick_sync')
-            if lastcall_delay:
-                lastcall_delay = datetime.fromisoformat(lastcall_delay)
-            else:
-                lastcall_delay = cron_job_id.lastcall
+        lastcall_delay = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.last_readytopick_sync')
+        if lastcall_delay:
+            lastcall_delay = datetime.fromisoformat(lastcall_delay)
         else:
-            lastcall = cron_job_id.lastcall
-            if lastcall:
-                lastcall_delay = lastcall
-            else:
-                lastcall_delay = False
+            lastcall_delay = cron_job_id.lastcall
 
         lastcall_delay_new = lastcall_delay - timedelta(days=10)
         self.sync_so_goflow(lastcall_delay_new, goflow_state, date_range, update_sync_index=True)
