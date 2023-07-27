@@ -289,6 +289,26 @@ class SaleOrder(models.Model):
 
         # self.update_so_status(lastcall_delay_new)
 
+
+    def api_call_orders_sweep(self):
+        print("W")
+        lastcall_delay = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.goflow_cutoff_date')
+        if lastcall_delay:
+            date_from = datetime.fromisoformat(lastcall_delay)
+
+            daterange = {
+                'date_from': date_from,
+                'date_to': date_from
+            }
+            self.api_call_for_sync_orders_shipped(date_range=daterange)
+            import time
+            time.sleep(60)
+            date_from = date_from + timedelta(days=1)
+            self.env['ir.config_parameter'].sudo().set_param('delivery_goflow.goflow_cutoff_date', date_from)
+            self.env.cr.commit()
+            self.api_call_orders_sweep()
+
+
     def api_call_for_sync_orders_shipped(self, call_for_index=False, date_range=False):
         cron_job_id = self.env.ref('delivery_goflow.sync_order_shipped_from_goflow_ir_cron')
         goflow_state = 'shipped'
@@ -603,9 +623,12 @@ class SaleOrder(models.Model):
         # print(result.json())
         goflow_api = result.json()
         orders = goflow_api["data"]
+        whileCounter = 1
         while goflow_api["next"]:
+            # print("whileCounter:",whileCounter)
             goflow_api = requests.get(goflow_api["next"], auth=BearerAuth(goflow_token), headers=headers).json()
             orders.extend(goflow_api["data"])
+            whileCounter = whileCounter + 1
         # print(len(orders))
         i = 1
         for batch_ids in self._split_batch(orders):
