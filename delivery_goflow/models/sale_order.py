@@ -290,8 +290,20 @@ class SaleOrder(models.Model):
         # self.update_so_status(lastcall_delay_new)
 
 
-    def api_call_orders_sweep(self):
-        print("W")
+    def api_call_orders_sweep2(self):
+        # print("W")
+        order_ids = self.search([]).filtered(lambda l: l.invoice_ids)
+        count = 1
+        for order in order_ids:
+            print("%s/%s" % (count, len(order_ids)))
+            count += 1
+            unmarked_invoices = order.invoice_ids.filtered(lambda x: not x.goflow_invoice_no)
+            if unmarked_invoices and order.goflow_invoice_no:
+                for unmarked_invoice in unmarked_invoices:
+                    unmarked_invoice.goflow_invoice_no = order.goflow_invoice_no
+                    self.env.cr.commit()
+
+    def api_call_orders_sweep1(self):
         lastcall_delay = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.goflow_cutoff_date')
         if lastcall_delay:
             date_from = datetime.fromisoformat(lastcall_delay)
@@ -301,12 +313,15 @@ class SaleOrder(models.Model):
                 'date_to': date_from
             }
             self.api_call_for_sync_orders_shipped(date_range=daterange)
+            self.env.cr.commit()
+
             import time
             time.sleep(60)
-            date_from = date_from + timedelta(days=1)
-            self.env['ir.config_parameter'].sudo().set_param('delivery_goflow.goflow_cutoff_date', date_from)
-            self.env.cr.commit()
-            self.api_call_orders_sweep()
+            lastcall = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.goflow_cutoff_date')
+            if lastcall:
+                date_from = date_from + timedelta(days=1)
+                self.env['ir.config_parameter'].sudo().set_param('delivery_goflow.goflow_cutoff_date', date_from)
+                self.api_call_orders_sweep()
 
 
     def api_call_for_sync_orders_shipped(self, call_for_index=False, date_range=False):
