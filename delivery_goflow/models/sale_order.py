@@ -562,6 +562,65 @@ class SaleOrder(models.Model):
             'goflow_tracking_number': tracking_number
         }
 
+
+    def _preparing_url2(self, lastcall, date_range, company_for_glow, goflow_state):
+        goflow_subdomain = self.env['ir.config_parameter'].get_param('delivery_goflow.subdomain_goflow')
+        store_args = self.get_store_param()
+        warehouse_args = self.get_warehouse_param(company_for_glow)
+        if date_range:
+            date_from = date_range.get('date_from')
+            date_to = date_range.get('date_to')
+            print(date_range)
+            date_from_str = date_from.strftime('%Y-%m-%dT%H:%M:%SZ')
+            date_to_str = date_to.strftime('%Y-%m-%dT23:59:59Z')
+            if goflow_state=='shipped' :
+                url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s&filters[date:gte]=%s&filters[date:lte]=%s' % (
+            goflow_subdomain, goflow_state, str(date_from_str), str(date_to_str))
+            else:
+                url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s&filters[date:gte]=%s&filters[date:lte]=%s' % (
+                    goflow_subdomain, goflow_state, str(date_from_str), str(date_to_str))
+            # print('url',url)
+            if store_args:
+                url = url.rstrip()
+                url += '&' + store_args
+            if warehouse_args:
+                url = url.rstrip()
+                url += '&' + warehouse_args
+            return url
+        elif lastcall:
+            # print(lastcall)
+            ll = lastcall.replace(hour=0, minute=0, second=0, microsecond=0)
+            goflow_lastcall = ll.strftime('%Y-%m-%dT%H:%M:%SZ ')
+            # Convert the start of the day datetime object to a string
+            print(goflow_lastcall)
+            # goflow_lastcall = yesterday_str
+            if goflow_state == 'shipped':
+                url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s&filters[status_updated_at:gte]=%s' % (
+            goflow_subdomain, goflow_state, str(goflow_lastcall))
+            else:
+                url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s&filters[date:gte]=%s' % (
+                    goflow_subdomain, goflow_state, str(goflow_lastcall))
+            # print('url',url)
+            if store_args:
+                url = url.rstrip()
+                url += '&' + store_args
+            if warehouse_args:
+                url = url.rstrip()
+                url += '&' + warehouse_args
+            return url
+        else:
+            # datetime_obj = datetime.strptime(goflow_cutoff_date, '%Y-%m-%d %H:%M:%S')
+            # goflow_cutoff = datetime_obj.strftime('%Y-%m-%dT%H:%M:%SZ ')
+            # url = 'https://%s.api.goflow.com/v1/orders?filters[status]=ready_to_pick&filters[date:gte]=%s'  % (goflow_subdomain,str(goflow_cutoff))
+            url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s' % (goflow_subdomain, goflow_state)
+            if store_args:
+                url = url.rstrip()
+                url += '&' + store_args
+            if warehouse_args:
+                url = url.rstrip()
+                url += '&' + warehouse_args
+            return url
+
     def _preparing_url(self, lastcall, date_range, company_for_glow, goflow_state):
         goflow_subdomain = self.env['ir.config_parameter'].get_param('delivery_goflow.subdomain_goflow')
         store_args = self.get_store_param()
@@ -573,7 +632,7 @@ class SaleOrder(models.Model):
             date_from_str = date_from.strftime('%Y-%m-%dT%H:%M:%SZ')
             date_to_str = date_to.strftime('%Y-%m-%dT23:59:59Z')
             if goflow_state=='shipped' :
-                url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s&filters[status_updated_at:gte]=%s&filters[date:lte]=%s' % (
+                url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s&filters[status_updated_at:gte]=%s&filters[status_updated_at:lte]=%s' % (
             goflow_subdomain, goflow_state, str(date_from_str), str(date_to_str))
             else:
                 url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s&filters[date:gte]=%s&filters[date:lte]=%s' % (
@@ -723,7 +782,7 @@ class SaleOrder(models.Model):
         headers = {
             'X-Beta-Contact': self.env.user.partner_id.email
         }
-        url = self._preparing_url(lastcall, date_range, company_for_glow, goflow_state)
+        url = self._preparing_url2(lastcall, date_range, company_for_glow, goflow_state)
         result = requests.get(url, auth=BearerAuth(goflow_token), headers=headers, verify=True)
         # print(result.json())
         goflow_api = result.json()
