@@ -254,10 +254,15 @@ class SaleOrder(models.Model):
                 if not self.invoice_ids:
                     self._create_invoices()
                 if self.invoice_ids:
+                    unmarked_invoices = self.invoice_ids.filtered(lambda x: not x.goflow_invoice_no)
+                    if unmarked_invoices and self.goflow_invoice_no:
+                        invoice.goflow_invoice_no = self.goflow_invoice_no
+
                     for invoice in self.invoice_ids.filtered(lambda x: x.state == 'draft'):
                         ## copy goflow invoice no to invoice in odoo
                         invoice.goflow_invoice_no = self.goflow_invoice_no
                         invoice.action_post()
+
                     self.goflow_full_invoiced = True
                     # print("Invoiced")
 
