@@ -319,6 +319,7 @@ class SaleOrder(models.Model):
             time.sleep(60)
             lastcall = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.goflow_cutoff_date')
             if lastcall:
+                date_from = datetime.fromisoformat(lastcall)
                 date_from = date_from + timedelta(days=1)
                 self.env['ir.config_parameter'].sudo().set_param('delivery_goflow.goflow_cutoff_date', date_from)
                 self.api_call_orders_sweep1()
