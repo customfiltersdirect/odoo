@@ -575,11 +575,11 @@ class SaleOrder(models.Model):
             date_from_str = date_from.strftime('%Y-%m-%dT%H:%M:%SZ')
             date_to_str = date_to.strftime('%Y-%m-%dT23:59:59Z')
             if goflow_state=='shipped' :
-                url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s&filters[date:gte]=%s&filters[date:lte]=%s' % (
-            goflow_subdomain, goflow_state, str(date_from_str), str(date_to_str))
+                url = 'https://%s.api.goflow.com/v1/orders?filters[date:gte]=%s&filters[date:lte]=%s' % (
+            goflow_subdomain, str(date_from_str), str(date_to_str))
             else:
-                url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s&filters[date:gte]=%s&filters[date:lte]=%s' % (
-                    goflow_subdomain, goflow_state, str(date_from_str), str(date_to_str))
+                url = 'https://%s.api.goflow.com/v1/orders?&filters[date:gte]=%s&filters[date:lte]=%s' % (
+                    goflow_subdomain, str(date_from_str), str(date_to_str))
             # print('url',url)
             if store_args:
                 url = url.rstrip()
