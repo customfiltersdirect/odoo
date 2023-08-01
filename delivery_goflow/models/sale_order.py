@@ -303,7 +303,7 @@ class SaleOrder(models.Model):
                     unmarked_invoice.goflow_invoice_no = order.goflow_invoice_no
                     self.env.cr.commit()
 
-    def api_call_orders_sweep1(self):
+    def api_call_orders_sweep1(self, orders=False):
         lastcall_delay = self.env['ir.config_parameter'].sudo().get_param('delivery_goflow.goflow_cutoff_date')
         if lastcall_delay:
             date_from = datetime.fromisoformat(lastcall_delay)
@@ -312,7 +312,7 @@ class SaleOrder(models.Model):
                 'date_from': date_from,
                 'date_to': date_from
             }
-            self.sync_update_so_goflow(lastcall=date_from, goflow_state="shipped", date_range=daterange)
+            self.sync_update_so_goflow(lastcall=date_from, goflow_state="shipped", date_range=daterange, orders=orders)
             self.env.cr.commit()
 
             import time
@@ -432,12 +432,15 @@ class SaleOrder(models.Model):
                 store_args = None
             return store_args
 
-    def _prepare_order_parameter(self, company_id):
-        total_orders = self.env['sale.order'].search([
-            ('company_id', '=', company_id.id),
-            ('goflow_id', '!=', False),
-            ('goflow_invoice_no', '=', False)], limit=200, order='goflow_order_date'
-        )
+    def _prepare_order_parameter(self, company_id, orders=False):
+        if orders:
+            total_orders = self.env['sale.order'].browse(orders)
+        else:
+            total_orders = self.env['sale.order'].search([
+                ('company_id', '=', company_id.id),
+                ('goflow_id', '!=', False),
+                ('goflow_invoice_no', '=', False)], limit=200, order='goflow_order_date'
+            )
 
         warehouse_args = False
 
@@ -809,7 +812,7 @@ class SaleOrder(models.Model):
                 self.env['goflow.sync.index'].sudo().create({'name': goflow_state, 'order_ids': order_ids})
 
 
-    def sync_update_so_goflow(self, lastcall, goflow_state, date_range, update_sync_index=False):
+    def sync_update_so_goflow(self, lastcall, goflow_state, date_range, update_sync_index=False, orders=False):
 
         company_for_glow = self.env['res.company'].search([('use_for_goflow_api', '=', True)], limit=1)
         goflow_token = self.env['ir.config_parameter'].get_param('delivery_goflow.token_goflow')
@@ -817,7 +820,7 @@ class SaleOrder(models.Model):
         headers = {
             'X-Beta-Contact': self.env.user.partner_id.email
         }
-        order_params = self._prepare_order_parameter(company_for_glow)
+        order_params = self._prepare_order_parameter(company_for_glow, orders)
         url = self._preparing_url_by_orders(company_for_glow, order_params)
         result = requests.get(url, auth=BearerAuth(goflow_token), headers=headers, verify=True)
         # print(result.json())
@@ -881,5 +884,5 @@ class SaleOrder(models.Model):
                             line_obj.goflow_tracking_number = line['tracking_number']
 
             self.env.cr.commit()
-            if order_ids and update_sync_index:
+            if order_ids:
                 self.env['goflow.sync.index'].sudo().create({'name': goflow_state, 'order_ids': order_ids})
