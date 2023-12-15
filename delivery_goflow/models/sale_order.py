@@ -752,11 +752,11 @@ class SaleOrder(models.Model):
                 goflow_store_obj = self.env['goflow.store'].search([('goflow_id', '=', goflow_store_id)], limit=1)
                 goflow_store_obj_partner_id, goflow_store_obj_id = goflow_store_obj.partner_id.id, goflow_store_obj.id
 
-                vals_partner_ship = self._prepare_partner_values(order)
-                partner_ship_obj = self.env['res.partner'].search([('name', '=', vals_partner_ship['name'])], limit=1)
-                if not partner_ship_obj:
-                    partner_ship_obj = self.env['res.partner'].create(vals_partner_ship)
-                    partner_ship_obj.parent_id = goflow_store_obj_partner_id
+                # vals_partner_ship = self._prepare_partner_values(order)
+                # partner_ship_obj = self.env['res.partner'].search([('name', '=', vals_partner_ship['name'])], limit=1)
+                # if not partner_ship_obj:
+                #     partner_ship_obj = self.env['res.partner'].create(vals_partner_ship)
+                #     partner_ship_obj.parent_id = goflow_store_obj_partner_id
                 order_lines = order["lines"]
                 goflow_id = order["id"]
                 # goflow_ship_boxes = order["shipment"]["boxes"]
@@ -796,7 +796,7 @@ class SaleOrder(models.Model):
                     so = self.env['sale.order'].create(order_values)
                     so.partner_id = goflow_store_obj_partner_id
                     so.partner_invoice_id = goflow_store_obj_partner_id
-                    so.partner_shipping_id = partner_ship_obj.id or goflow_store_obj_partner_id
+                    so.partner_shipping_id = goflow_store_obj_partner_id
                     so.goflow_id = order["id"]
                     so.goflow_store_id = goflow_store_obj_id
                     # so.company_id = company_for_glow and company_for_glow.id or False
@@ -844,10 +844,10 @@ class SaleOrder(models.Model):
                 goflow_store_obj_partner_id, goflow_store_obj_id = goflow_store_obj.partner_id.id, goflow_store_obj.id
 
                 vals_partner_ship = self._prepare_partner_values(order)
-                partner_ship_obj = self.env['res.partner'].search([('name', '=', vals_partner_ship['name'])], limit=1)
-                if not partner_ship_obj:
-                    partner_ship_obj = self.env['res.partner'].create(vals_partner_ship)
-                    partner_ship_obj.parent_id = goflow_store_obj_partner_id
+                # partner_ship_obj = self.env['res.partner'].search([('name', '=', vals_partner_ship['name'])], limit=1)
+                # if not partner_ship_obj:
+                #     partner_ship_obj = self.env['res.partner'].create(vals_partner_ship)
+                #     partner_ship_obj.parent_id = goflow_store_obj_partner_id
                 order_lines = order["lines"]
                 goflow_id = order["id"]
                 # goflow_ship_boxes = order["shipment"]["boxes"]
