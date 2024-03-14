@@ -12,7 +12,7 @@ class MRP_Production(models.Model):
     def compute_count(self):
         for record in self:
             record.transfer_count = self.env['stock.picking'].search_count(
-                [('origin', '=', self.name)])
+                [('production_order', '=', self.id)])
 
     def Create_Transfer_from_MO(self):
         lines = []
@@ -27,11 +27,12 @@ class MRP_Production(models.Model):
                 'picking_type_id' : 21,
                 'location_id' : 8,
                 'location_dest_id': 20,
-                'origin': rec.name,
+                'origin': rec.id,
+                'production_order': rec.id,
                 'move_line_ids_without_package' : lines
             }
 
-        check_for_existing_picking = self.env['stock.picking'].search([('origin','=',self.name)])
+        check_for_existing_picking = self.env['stock.picking'].search([('production_order','=',self.id)])
         if not check_for_existing_picking:
             mrp = self.env['stock.picking'].create(obj)
             mrp.action_confirm()
@@ -126,10 +127,15 @@ class MRP_Production(models.Model):
         self.ensure_one()
         return {
             'name': 'Put In a Pack',
-            'domain': [('origin', '=', self.name)],
+            'domain': [('production_order', '=', self.id)],
             'view_type': 'form',
             'res_model': 'stock.picking',
             'view_id': False,
             'view_mode': 'tree,form',
             'type': 'ir.actions.act_window'
         }
+
+class stock_picking(models.Model):
+    _inherit = 'stock.picking'
+
+    production_order = fields.Many2one('mrp.production' , string='Manufacturing Order')
