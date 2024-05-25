@@ -4,6 +4,9 @@
 from odoo import models, fields, api, _
 from odoo.osv import expression
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools.safe_eval import safe_eval
+
+from .constants import Constants
 
 
 SECURITY_GROUP = 'printnode_base.printnode_security_group_user'
@@ -14,6 +17,7 @@ class PrintNodeScenario(models.Model):
     Scenarios to print reports
     """
     _name = 'printnode.scenario'
+    _inherit = 'printnode.logger.mixin'
     _description = 'PrintNode Scenarios'
 
     _rec_name = 'report_id'
@@ -114,9 +118,6 @@ class PrintNodeScenario(models.Model):
             'print_product_labels_on_transfer',
             'print_single_product_label_on_transfer',
             'print_multiple_product_labels_on_transfer',
-            'print_lot_labels_on_transfer',
-            'print_single_lot_label_on_transfer',
-            'print_multiple_lot_labels_on_transfer',
         ]
         if not self.env.company.print_labels_format and self.active and self.action.code in actions:
             raise UserError(_(
@@ -125,6 +126,8 @@ class PrintNodeScenario(models.Model):
             ))
 
     def edit_domain(self):
+        """ Returns action window with 'Domain Editor'
+        """
         domain_editor = self.env.ref(
             'printnode_base.printnode_scenario_domain_editor',
             raise_if_not_found=False,
@@ -147,13 +150,15 @@ class PrintNodeScenario(models.Model):
         Returns True when at least a single scenario found. In other cases returns False.
         """
         user = self.env.user
-        if (
-            not self.env.company.printnode_enabled
-            or not user.has_group(SECURITY_GROUP)
-            or not user.printnode_enabled
-        ):
-            # It is possible to execute scanarios from scheduled actions
-            if not self.env.context.get('from_cron', False):
+        company = self.env.company
+
+        if not company.printnode_enabled:
+            return False
+
+        if not user.has_group(SECURITY_GROUP) or not user.printnode_enabled:
+            # It is possible to execute scenarios from scheduled actions
+            if not self.env.context.get('printnode_from_cron', False) \
+                    or not company.printing_scenarios_from_crons:
                 return False
 
         scenarios = self.sudo().search([
@@ -166,15 +171,28 @@ class PrintNodeScenario(models.Model):
         for scenario in scenarios:
             objects = scenario._apply_domain(ids_list)
             scenario_method_name = f'_scenario_{scenario.action.code}'
+            scenario.printnode_logger(
+                Constants.SCENARIOS_LOG_TYPE,
+                f"Objects to print defined: {objects._name}{objects.ids}")
 
             if objects:
+                printer, printer_bin = scenario._get_printer()
+                print_options = {'bin': printer_bin.name} if printer_bin else {}
+
                 if scenario.model_id != scenario.reports_model_id:
                     # When we want to print reports for different model
                     # We should call a special method to print
+                    scenario.printnode_logger(
+                        Constants.SCENARIOS_LOG_TYPE,
+                        'Model and report model do not match'
+                    )
                     if hasattr(objects, scenario_method_name):
+                        scenario.printnode_logger(
+                            Constants.SCENARIOS_LOG_TYPE,
+                            f"The {scenario_method_name} is defined for "
+                            f"{objects._name} model"
+                        )
                         scenario_method = getattr(objects, scenario_method_name)
-                        printer, printer_bin = scenario._get_printer()
-                        print_options = {'bin': printer_bin.name} if printer_bin else {}
                         printed = scenario_method(
                             scenario=scenario,
                             report_id=scenario.report_id,
@@ -186,10 +204,17 @@ class PrintNodeScenario(models.Model):
                     # When model and reports model are the same
                     # We call a special method to print or
                     # pass the objects to default printnode_print method
+                    scenario.printnode_logger(
+                        Constants.SCENARIOS_LOG_TYPE,
+                        f"Model and report model are the same - {scenario.reports_model_id.model}"
+                    )
                     if hasattr(self.env[scenario.model_id.model], scenario_method_name):
+                        scenario.printnode_logger(
+                            Constants.SCENARIOS_LOG_TYPE,
+                            f"The {scenario_method_name} is defined for "
+                            f"{scenario.reports_model_id.model} model"
+                        )
                         scenario_method = getattr(objects, scenario_method_name)
-                        printer, printer_bin = scenario._get_printer()
-                        print_options = {'bin': printer_bin.name} if printer_bin else {}
                         printed = scenario_method(
                             scenario=scenario,
                             report_id=scenario.report_id,
@@ -198,16 +223,21 @@ class PrintNodeScenario(models.Model):
                             options=print_options,
                         )
                     else:
-                        printer, printer_bin = scenario._get_printer()
-                        options = {'bin': printer_bin.name} if printer_bin else {}
+                        scenario.printnode_logger(
+                            Constants.SCENARIOS_LOG_TYPE,
+                            'Printing will be done via the default printnode_print method'
+                        )
                         res = printer.printnode_print(
                             scenario.report_id,
                             objects,
                             copies=scenario.number_of_copies,
-                            options=options,
+                            options=print_options,
                         )
 
                         printed = bool(res)
+
+                if printed:
+                    scenario.printnode_logger(Constants.SCENARIOS_LOG_TYPE, 'Printing successful')
 
         return printed
 
@@ -220,7 +250,7 @@ class PrintNodeScenario(models.Model):
         if self.domain == '[]':
             return self.env[self.model_id.model].browse(ids_list)
         return self.env[self.model_id.model].search(
-            expression.AND([[('id', 'in', ids_list)], eval(self.domain)])
+            expression.AND([[('id', 'in', ids_list)], safe_eval(self.domain)])
         )
 
     def _get_printer(self):

@@ -100,3 +100,26 @@ class Company(models.Model):
         string='Disable fit to the page size',
         default=False,
     )
+
+    debug_logging = fields.Boolean(
+        string='Debug logging',
+        default=False,
+        help='By enabling this feature, all requests will be logged. '
+             'You can find them in "Settings - Technical - Logging" menu.',
+    )
+
+    log_type_ids = fields.Many2many(
+        comodel_name='printnode.log.type',
+        string='Logs to write',
+        required=False,
+    )
+
+    printing_scenarios_from_crons = fields.Boolean(
+        string='Allow to execute printing scenarios from crons',
+        default=True,
+    )
+
+    secure_printing = fields.Boolean(
+        string='Printing without sending documents to the print server',
+        default=False,
+    )

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+<t t-name="printnode_base.DirectPrintStatusMenu">
+    <Dropdown autoOpen="false" beforeOpen.bind="beforeOpen" onStateChanged="state => this.state.isOpen = state.open" position="'bottom-end'" menuClass="directPrintStatusMenuSystray.menuClass" class="directPrintStatusMenuSystray.class">
+        <t t-set-slot="toggler">
+            <i class="fa fa-lg fa-print" role="img" aria-label="Messages" t-on-click="() => store.discuss.activeTab = ui.isSmall and store.discuss.activeTab === 'main' ? 'main' : store.discuss.activeTab"></i>
+            <span t-if="state.releases.length and state.isManager">
+                <span class="DirectPrintStatusMenu_badge badge rounded-pill">!</span>
+            </span>
+        </t>
+        <t t-set-slot="default">
+            <t t-call="printnode_base.DirectPrintStatusMenu.content"/>
+        </t>
+    </Dropdown>
+</t>
+
+<t t-name="printnode_base.DirectPrintStatusMenu.content">
+    <div t-att-class="`p-3 ${directPrintStatusMenuSystray.contentClass} o-printnode_base-StatusMenu`">
+        <t t-if="state.directPrintEnabled">
+            <!-- Loader -->
+            <t t-if="!state.loaded">
+                <i class="DirectPrintStatusMenu_loading fa fa-circle-o-notch fa-spin"/>
+            </t>
+
+            <t t-if="state.loaded">
+                <!-- Workstation devices -->
+                <t t-if="state.workstations">
+                    <div>
+                        <h4>Select Workstation</h4>
+                        <select class="form-select" aria-label="Default select example" t-on-change="setWorkstationDevice">
+                            <option value="">Select Workstation</option>
+                            <t t-foreach="state.workstations" t-as="workstation" t-key="workstation.id">
+                                <option t-att-value="workstation.id" t-att-selected="workstation.id == currentWorkstationId"><t t-esc="workstation.name"/></option>
+                            </t>
+                        </select>
+                    </div>
+                    <hr />
+                </t>
+
+
+                <t t-if="state.devices">
+                    <h4>Default Devices</h4>
+                    <div class="o_printnode_status_menu_devices">
+                        <p class="mb-0">
+                            <a class="collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#printnodeDefaultDevices" aria-expanded="false" aria-controls="printnodeDefaultDevices">Show Default Devices <i class="fa fa-light fa-arrow-right"></i></a>
+                        </p>
+                        <div class="collapse" id="printnodeDefaultDevices">
+                            <t t-foreach="state.devices" t-as="devices_of_type" t-key="devices_of_type[0]">
+                                <t t-foreach="devices_of_type[1]" t-as="device" t-key="device.label">
+                                    <div>
+                                        <b><t t-esc="device.label" />: </b>
+                                        <t t-if="device.id">
+                                            <t t-esc="device.name" />
+                                        </t>
+                                        <t t-else="">
+                                            Device isn't set
+                                        </t>
+                                    </div>
+                                </t>
+
+                                <t t-if="!devices_of_type_last">
+                                    <hr />
+                                </t>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+
+                <t t-if="state.isManager">
+                    <hr />
+
+                    <!-- Printing stats -->
+                    <div class="o_printnode_status_menu_limits">
+                        <t t-foreach="state.limits" t-as="limit" t-key="limit.account">
+                            <div>
+                                <t t-if="limit.error">
+                                    <b><t t-esc="limit.account"/></b>: Something went wrong. Check the details on the Direct Print / Settings page
+                                </t>
+                                <t t-elif="limit.limits">
+                                    <b><t t-esc="limit.account"/></b>: <t t-esc="limit.printed"/>/<t t-esc="limit.limits"/> printed
+                                </t>
+                                <t t-else="">
+                                    <b><t t-esc="limit.account"/></b>: Not Available
+                                    <i class="fa fa-info-circle" title="Number of printed documents and plan limits are unavailable (most likely because this account is a child PrintNode account)" data-toggle="tooltip"></i>
+                                </t>
+                            </div>
+                        </t>
+
+                        <t t-if="!state.limits.length">
+                            <span>No Direct Print accounts added</span>
+                        </t>
+                    </div>
+
+                    <hr />
+
+                    <!-- Releases -->
+                    <div class="DirectPrintStatusMenu_releases">
+                        <t t-foreach="state.releases" t-as="release" t-key="release.id">
+                            <div class="alert alert-primary mt-3" role="alert">
+                                <h5>
+                                    <t t-if="release.is_critical_update">
+                                        <i class="fa fa-exclamation-circle"/>
+                                    </t>
+                                    New Release: <t t-esc="release.version"/>
+                                </h5>
+                                <t t-set="release_notes" t-value="release.release_notes.split('\n')"/>
+                                <ul class="small mb-0">
+                                    <t t-foreach="release_notes" t-as="release_note" t-key="release_note_index">
+                                        <li><t t-out="release_note"/></li>
+                                    </t>
+                                </ul>
+                            </div>
+                        </t>
+
+                        <t t-if="state.releases.length">
+                            <a href="https://print.ventor.tech/faq#i-have-purchased-a-module-where-can-i-download-the-latest-odoo-direct-print-module-version" target="_blank">How to update the app?</a>
+                        </t>
+                    </div>
+
+                    <!-- Rate Us block -->
+                    <div class="DirectPrintStatusMenu_rate_us">
+                        <a t-att-href="rateUsURL" target="_blank">Rate Us <i class="fa fa-thumbs-o-up"></i></a>
+                    </div>
+                </t>
+            </t>
+        </t>
+
+        <t t-if="!state.directPrintEnabled">
+            <div class="alert alert-danger mb-0" role="alert">
+                <h5>Direct Print PRO module is disabled</h5>
+                <p>Please enable it on the company level (Direct Print → Settings page) and in user settings (User → Preferences).</p>
+            </div>
+        </t>
+    </div>
+    <div t-if="ui.isSmall" class="o-printnode_base-StatusMenu-navbar d-flex border-top bg-view shadow-lg w-100 btn-group">
+        
+    </div>
+</t>
+
+</templates>

@@ -18,17 +18,19 @@
                     <field name="with_custom_qty" />
                 </group>
 
-                <group attrs="{'invisible': [('with_custom_qty', '=', True)]}">
+                <group invisible="with_custom_qty == True">
                     <field name="number_copy" required="1"/>
                 </group>
 
-                <group attrs="{'invisible': [('with_custom_qty', '!=', True)]}">
-                    <field name="record_line_ids" nolabel="1">
-                        <tree editable="bottom" create="false">
-                            <field name="record_id" readonly="1"/>
-                            <field name="quantity"/>
-                        </tree>
-                    </field>
+                <group invisible="with_custom_qty != True">
+                    <div colspan="2" class="row justify-content-start">
+                            <field name="record_line_ids" nolabel="1">
+                                <tree editable="bottom" create="false">
+                                    <field name="record_id" readonly="1"/>
+                                    <field name="quantity"/>
+                                </tree>
+                            </field>
+                    </div>
                 </group>
 
                 <group name="printer">
@@ -37,7 +39,7 @@
                     <field name="status" invisible="1"/>
                 </group>
 
-                <p colspan="4" class="text-danger" attrs="{'invisible': [('status', '!=', 'offline')]}">
+                <p colspan="4" class="text-danger" invisible="status != 'offline'">
                     Printer is not available. Please, choose another printer.
                 </p>
 

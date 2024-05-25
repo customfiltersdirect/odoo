@@ -3,12 +3,11 @@
 from odoo import api, fields, models
 
 
-class KSCreateDashboardWizard(models.TransientModel):
+class KSduplicateDashboardWizard(models.TransientModel):
     _name = 'ks.dashboard.duplicate.wizard'
     _description = 'Dashboard Duplicate Wizard'
 
-    ks_top_menu_id = fields.Many2one('ir.ui.menu', string="Show Under Menu", required=True,
-                                     domain="['|',('action','=',False),('parent_id','=',False)]",
+    ks_top_menu_id = fields.Many2one('ir.ui.menu', string="Show Under Menu", required=True, domain="[('parent_id','=',False)]",
                                      default=lambda self: self.env['ir.ui.menu'].search(
                                          [('name', '=', 'My Dashboard')]))
 
@@ -31,10 +30,10 @@ class KSCreateDashboardWizard(models.TransientModel):
         return {
             'type': 'ir.actions.client',
             'name': "Dashboard Ninja",
-            'res_model': 'ks_deshboard_ninja.board',
+            'res_model': 'ks_dashboard_ninja.board',
             'params': {'ks_dashboard_id': dup_dash.id},
             'tag': 'ks_dashboard_ninja',
-            'context': self.with_context(context)._context
+            # 'context': self.with_context(context)._context
         }
 
 
@@ -54,13 +53,13 @@ class KSDeleteDashboardWizard(models.TransientModel):
         '''this function creats record of ks_dashboard_ninja.board and return dashboard action_id'''
         dashboard_id = self._context.get('dashboard_id')
         self.env['ks_dashboard_ninja.board'].browse(dashboard_id).unlink()
-        context = {'ks_reload_menu': True, 'ks_menu_id': self.env['ir.ui.menu'].search([('name', '=', 'My Dashboard')])[0].id}
+        context = {'ks_reload_menu': True, 'ks_menu_id': self.env['ir.ui.menu'].search([('name', '=', 'My Dashboard')], limit=1).id}
         return {
             'type': 'ir.actions.client',
             'name': "Dashboard Ninja",
-            'res_model': 'ks_deshboard_ninja.board',
+            'res_model': 'ks_dashboard_ninja.board',
             'params': {'ks_dashboard_id': 1},
             'tag': 'ks_dashboard_ninja',
-            'context': self.with_context(context)._context
+            # 'context': self.with_context(context)._context
         }
 

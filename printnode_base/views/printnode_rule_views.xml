@@ -15,7 +15,7 @@
                     <field name="report_model" />
                     <field name="error" invisible="1" />
                     <field name="notes" widget="html" />
-                    <field name="active" />
+                    <field name="active" widget="boolean_toggle" />
                 </tree>
             </field>
         </record>

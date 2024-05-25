@@ -1,43 +1,57 @@
-odoo.define('ks_dashboard_ninja_list.ks_to_do_preview', function(require) {
-    "use strict";
+/** @odoo-module */
 
-    var registry = require('web.field_registry');
-    var AbstractField = require('web.AbstractField');
-    var core = require('web.core');
+import { formatDate, parseDateTime } from "@web/core/l10n/dates";
+import { CharField } from "@web/views/fields/char/char_field";
+import { registry } from "@web/core/registry";
+import field_utils from 'web.field_utils';
+import { loadCSS,loadJS } from "@web/core/assets";
+import { qweb } from 'web.core';
+import core from 'web.core';
+import session from 'web.session';
 
-    var QWeb = core.qweb;
-    var field_utils = require('web.field_utils');
+const { useEffect, useRef, xml, onWillUpdateProps, onMounted, onWillStart } = owl;
 
-    var KsToDOViewPreview = AbstractField.extend({
-        supportedFieldTypes: ['char'],
-
-        resetOnAnyFieldChange: true,
-
-        init: function(parent, state, params) {
-            this._super.apply(this, arguments);
-            this.state = {};
-        },
-
-        _render: function() {
-            var self = this;
-            this.$el.empty()
-            var rec = self.recordData;
-            var ks_rgba_font_color;
-            if (rec.ks_dashboard_item_type === 'ks_to_do') {
-                    self.ksRenderToDoView(rec);
+class KsToDOViewPreview extends CharField {
+    setup() {
+        super.setup();
+        const self = this;
+        const inputRef = useRef("input");
+        useEffect(
+            (input) => {
+                if (input) {
+                    self._Ks_render();
                 }
-        },
+            },
+            () => [inputRef.el]
 
-          _ks_get_rgba_format: function(val) {
-            var rgba = val.split(',')[0].match(/[A-Za-z0-9]{2}/g);
-            rgba = rgba.map(function(v) {
-                return parseInt(v, 16)
-            }).join(",");
-            return "rgba(" + rgba + "," + val.split(',')[1] + ")";
-        },
+        );
+        onWillUpdateProps(this.onWillUpdateProps);
+       document.body.addEventListener('click', function(evt) {
+        if ($(evt.target).hasClass("ks_li_tab")) {
+        self.ksOnToDoClick(evt);
+    }
+}, false);
 
-        ksRenderToDoView: function(rec) {
-            var self = this;
+    }
+
+    onWillUpdateProps(){
+        this._Ks_render()
+    }
+
+    _ks_get_rgba_format(val) {
+        var rgba = val.split(',')[0].match(/[A-Za-z0-9]{2}/g);
+        rgba = rgba.map(function(v) {
+            return parseInt(v, 16)
+        }).join(",");
+        return "rgba(" + rgba + "," + val.split(',')[1] + ")";
+    }
+
+    _Ks_render() {
+        const self = this;
+        $(this.input.el.parentElement).find('div').remove()
+        $(this.input.el.parentElement).find('input').addClass('d-none')
+        var rec = self.props.record.data;
+        if (rec.ks_dashboard_item_type === 'ks_to_do') {
             var ks_header_color = self._ks_get_rgba_format(rec.ks_header_bg_color);
             var ks_font_color = self._ks_get_rgba_format(rec.ks_font_color);
             var ks_rgba_button_color = self._ks_get_rgba_format(rec.ks_button_color);
@@ -45,7 +59,7 @@ odoo.define('ks_dashboard_ninja_list.ks_to_do_preview', function(require) {
                    if (rec.ks_to_do_data){
                         list_to_do_data = JSON.parse(rec.ks_to_do_data)
                    }
-            var $todoViewContainer = $(QWeb.render('ks_to_do_container', {
+            var $todoViewContainer = $(qweb.render('ks_to_do_container', {
 
                 ks_to_do_view_name: rec.name ? rec.name : 'Name',
                 to_do_view_data: list_to_do_data,
@@ -54,15 +68,30 @@ odoo.define('ks_dashboard_ninja_list.ks_to_do_preview', function(require) {
             $todoViewContainer.find('.ks_card_header').addClass('ks_bg_to_color').css({"color": ks_font_color + ' !important' });
             $todoViewContainer.find('.ks_li_tab').addClass('ks_bg_to_color').css({"color": ks_font_color + ' !important' });
             $todoViewContainer.find('.ks_chart_heading').addClass('ks_bg_to_color').css({"color": ks_font_color + ' !important' });
-            this.$el.append($todoViewContainer);
-        },
+            $(this.input.el.parentElement).append($todoViewContainer);
+        }
+    }
+    ksOnToDoClick(ev){
+            ev.preventDefault();
+            var self= this;
+            var tab_id = $(ev.target).attr('href');
+            var $tab_section = $('#' + tab_id.substring(1));
+            $(ev.target).addClass("active");
+            $(ev.target).parent().siblings().each(function(){
+                $(this).children().removeClass("active");
+            });
+            $('#' + tab_id.substring(1)).siblings().each(function(){
+                $(this).removeClass("active");
+                $(this).addClass("fade");
+            });
+            $tab_section.removeClass("fade");
+            $tab_section.addClass("active");
+            $(ev.target).parent().parent().siblings().attr('data-section-id', $(ev.target).data().sectionId);
+        }
+}
 
+registry.category("fields").add("ks_dashboard_to_do_preview", KsToDOViewPreview);
 
-    });
-    registry.add('ks_dashboard_to_do_preview', KsToDOViewPreview);
-
-    return {
+return {
         KsToDOViewPreview: KsToDOViewPreview,
-    };
-
-});
+    }

@@ -1,4 +1,4 @@
-from odoo import _, exceptions, fields, models
+from odoo import _, api, exceptions, fields, models
 
 
 PRODUCT_LABEL_MODELS_MAPPING = {
@@ -17,16 +17,36 @@ class ProductLabelLayout(models.TransientModel):
     )
 
     zld_label_id = fields.Many2one(
-        string='Label from ZPL Designer',
+        string='Available Labels from ZPL Designer',
         comodel_name='zld.label',
-        domain=lambda self: self._get_zld_label_domain(),
+        domain="[('id', 'in', zld_label_ids)]",
     )
 
-    def _get_zld_label_domain(self):
-        return [
-            ('is_published', '=', True),
-            ('model_id', '=', PRODUCT_LABEL_MODELS_MAPPING.get(self._context.get('active_model')))
-        ]
+    # This field used as filter for zld_label_id field
+    zld_label_ids = fields.Many2many(
+        string='Label from ZPL Designer',
+        comodel_name='zld.label',
+        compute='_compute_zld_label_ids',
+    )
+
+    @api.depends('print_format')
+    def _compute_zld_label_ids(self):
+        for rec in self:
+            # Update domain for zld_label_id field
+            if self.print_format != 'zld_label':
+                rec.zld_label_ids = False
+                return
+
+            active_model = ''
+            if rec.product_tmpl_ids:
+                active_model = 'product.template'
+            elif rec.product_ids:
+                active_model = 'product.product'
+
+            rec.zld_label_ids = self.env['zld.label'].search([
+                ('is_published', '=', True),
+                ('model_id', '=', PRODUCT_LABEL_MODELS_MAPPING[active_model])
+            ])
 
     def _prepare_report_data(self):
         xml_id, data = super()._prepare_report_data()

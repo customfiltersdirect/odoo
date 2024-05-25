@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data noupdate="1">
+        <!-- Set default models for zld labels -->
+        <function model="res.company" name="_set_default_zld_allowed_models" />
+    </data>
+</odoo>

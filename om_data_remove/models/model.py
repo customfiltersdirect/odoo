@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 from odoo import api, fields, models, _
 
@@ -19,15 +17,11 @@ class ResConfigSettings(models.TransientModel):
                 continue
             obj_name = line
             obj = self.pool.get(obj_name)
-            check_if_company_id  = self.env['ir.model.fields'].search([('model_id.model','=',obj_name),('name','=','company_id'),('store','=',True)])
             if not obj:
                 t_name = obj_name.replace('.', '_')
             else:
                 t_name = obj._table
-            if check_if_company_id:
-                sql = "delete from %s where company_id = %s" % (t_name,self.env.company.id)
-            else:
-                sql = "delete from %s " % t_name
+            sql = "delete from %s" % t_name
             try:
                 self._cr.execute(sql)
                 self._cr.commit()
@@ -277,7 +271,6 @@ class ResConfigSettings(models.TransientModel):
             pass
         seqs = []
         res = self.remove_data(to_removes, seqs)
-        self.env.company.write({'chart_template_id': False})
         return res
 
     def remove_project(self):
@@ -363,13 +356,13 @@ class ResConfigSettings(models.TransientModel):
                 rec._compute_complete_name()
             except:
                 pass
-        ids = self.env['stock.location'].search([
-            ('location_id', '!=', False),
-            ('usage', '!=', 'views'),
-        ], order='complete_name')
-        for rec in ids:
-            try:
+        try:
+            ids = self.env['stock.location'].search([
+                ('location_id', '!=', False),
+                ('usage', '!=', 'views'),
+            ], order='complete_name')
+            for rec in ids:
                 rec._compute_complete_name()
-            except:
-                pass
+        except:
+            pass
         return True

@@ -1,16 +1,8 @@
 # Copyright 2021 VentorTech OU
 # See LICENSE file for full copyright and licensing details.
 
-from odoo import api, models, fields, _
+from odoo import models, fields, _
 from odoo.exceptions import UserError
-
-
-# Mapping between workstation device attributes and Odoo models
-WORKSTATION_DEVICES = {
-    'printnode_workstation_printer_id': 'printnode.printer',
-    'printnode_workstation_label_printer_id': 'printnode.printer',
-    'printnode_workstation_scales_id': 'printnode.scales',
-}
 
 
 class User(models.Model):
@@ -49,25 +41,6 @@ class User(models.Model):
         string='Direct Print Rules',
     )
 
-    # Workstation devices
-    printnode_workstation_printer_id = fields.Many2one(
-        'printnode.printer',
-        string='Default Workstation Printer',
-        store=False,
-    )
-
-    printnode_workstation_label_printer_id = fields.Many2one(
-        'printnode.printer',
-        string='Default Workstation Shipping Label Printer',
-        store=False,
-    )
-
-    printnode_workstation_scales_id = fields.Many2one(
-        'printnode.scales',
-        string='Default Workstation Scales',
-        store=False,
-    )
-
     @property
     def SELF_READABLE_FIELDS(self):
         readable_fields = [
@@ -77,9 +50,6 @@ class User(models.Model):
             'scales_enabled',
             'user_label_printer',
             'printnode_rule_ids',
-            'printnode_workstation_printer_id',
-            'printnode_workstation_label_printer_id',
-            'printnode_workstation_scales_id',
         ]
 
         return super().SELF_READABLE_FIELDS + readable_fields
@@ -92,47 +62,30 @@ class User(models.Model):
             'printnode_scales',
             'scales_enabled',
             'user_label_printer',
-            'printnode_workstation_printer_id',
-            'printnode_workstation_label_printer_id',
-            'printnode_workstation_scales_id',
         ]
 
         return super().SELF_WRITEABLE_FIELDS + writable_fields
 
-    def read(self, fields=None, load='_classic_read'):
-        # Add information about workstation printers (if presented)
-        for workstation_device_name in WORKSTATION_DEVICES.keys():
-            if fields and workstation_device_name not in fields:
-                # No need to return the workstation fields values
-                continue
-
-            workstation_device = self._get_workstation_device(workstation_device_name)
-
-            if workstation_device:
-                setattr(self, workstation_device_name, workstation_device)
-
-        data = super().read(fields, load)
-
-        return data
-
     def get_shipping_label_printer(self, carrier_id=None, raise_exc=False):
         """
         Printer search sequence:
-        1. Default Workstation Shipping Label Printer (User preferences)
-        2. Default Shipping Label Printer for current user (User Preferences)
-        3. Default Delivery Carrier Printer
+        1. Default Workstation Shipping Label Printer (Settings)
+        2. Default Delivery Carrier Printer
+        3. Default Shipping Label Printer for current user (User Preferences)
         4. Default Shipping Label Printer for current company (Settings)
         """
         company = self.env.company
 
         # There can be printer for the current workstation
-        workstation_label_printer_id = self._get_workstation_device(
-            'printnode_workstation_label_printer_id')
+        workstation_label_printer_id = self._get_workstation_device('label_printer_id')
+
+        if workstation_label_printer_id:
+            return workstation_label_printer_id
 
         delivery_carrier_printer = carrier_id.printer_id if carrier_id else None
 
-        printer = workstation_label_printer_id or self.user_label_printer or \
-            delivery_carrier_printer or company.company_label_printer
+        printer = (delivery_carrier_printer or self.user_label_printer
+                   or company.company_label_printer)
 
         if not printer and raise_exc:
             raise UserError(_(
@@ -144,37 +97,51 @@ class User(models.Model):
 
     def get_report_printer(self, report_id):
         """
+        :param int report_id: ID of the report to searching
+
         Printer search sequence:
         1. Printer from Print Action Button or Print Scenario (if specified, out of this method)
+
         2. Printer from User Rules (if exists)
-        3. Default Workstation Printer (User preferences)
-        4. Default printer for current user (User Preferences)
-        5. Default printer for current company (Settings)
+        3. Printer from Report Policy (if exists)
+        4. Default Workstation Printer (Settings)
+        5. Default printer for current user (User Preferences)
+        6. Default printer for current company (Settings)
         """
         self.ensure_one()
 
         rule = self.printnode_rule_ids.filtered(lambda r: r.report_id.id == report_id)[:1]
 
-        # There can be printer for the current workstation
-        workstation_printer_id = self._get_workstation_device('printnode_workstation_printer_id')
+        if rule.printer_id:
+            return rule.printer_id, rule.printer_bin
 
-        printer = rule.printer_id or workstation_printer_id or \
-            self.printnode_printer or self.env.company.printnode_printer
-        printer_bin = rule.printer_bin if rule.printer_id else printer.default_printer_bin
+        report_policy = self.env['printnode.report.policy'].search(
+            [('report_id', '=', report_id)], limit=1)
+
+        if report_policy.printer_id:
+            return report_policy.printer_id, report_policy.printer_bin
+
+        # There can be printer for the current workstation
+        workstation_printer_id = self._get_workstation_device('printer_id')
+
+        printer = (workstation_printer_id or self.printnode_printer
+                   or self.env.company.printnode_printer)
+
+        printer_bin = printer.default_printer_bin
 
         return printer, printer_bin
 
     def get_scales(self):
         """
         Scales search sequence:
-        3. Default Workstation Scales (User preferences)
+        3. Default Workstation Scales (Settings)
         4. Default scales for current user (User Preferences)
         5. Default scales for current company (Settings)
         """
         self.ensure_one()
 
         # There can be scales for the current workstation
-        workstation_scales_id = self._get_workstation_device('printnode_workstation_scales_id')
+        workstation_scales_id = self._get_workstation_device('scales_id')
 
         scales = workstation_scales_id or self.printnode_scales or self.env.company.printnode_scales
 
@@ -182,47 +149,11 @@ class User(models.Model):
 
     def _get_workstation_device(self, device):
         """
-        Helper method to get device set for the current workstation
+        Helper method to get correct device for the current workstation
         """
-        if device not in WORKSTATION_DEVICES:
+        workstation = self.env['printnode.workstation'].get_workstation()
+
+        if not workstation:
             return None
 
-        model = WORKSTATION_DEVICES[device]
-        workstation_device_id = self.env.context.get(device)
-
-        if not workstation_device_id:
-            return None
-
-        try:
-            workstation_device_id = int(workstation_device_id)
-        except ValueError:
-            return None
-
-        workstation_device = self.env[model].browse([workstation_device_id])
-
-        return workstation_device.exists()
-
-    @api.model
-    def validate_device_id(self, devices):
-        """
-        Returns True if related record with ID exists
-        """
-        resp = {}
-
-        for field_name, id in devices.items():
-            # Assume that by default ID is wrong
-            resp[field_name] = False
-
-            id = int(id)
-            fields = self.fields_get([field_name])
-
-            field = fields.get(field_name, {})
-            model = field.get('relation')
-
-            # Bad field name or field is not relation
-            if not model:
-                continue
-
-            resp[field_name] = self.env[model].browse([id]).exists().name
-
-        return resp
+        return getattr(workstation, device, None)

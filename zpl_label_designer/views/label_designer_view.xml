@@ -7,72 +7,68 @@
             <field name="model">zld.label</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-                <form string="Label View" js_class="zld_label_form">
-                    <header>
-                        <button name="generate_zpl" string="Generate ZPL And Preview" type="object" class="oe_read_only" />
-                        <button name="publish" string="Publish" type="object" class="oe_highlight oe_read_only" attrs="{'invisible': [('view_id', '!=', False)]}" />
-                        <button name="publish" string="Update Published Label" type="object" class="oe_highlight oe_read_only" attrs="{'invisible': [('view_id', '=', False)]}" />
-                        <button name="unpublish" string="Unpublish" type="object" class="oe_read_only" attrs="{'invisible': [('view_id', '=', False)]}"/>
-                        <button name="open_view" string="Open Label View" type="object" class="oe_read_only" groups="base.group_no_one" attrs="{'invisible': [('view_id', '=', False)]}"/>
+                <form string="Label View" js_class="zld_label_form_view">
+                    <header groups="zpl_label_designer.zld_security_group_manager">
+                        <button name="open_in_designer" string="Open in Designer" type="object" invisible="designer_label_id == False" />
+                        <button name="publish" string="Publish" type="object" class="oe_highlight" invisible="action_report_id != False" />
+                        <button name="unpublish" string="Unpublish" type="object" invisible="action_report_id == False" />
+                        <button name="open_view" string="Open Label View" type="object" groups="base.group_no_one" invisible="view_id == False" />
                     </header>
 
                     <sheet>
-
-                        <group attrs="{'invisible': [['is_modified', '!=', True]]}">
-                            <div class="alert alert-info text-center pt-4 pb-4" role="alert">
-                                You made a change to the ZPL label design. In order to apply them
-                                to your Odoo instance, you need to click “Update Published Label“ button.
-                            </div>
-                        </group>
-
-                        <group col="3">
-                            <group>
-                                <field name="name" />
-                                <field name="view_id" invisible="1" />
-                                <field name="is_modified" invisible="1" />
-
-                                <field name="print_report_name" groups="base.group_no_one" />
-                                <field name="print_report_name_preview" groups="base.group_no_one" />
-                            </group>
-                            <group>
-                                <field name="model_id" options="{'no_create': True, 'no_edit': True, 'no_open': True}" attrs="{'readonly': [('id', '!=', False)]}" />
-                            </group>
-                            <group>
-                                <field name="orientation" />
-                            </group>
-                        </group>
-                        <group col="3">
-                            <group>
-                                <field name="width" />
-                            </group>
-                            <group>
-                                <field name="height" />
-                            </group>
-                            <group>
-                                <field name="dpi" />
-                            </group>
-                        </group>
-
-                        <group string="Editor" attrs="{'invisible': [['id', '=', False]]}">
-                            <field name="blob" widget="zld_label_editor" nolabel="1" />
-                        </group>
-
-                        <div attrs="{'invisible': ['|', '|', ['id', '=', False], ['preview', '=', False], ['preview', '=', '']]}">
-                            <group string="Preview">
-                                <div class="label-container">
-                                    <field name="preview" nolabel="1" readonly="1" widget="zld_preview" class="w-100" />
-                                </div>
-                            </group>
-                            <div>
-                                <small>Preview provided by <a href="http://labelary.com/" target="_blank">Labelary</a></small>
-                            </div>
+                        <div class="alert alert-info text-center pt-4 pb-4" role="alert" invisible="is_published == False or is_modified == False">
+                            You made a change to the ZPL label design. In order to apply them
+                            you need to click “Update Published Label“ button.
                         </div>
 
-                        <group attrs="{'invisible': [['id', '!=', False]]}">
-                            <div class="alert alert-info text-center pt-4 pb-4" role="alert">
-                                <h1>Please save the record before editing a label</h1>
-                            </div>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Label Name" class="oe_inline me-3" />
+                                <field name="is_published" invisible="1" />
+
+                                <span class="badge bg-success rounded-pill o_field_badge bg-opacity-50" invisible="is_published == False">Published</span>
+                                <span class="badge bg-secondary rounded-pill o_field_badge bg-opacity-50" invisible="is_published != False">Not Published</span>
+                            </h1>
+                        </div>
+
+                        <group>
+                            <group>
+                                <field name="model_id" />
+                                <field name="dpi" />
+                                <field name="width" />
+                                <field name="height" />
+                                <field name="orientation" />
+
+                                <field name="view_id" invisible="1" />
+                                <field name="action_report_id" invisible="1" />
+                                <field name="is_modified" invisible="1" />
+                                <field name="designer_label_id" invisible="1" />
+                            </group>
+                            <group groups="base.group_no_one">
+                                <field name="print_report_name" />
+                                <field name="print_report_name_preview" />
+                                <field name="designer_label_id" />
+                                <field name="write_date" />
+                            </group>
                         </group>
+
+                        <div>
+                            <small>To change label or its parameters click on "Open in Designer" button</small>
+                        </div>
+
+                        <group string="Preview">
+                            <field name="preview" nolabel="1" readonly="1" widget="zld_label_preview" colspan="2" />
+                        </group>
+                        <div>
+                            <small>
+                                The preview may have inaccuracies in the display of elements due
+                                to the difference of the fonts used in the designer and in ZPL
+                            </small>
+                        </div>
+
+                        <div>
+                            <small>Preview provided by <a href="http://labelary.com/" target="_blank">Labelary</a></small>
+                        </div>
                     </sheet>
                 </form>
             </field>
@@ -82,7 +78,7 @@
             <field name="name">zld.label.view</field>
             <field name="model">zld.label</field>
             <field name="arch" type="xml">
-                <tree>
+                <tree js_class="zld_label_list_view" import="false">
                     <field name="name" />
                     <field name="model_id" />
                     <field name="is_published" />

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="printnode_abstract_print_line_reports_wizard_form" model="ir.ui.view">
+        <field name="name">printnode.abstract.print.line.reports.wizard.form</field>
+        <field name="model">printnode.abstract.print.line.reports.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="report_id" required="1" options="{'no_create': True}"/>
+                </group>
+
+                <group>
+                    <field name="number_copy" required="1"/>
+                </group>
+
+                <group>
+                    <field name="record_line_ids" nolabel="1" colspan="2">
+                        <tree editable="bottom" create="false">
+                            <field name="name" readonly="1"/>
+                            <field name="record_id" invisible="1"/>
+                            <field name="quantity"/>
+                        </tree>
+                    </field>
+                </group>
+
+                <group name="printer">
+                    <field name="printer_id" options="{'no_create': True, 'no_open': True}"/>
+                    <field name="printer_bin" options="{'no_create': True, 'no_open': True}"/>
+                    <field name="status" invisible="1"/>
+                </group>
+
+                <p colspan="4" class="text-danger" invisible="status != 'offline'">
+                    Printer is not available. Please, choose another printer.
+                </p>
+                <footer>
+                    <button string="Print" name="do_print" type="object" class="oe_highlight"/>
+                    <button string="Cancel" class="btn btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

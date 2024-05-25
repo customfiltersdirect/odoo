@@ -19,11 +19,7 @@ class TestPrintNodeScales(TestPrintNodeCommon):
         Test for the correct naming of the scales
         """
 
-        name = '{}-{} ({})'.format(
-            self.scales.name,
-            self.scales.device_num,
-            self.scales.computer_id.name,
-        )
+        name = f'{self.scales.name}-{self.scales.device_num} ({self.scales.computer_id.name})'
         test_composite_scales_name = [(self.scales.id, name), ]
         composite_scales_name_from_method = self.scales.name_get()
 

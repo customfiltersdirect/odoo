@@ -13,10 +13,30 @@ return KsDashboard.include({
         'click .ks_edit_content': '_onKsEditTask',
         'click .ks_delete_content': '_onKsDeleteContent',
         'click .header_add_btn': '_onKsAddTask',
+        'click .ks_create_task': '_onKsCreateTask',
 //        'click .ks_add_section': '_onKsAddSection',
         'click .ks_li_tab': '_onKsUpdateAddButtonAttribute',
         'click .ks_do_item_active_handler': '_onKsActiveHandler',
+        'click .ks_li_tab': 'ksOnToDoClick',
     }),
+
+        ksOnToDoClick: function(ev){
+            ev.preventDefault();
+            var self= this;
+            var tab_id = $(ev.currentTarget).attr('href');
+            var $tab_section = $('#' + tab_id.substring(1));
+            $(ev.currentTarget).addClass("active");
+            $(ev.currentTarget).parent().siblings().each(function(){
+                $(this).children().removeClass("active");
+            });
+            $('#' + tab_id.substring(1)).siblings().each(function(){
+                $(this).removeClass("active");
+                $(this).addClass("fade");
+            });
+            $tab_section.removeClass("fade");
+            $tab_section.addClass("active");
+            $(ev.currentTarget).parent().parent().siblings().attr('data-section-id', $(ev.currentTarget).data().sectionId);
+        },
 
         ksRenderDashboardItems: function(items) {
             var self = this;
@@ -62,13 +82,13 @@ return KsDashboard.include({
                         var $to_do_preview = self.ksRenderToDoDashboardView(items[i])[0];
                         if (items[i].id in self.gridstackConfig) {
                             if (config.device.isMobile){
-                                self.grid.addWidget($to_do_preview[0], {x:self.gridstackConfig[items[i].id].x, y:self.gridstackConfig[items[i].id].y, w:self.gridstackConfig[items[i].id].w, h:self.gridstackConfig[items[i].id].h, autoPosition:true, minW:3, maxW:null, minH:2, maxH:null, id:items[i].id});
+                                self.grid.addWidget($to_do_preview[0], {x:self.gridstackConfig[items[i].id].x, y:self.gridstackConfig[items[i].id].y, w:self.gridstackConfig[items[i].id].w, h:self.gridstackConfig[items[i].id].h, autoPosition:true, minW:5, maxW:null, minH:2, maxH:null, id:items[i].id});
                              }
                              else{
-                                self.grid.addWidget($to_do_preview[0], {x:self.gridstackConfig[items[i].id].x, y:self.gridstackConfig[items[i].id].y, w:self.gridstackConfig[items[i].id].w, h:self.gridstackConfig[items[i].id].h, autoPosition:false, minW:3, maxW:null, minH:2, maxH:null, id:items[i].id});
+                                self.grid.addWidget($to_do_preview[0], {x:self.gridstackConfig[items[i].id].x, y:self.gridstackConfig[items[i].id].y, w:self.gridstackConfig[items[i].id].w, h:self.gridstackConfig[items[i].id].h, autoPosition:false, minW:5, maxW:null, minH:2, maxH:null, id:items[i].id});
                              }
                         } else {
-                            self.grid.addWidget($to_do_preview[0], {x:0, y:0, w:6, h:4, autoPosition:true, minW:3, maxW:null, minH:2, maxH:null, id:items[i].id})
+                            self.grid.addWidget($to_do_preview[0], {x:0, y:0, w:6, h:4, autoPosition:true, minW:5, maxW:null, minH:2, maxH:null, id:items[i].id})
                         }
                     } else {
                         self._renderGraph(items[i], self.grid)
@@ -93,7 +113,9 @@ return KsDashboard.include({
                 ks_dashboard_list: self.ks_dashboard_data.ks_dashboard_list,
                 item_id: item_id,
                 to_do_view_data: list_to_do_data,
-                 ks_rgba_button_color:ks_rgba_button_color,
+                ks_rgba_button_color:ks_rgba_button_color,
+                ks_info: item.ks_info,
+                ks_company:item.ks_company
             })).addClass('ks_dashboarditem_id')
             $ks_gridstack_container.find('.ks_card_header').addClass('ks_bg_to_color').css({"background-color": ks_header_color });
             $ks_gridstack_container.find('.ks_card_header').addClass('ks_bg_to_color').css({"color": ks_font_color + ' !important' });
@@ -116,6 +138,8 @@ return KsDashboard.include({
 
             return $todoViewContainer
         },
+
+//        _onKsCreateTask
 
         _onKsEditTask: function(e){
             var self = this;
@@ -213,10 +237,11 @@ return KsDashboard.include({
             buttons: [
                 {
                 text: 'Save',
-                classes: 'btn-primary',
+                classes: 'btn-primary ks_create_task',
                 click: function(e){
                     var content = $(e.currentTarget.parentElement.parentElement).find('.ks_section').val();
                     if (content.length === 0){
+                    console.log('here')
 //                        this.do_notify(false, _t('Successfully sent to printer!'));
                     }
                     else{
@@ -257,7 +282,6 @@ return KsDashboard.include({
 
                 });
         },
-
 
         _onKsUpdateAddButtonAttribute: function(e){
             var item_id = e.currentTarget.dataset.itemId;

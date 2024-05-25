@@ -34,7 +34,11 @@ class IrAttachment(models.Model):
             job_ids.append(job_id)
 
         names = ', '.join([a.name for a in self])
-        message = _('Successfully sent {} to printer {}').format(names, printer.name)
+        message = _(
+            'Successfully sent %(names)s to printer %(printer)s',
+            names=names,
+            printer=printer.name
+        )
 
         return message, job_ids
 

@@ -12,4 +12,30 @@
         </field>
     </record>
 
+    <!-- Picking > Action > Print Operation Reports -->
+    <record id="action_picking_print_operation_reports" model="ir.actions.server">
+        <field name="name">Print Operation Reports</field>
+        <field name="model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_model_id" ref="stock.model_stock_picking" />
+        <field name="binding_view_types">form</field>
+        <field name="state">code</field>
+        <field name="code">
+if records:
+    action = records.open_print_operation_reports_wizard()
+        </field>
+    </record>
+
+    <!-- Sale Order > Action > Print Order Line Reports -->
+    <record id="action_picking_print_order_line_reports" model="ir.actions.server">
+        <field name="name">Print Order Line Reports</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="binding_model_id" ref="sale.model_sale_order" />
+        <field name="binding_view_types">form</field>
+        <field name="state">code</field>
+        <field name="code">
+if records:
+    action = records.open_print_order_line_reports_wizard()
+        </field>
+    </record>
+
 </odoo>

@@ -40,8 +40,8 @@ class PrintNodeActionMethod(models.Model):
 
     @api.constrains('method')
     def _check_skip_method(self):
-        su = self.env['ir.config_parameter'].sudo()
-        methods_list = su.get_param('printnode_base.skip_methods', '').split(',')
+        methods_list = self.env['ir.config_parameter'].sudo() \
+            .get_param('printnode_base.skip_methods', '').split(',')
         for action_method in self:
             if action_method.method in methods_list:
                 raise ValidationError(

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="printnode_print_sale_order_line_reports_wizard_form" model="ir.ui.view">
+        <field name="name">printnode.print.sale.order.line.reports.wizard.form</field>
+        <field name="model">printnode.print.sale.order.line.reports.wizard</field>
+        <field name="inherit_id" ref="printnode_base.printnode_abstract_print_line_reports_wizard_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <!-- Nothing to change -->
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

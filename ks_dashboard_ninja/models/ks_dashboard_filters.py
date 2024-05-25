@@ -11,7 +11,7 @@ class KsDashboardNinjaTemplate(models.Model):
     ks_dashboard_board_id = fields.Many2one('ks_dashboard_ninja.board', string="Dashboard")
     ks_model_id = fields.Many2one('ir.model', string='Model',
                                   domain="[('access_ids','!=',False),('transient','=',False),"
-                                         "('model','not ilike','base_import%'),'|',('model','not ilike','ir.%'),('model','=ilike','_%ir.%'),"
+                                         "('model','not ilike','base_import%'),('model','not ilike','ir.%'),"
                                          "('model','not ilike','web_editor.%'),('model','not ilike','web_tour.%'),"
                                          "('model','!=','mail.thread'),('model','not ilike','ks_dash%'), ('model','not ilike','ks_to%')]",
                                   help="Data source to fetch and read the data for the creation of dashboard items. ")
@@ -54,7 +54,7 @@ class KsDashboardNinjaTemplate(models.Model):
     ks_dashboard_board_id = fields.Many2one('ks_dashboard_ninja.board', string="Dashboard")
     ks_model_id = fields.Many2one('ir.model', string='Model',
                                   domain="[('access_ids','!=',False),('transient','=',False),"
-                                         "('model','not ilike','base_import%'),'|',('model','not ilike','ir.%'),('model','=ilike','_%ir.%'),"
+                                         "('model','not ilike','base_import%'),('model','not ilike','ir.%'),"
                                          "('model','not ilike','web_editor.%'),('model','not ilike','web_tour.%'),"
                                          "('model','!=','mail.thread'),('model','not ilike','ks_dash%'), ('model','not ilike','ks_to%')]",
                                   help="Data source to fetch and read the data for the creation of dashboard items. ")

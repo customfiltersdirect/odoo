@@ -1,7 +1,9 @@
 # Copyright 2021 VentorTech OU
 # See LICENSE file for full copyright and licensing details.
-from odoo import api, exceptions, fields, models, _
+
 from requests.models import PreparedRequest
+
+from odoo import api, exceptions, fields, models, _
 
 
 class PrintnodeInstaller(models.TransientModel):
@@ -70,8 +72,8 @@ class PrintnodeInstaller(models.TransientModel):
         portal_base_url = self.env['ir.config_parameter'].sudo().get_param('printnode_base.dpc_url')
         odoo_base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
 
-        portal_url = '{}/get-api-key'.format(portal_base_url)
-        controller_url = '{}/dpc-callback'.format(odoo_base_url)
+        portal_url = f'{portal_base_url}/get-api-key'
+        controller_url = f'{odoo_base_url}/dpc-callback'
 
         # Requests lib used to simplicity
         request = PreparedRequest()
@@ -84,6 +86,8 @@ class PrintnodeInstaller(models.TransientModel):
         }
 
     def show_settings(self):
+        """ Returns action window with settings.
+        """
         self.state = 'settings'
 
         return {
@@ -95,6 +99,8 @@ class PrintnodeInstaller(models.TransientModel):
         }
 
     def show_introduction(self):
+        """ Returns action window with introduction DPC module.
+        """
         self.state = 'introduction'
 
         return {

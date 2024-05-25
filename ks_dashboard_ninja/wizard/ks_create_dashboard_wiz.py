@@ -10,7 +10,7 @@ class KSCreateDashboardWizard(models.TransientModel):
     name = fields.Char(string="Dashboard Name", required=True)
     ks_menu_name = fields.Char(string="Menu Name", required=True)
     ks_top_menu_id = fields.Many2one('ir.ui.menu',
-                                     domain="['|',('action','=',False),('parent_id','=',False)]",
+                                     domain="[('parent_id','=',False)]",
                                      string="Show Under Menu", required=True,
                                      default=lambda self: self.env['ir.ui.menu'].search(
                                          [('name', '=', 'My Dashboard')])[0])
@@ -44,5 +44,5 @@ class KSCreateDashboardWizard(models.TransientModel):
             'res_model': 'ks_dashboard_ninja.board',
             'params': {'ks_dashboard_id': ks_create_record.id},
             'tag': 'ks_dashboard_ninja',
-            'context': self.with_context(context)._context
+            # 'context': self.with_context(context)._context
         }

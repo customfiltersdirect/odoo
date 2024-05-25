@@ -21,26 +21,10 @@ class TestPrintNodeStockPicking(TestPrintNodeCommon):
             'name': 'Test package',
         })
         self.test_stock_picking = self.env['stock.picking'].create({
-            'location_id': self.env['stock.location'].create({
-                'name': 'Test_location',
-                'usage': 'internal'
-            }).id,
-            'location_dest_id': self.env['stock.location'].create({
-                'name': 'Test_dest_location',
-                'usage': 'customer'
-            }).id,
+            'location_id': self.env.ref('stock.stock_location_suppliers').id,
+            'location_dest_id': self.location_dest.id,
             'move_type': 'direct',
-            'picking_type_id': self.env['stock.picking.type'].create({
-                'code': 'internal',
-                'company_id': self.company.id,
-                'name': 'Test_picking_type',
-                'sequence_code': 'TEST',
-                'warehouse_id': self.env['stock.warehouse'].create({
-                    'partner_id': self.env['res.partner'].create({'name': 'Test Partner'}).id,
-                    'name': 'Test_warehouse',
-                    'code': 'Test',
-                }).id,
-            }).id,
+            'picking_type_id': self.picking_type_incoming.id,
         })
 
     def test_scenario_print_package_on_put_in_pack(self):

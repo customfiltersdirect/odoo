@@ -9,7 +9,7 @@
                     <field invisible="1" name="state"/>
 
                     <h1>App Installed</h1>
-                    <div states="introduction">
+                    <div invisible="state != 'introduction'">
                         <p>
                             Now you need to subscribe to our Printing Service.
                             <br />
@@ -26,16 +26,16 @@
 
                     </div>
 
-                    <group states="settings">
+                    <group invisible="state != 'settings'">
                         <field name="api_key" />
                         <!-- <field name="is_allowed_to_collect_data" /> -->
                     </group>
 
-                    <footer states="introduction">
+                    <footer invisible="state != 'introduction'">
                         <button string="Continue" name="get_api_key" type="object" class="btn-primary"/>
                     </footer>
 
-                    <footer states="settings">
+                    <footer invisible="state != 'settings'">
                         <button string="Save" name="save_settings" type="object" class="btn-primary"/>
                         <button string="Back" name="show_introduction" type="object" class="btn-secondary"/>
                     </footer>

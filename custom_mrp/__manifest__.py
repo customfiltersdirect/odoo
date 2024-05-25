@@ -23,7 +23,7 @@
 {
     "name": "Custom Manufacturing",
     "summary": "Customisation in manufacturing",
-    "version": "15.0.1.0.0",
+    "version": "17.0.1.0.0",
     "website": "https://www.cybrosys.com",
     "description": """
         Customisation in manufacturing
@@ -31,9 +31,9 @@
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
+    'depends': ['base', 'mrp', 'stock'],
     "data": [
     ],
-    'depends': ['base', 'mrp', 'stock'],
     'license': 'OPL-1',
     'installable': True,
     'auto_install': False,

@@ -31,9 +31,9 @@ class TestPrintNodeActionButton(TestPrintNodeCommon):
         Test _get_model_objects method from printnode.action.button model
         """
 
-        self.partner_1 = self.env['res.partner'].create({'name': 'Direct Print Partner1'})
-        self.partner_2 = self.env['res.partner'].create({'name': 'Direct Print Partner2'})
-        self.sl_order = self.env['sale.order'].create({'partner_id': self.partner_1.id})
+        partner_1 = self.env['res.partner'].create({'name': 'Direct Print Partner1'})
+        partner_2 = self.env['res.partner'].create({'name': 'Direct Print Partner2'})
+        sl_order = self.env['sale.order'].create({'partner_id': partner_1.id})
 
         # Empty ids_list
         related_model = self.action_button._get_model_objects([])
@@ -41,17 +41,17 @@ class TestPrintNodeActionButton(TestPrintNodeCommon):
 
         # Empty action domain
         self.assertEqual(self.action_button.domain, '[]')
-        objects = self.action_button._get_model_objects(self.sl_order.ids)
-        self.assertEqual(objects, self.sl_order)
+        objects = self.action_button._get_model_objects(sl_order.ids)
+        self.assertEqual(objects, sl_order)
 
         # Set action domain for 'partner_1' (partner for 'sl_order')
-        self.action_button.domain = '[["partner_id", "=", %s]]' % self.partner_1.id
-        objects = self.action_button._get_model_objects(self.sl_order.ids)
-        self.assertEqual(objects, self.sl_order)
+        self.action_button.domain = f'[["partner_id", "=", {partner_1.id}]]'
+        objects = self.action_button._get_model_objects(sl_order.ids)
+        self.assertEqual(objects, sl_order)
 
         # Set action domain for 'partner_2'. Sale Order will be filtered.
-        self.action_button.domain = '[["partner_id", "=", %s]]' % self.partner_2.id
-        objects = self.action_button._get_model_objects(self.sl_order.ids)
+        self.action_button.domain = f'[["partner_id", "=", {partner_2.id}]]'
+        objects = self.action_button._get_model_objects(sl_order.ids)
         self.assertFalse(objects)
 
     def test_onchange_printer(self):

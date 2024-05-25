@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates>
     <t t-name="ks_dn_filter_container">
-        <div class="ks_dashboard_top_menu ks_select_none" style="margin: auto;">
+        <div class="ks_dashboard_top_menu ks_select_none" style="padding:10px">
 
             <!--  Date Filter Selection Options (Hide default for no content view)-->
             <div class="ks_dashboard_link ks_am_content_element ks_hide mr-4"
@@ -11,7 +11,7 @@
                     <div class="ks_dn_selection_box">
                         <div class="btn-group ">
                             <button class="o_dropdown_toggler_btn btn btn-secondary dropdown-toggle ks_date_filter_dropdown"
-                                    data-toggle="dropdown"
+                                    data-bs-toggle="dropdown"
                                     aria-expanded="false">
                                 <span class="fa fa-lg fa-filter"/>
                                 <span class="ks_dn_filter_selection">Filter</span>

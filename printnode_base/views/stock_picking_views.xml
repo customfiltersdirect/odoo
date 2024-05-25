@@ -7,22 +7,16 @@
             <field name="model">stock.picking</field>
             <field name="inherit_id" ref="stock.view_picking_form" />
             <field name="arch" type="xml">
-                <xpath expr="//header/button[@name='action_toggle_is_locked']" position="after">
+                <xpath expr="//header/button[@name='action_open_label_type']" position="after">
                     <button name="print_last_shipping_label"
                             string="Print Last Shipping Label"
-                            attrs="{'invisible': ['|', '|',
-                                ('picking_type_code', '!=', 'outgoing'),
-                                ('state', 'in', ('draft', 'cancel')),
-                                ('is_locked', '=', False)]}"
+                            invisible="picking_type_code != 'outgoing' or state in ('draft', 'cancel') or is_locked == False"
                             groups="printnode_base.printnode_security_group_user"
                             type="object" />
                 </xpath>
                 <xpath expr="//page[last()]" position="after">
                     <page string="Shipping Labels"
-                          attrs="{'invisible': ['|', '|',
-                                ('picking_type_code', '!=', 'outgoing'),
-                                ('state', 'in', ('draft', 'cancel')),
-                                ('is_locked', '=', False)]}"
+                        invisible="picking_type_code != 'outgoing' or state in ('draft', 'cancel') or is_locked == False"
                           groups="printnode_base.printnode_security_group_user">
                         <field name="shipping_label_ids" />
                     </page>

@@ -22,7 +22,7 @@ class PrintnodePrintReportsUniversalWizard(models.TransientModel):
 
     report_id = fields.Many2one(
         comodel_name='ir.actions.report',
-        domain=lambda self: self._get_available_reports()
+        domain=lambda self: self._get_reports_domain()
     )
 
     number_copy = fields.Integer(
@@ -70,23 +70,9 @@ class PrintnodePrintReportsUniversalWizard(models.TransientModel):
         # to report_id will be applied)
         report_id = self.report_id
 
-        # User rules
-        user_rules_printer_id = self.env['printnode.rule'].search([
-            ('user_id', '=', self.env.uid),
-            ('report_id', '=', report_id.id),  # There will be no rules for report_id = False
-        ], limit=1).printer_id
+        printer_id, _ = self.env.user.get_report_printer(report_id.id)
 
-        # Workstation printer
-        workstation_printer_id = self.env.user._get_workstation_device(
-            'printnode_workstation_printer_id')
-
-        # Priority:
-        # 1. Printer from User Rules (if exists)
-        # 2. Default Workstation Printer (User preferences)
-        # 3. Default printer for current user (User Preferences)
-        # 4. Default printer for current company (Settings)
-        return user_rules_printer_id or workstation_printer_id or \
-            self.env.user.printnode_printer or self.env.company.printnode_printer
+        return printer_id
 
     @api.constrains('number_copy')
     def _check_quantity(self):
@@ -122,7 +108,7 @@ class PrintnodePrintReportsUniversalWizard(models.TransientModel):
         active_model = self.env.context.get('active_model')
 
         if not (active_ids and active_model):
-            return
+            return None
 
         return self.env[active_model].browse(active_ids)
 
@@ -138,7 +124,7 @@ class PrintnodePrintReportsUniversalWizard(models.TransientModel):
             ]
             self.record_names = ", ".join(record_names)
 
-    def _get_available_reports(self):
+    def _get_reports_domain(self):
         active_model = self.env.context.get('active_model')
         return [*REPORT_DOMAIN, ('model', '=', active_model)]
 
@@ -165,19 +151,21 @@ class PrintnodePrintReportsUniversalWizard(models.TransientModel):
         docids = self.env[active_model]
 
         # Add copies
-        if not self.with_custom_qty:
-            # The same quantity for all records
-            docids = self.record_line_ids.mapped('record_id')
-            for i in range(self.number_copy - 1):
-                docids += docids
-        else:
-            # Custom quantity for each record
-            for line_id in self.record_line_ids:
-                for i in range(line_id.quantity):
-                    docids += line_id.record_id
+        # FIXME: This doesn't work for now because of bug in Odoo 16.0. Need to be uncommented
+        # when bug will be fixed
+        # if not self.with_custom_qty:
+        #     # The same quantity for all records
+        #     for i in range(self.number_copy):
+        #         docids = docids.concat(self.record_line_ids.mapped('record_id'))
+        # else:
+        #     # Custom quantity for each record
+        #     for line in self.record_line_ids:
+        #         for i in range(line.quantity):
+        #             docids += line.record_id
 
-        # If no printer than download PDF
-        if not self.printer_id:
+        # If immediate printing via PrintNode is disabled for the current user,
+        # or if no printer is defined for the wizard, the PDF will be downloaded
+        if not self.env.user.printnode_enabled or not self.printer_id:
             return report.with_context(download_only=True).report_action(docids=docids)
 
         options = {}
@@ -185,15 +173,28 @@ class PrintnodePrintReportsUniversalWizard(models.TransientModel):
             options['bin'] = self.printer_bin.name
 
         # If printer than send to printnode
-        self.printer_id.printnode_print(
-            report,
-            docids,
-            options=options,
-        )
+        # self.printer_id.printnode_print(
+        #     report,
+        #     docids,
+        #     options=options,
+        # )
+
+        # FIXME: Check comment above
+        for line in self.record_line_ids:
+            copies = line.quantity if self.with_custom_qty else self.number_copy
+            self.printer_id.printnode_print(
+                report,
+                line.record_id,
+                copies=copies,
+                options=options,
+            )
 
         title = _('Report was sent to printer')
-        message = _('Document "{}" was sent to printer {}').format(
-            report.name, self.printer_id.name)
+        message = _(
+            'Document "%(report)s" was sent to printer %(printer)s',
+            report=report.name,
+            printer=self.printer_id.name,
+        )
 
         return {
             'type': 'ir.actions.client',
@@ -234,7 +235,7 @@ class PrintnodePrintReportsUniversalWizardLine(models.TransientModel):
                         product=rec.product_id.display_name)
                 )
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals):
         # Update type of record_id field based on active_model value from context
         self._update_record_id_field()

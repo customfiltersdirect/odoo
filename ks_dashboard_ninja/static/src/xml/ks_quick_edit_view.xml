@@ -1,6 +1,6 @@
-<templates>
+<templates xml:space="preserve">
 
-    <t t-name="ksQuickEditViewOption">
+    <t t-name="ksQuickEditViewOption" >
         <div>
             <div class="ks_item_field_info">
             </div>

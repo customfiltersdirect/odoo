@@ -38,9 +38,57 @@ class TestPrintNodeAccount(TestPrintNodeCommon):
     def setUp(self):
         super(TestPrintNodeAccount, self).setUp()
 
+        self.computer_2 = self.env['printnode.computer'].create({
+            'name': 'VENTORTECH-DEV',
+            # 'printnode_id': 413,
+            'status': 'disconnected',
+            'account_id': self.account.id,
+        })
+
+        self.printer_2 = self.env['printnode.printer'].create({
+            'name': 'PDF',
+            # 'printnode_id': 710,
+            'status': 'online',
+            'computer_id': self.computer_2.id,
+        })
+
+        self.printer_bin_2 = self.env['printnode.printer.bin'].create({
+            'name': 'Test Bin #2',
+            'printer_id': self.printer_2.id,
+        })
+
         self.printer_job = self.env['printnode.printjob'].create({
             'printer_id': self.printer.id,
             'description': 'Test print',
+        })
+
+        self.printer_job_2 = self.env['printnode.printjob'].create({
+            'printer_id': self.printer_2.id,
+            'description': 'Test print #2',
+        })
+
+        self.scales_2 = self.env['printnode.scales'].create({
+            'name': 'Local Test Scales 2',
+            'device_num': 3,
+            # 'printnode_id': 730,
+            'status': 'offline',
+            'computer_id': self.computer_2.id,
+        })
+
+        self.action_button.update({
+            'printer_id': self.printer.id,
+        })
+
+        self.user_rule.update({
+            'printer_id': self.printer.id,
+        })
+
+        self.scenario.update({
+            'printer_id': self.printer.id,
+        })
+
+        self.delivery_carrier.update({
+            'printer_id': self.printer.id,
         })
 
     def test_deactivate_printers(self):
@@ -129,19 +177,26 @@ class TestPrintNodeAccount(TestPrintNodeCommon):
             'deviceName': 'Local Test Scales 1',
         }
         self.assertNotEqual(self.scales.name, 'Local Test Scales 1')
+
+        # Update scales
         self.account._create_or_update_scales(test_scales_1, self.computer)
 
-        self.assertEqual(self.env['printnode.scales'].search([]), self.scales)
+        self.assertEqual(
+            self.env['printnode.scales'].search([
+                ('printnode_id', '=', int(test_scales_1['productId']))
+            ]),
+            self.scales
+        )
         self.assertEqual(self.scales.name, 'Local Test Scales 1')
 
+        # Create new scales
         test_scales_2 = TEST_SCALES_FROM_PRINTNODE[0]
         self.account._create_or_update_scales(test_scales_2, self.computer)
 
-        self.assertEqual(self.env['printnode.scales'].search_count([]), 2)
-        self.assertEqual(self.scales.name, 'Local Test Scales 1')
+        self.assertEqual(self.env['printnode.scales'].search_count([]), 3)
         self.assertEqual(
             self.env['printnode.scales'].search([
-                ('printnode_id', '=', test_scales_2['productId']),
+                ('device_num', '=', int(test_scales_2['deviceNum'])),
             ]).name,
             'Local Test Scales 2'
         )
@@ -230,28 +285,36 @@ class TestPrintNodeAccount(TestPrintNodeCommon):
         Should be provided other tools for API testing. If the api fails - this test case won't
         determine it.
         """
-
-        self.assertFalse(self.printer.online)
-
+        self.env.company.printnode_recheck = True
         test_printers = TEST_PRINTERS_FROM_PRINTNODE
-        test_printers[0]['computer']['state'] = 'connected'
 
-        with self.cr.savepoint(), patch.object(type(self.account), '_send_printnode_request', ) \
-                as mock_account:
-            mock_account.return_value = test_printers
-            test_rechecked_printer = self.account.recheck_printer(self.printer)
-            self.assertTrue(self.printer.online)
-            self.assertTrue(test_rechecked_printer)
-            mock_account.assert_called_once()
-
-        test_printers[0]['computer']['state'] = 'disconnected'
+        # Printer status - "online"
+        # Computer status - "disconnected"
         with self.cr.savepoint(), patch.object(type(self.account), '_send_printnode_request', ) \
                 as mock_account:
             mock_account.return_value = test_printers
             test_rechecked_printer = self.account.recheck_printer(self.printer)
             self.assertFalse(self.printer.online)
             self.assertFalse(test_rechecked_printer)
-            mock_account.assert_called_once()
+
+        # Printer status - "online"
+        # Computer status - "connected"
+        test_printers[0]['computer']['state'] = 'connected'
+        with self.cr.savepoint(), patch.object(type(self.account), '_send_printnode_request', ) \
+                as mock_account:
+            mock_account.return_value = test_printers
+            test_rechecked_printer = self.account.recheck_printer(self.printer)
+            self.assertTrue(self.printer.online)
+            self.assertTrue(test_rechecked_printer)
+
+        # Printer status - "offline"
+        test_printers[0]['state'] = 'offline'
+        with self.cr.savepoint(), patch.object(type(self.account), '_send_printnode_request', ) \
+                as mock_account:
+            mock_account.return_value = test_printers
+            test_rechecked_printer = self.account.recheck_printer(self.printer)
+            self.assertFalse(self.printer.online)
+            self.assertFalse(test_rechecked_printer)
 
     def test_import_devices(self):
         """
@@ -265,19 +328,23 @@ class TestPrintNodeAccount(TestPrintNodeCommon):
         test_printers = TEST_PRINTERS_FROM_PRINTNODE
         test_scales = TEST_SCALES_FROM_PRINTNODE
 
-        self.assertEqual(self.env['printnode.computer'].search_count([]), 1)
-        self.assertEqual(self.env['printnode.printer'].search_count([]), 4)
-        self.assertEqual(self.env['printnode.scales'].search_count([]), 1)
+        self.assertEqual(self.env['printnode.computer'].search_count([]), 2)
+        self.assertEqual(self.env['printnode.printer'].search_count([]), 5)
+        self.assertEqual(self.env['printnode.scales'].search_count([]), 2)
 
         with self.cr.savepoint(), patch.object(type(self.account), '_send_printnode_request') as \
                 mock_account_send_printnode_request:
             def side_effect_send_printnode_request(uri: str):
                 if uri == 'computers':
                     return test_computers
-                elif 'computers' in uri and 'printers' in uri:
+
+                if 'computers' in uri and 'printers' in uri:
                     return test_printers
-                elif 'computer' in uri and 'scales' in uri:
+
+                if 'computer' in uri and 'scales' in uri:
                     return test_scales
+
+                return None
 
             mock_account_send_printnode_request.return_value = None
             mock_account_send_printnode_request.side_effect = side_effect_send_printnode_request
@@ -285,9 +352,68 @@ class TestPrintNodeAccount(TestPrintNodeCommon):
             self.account.import_devices()
             self.assertEqual(mock_account_send_printnode_request.call_count, 3)
 
-            self.assertEqual(self.env['printnode.computer'].search_count([]), 2)
-            self.assertEqual(self.env['printnode.printer'].search_count([]), 5)
-            self.assertEqual(self.env['printnode.scales'].search_count([]), 2)
+            self.assertEqual(self.env['printnode.computer'].search_count([]), 3)
+            self.assertEqual(self.env['printnode.printer'].search_count([]), 6)
+            self.assertEqual(self.env['printnode.scales'].search_count([]), 3)
+
+    def test_clear_devices_from_odoo(self):
+        """
+        Test to check deleting of devices from Odoo which
+        not presented in the Printnode Account
+        """
+
+        # Set Up
+        self.computer_2.update({
+            'printnode_id': 413,
+        })
+        self.printer_2.update({
+            'printnode_id': 710,
+        })
+        self.scales_2.update({
+            'printnode_id': 730,
+        })
+
+        # The number of the following entities will decrease
+        self.assertEqual(self.env['printnode.computer'].search_count([]), 2)
+        self.assertEqual(self.env['printnode.printer'].search_count([]), 5)
+        self.assertEqual(self.env['printnode.printer.bin'].search_count([]), 2)
+        self.assertEqual(self.env['printnode.printjob'].search_count([]), 2)
+        self.assertEqual(self.env['printnode.scales'].search_count([]), 2)
+        self.assertEqual(self.env['printnode.rule'].search_count([]), 1)
+
+        # The state of the "printer_id" field of the following entities will change
+        self.assertEqual(self.action_button.printer_id, self.printer)
+        self.assertEqual(self.scenario.printer_id, self.printer)
+        self.assertEqual(self.delivery_carrier.printer_id, self.printer)
+
+        mock_import_devices = \
+            self._create_patch_object(type(self.account), 'import_devices')
+        mock_import_devices.return_value = None
+
+        with self.cr.savepoint(), patch.object(type(self.account), '_send_printnode_request') as \
+                mock_send_printnode_request:
+            def side_effect_send_printnode_request(uri: str):
+                if uri == 'computers':
+                    return TEST_COMPUTERS_FROM_PRINTNODE
+
+                return TEST_PRINTERS_FROM_PRINTNODE
+
+            mock_send_printnode_request.side_effect = side_effect_send_printnode_request
+
+            # Clear devices
+            self.account.clear_devices_from_odoo()
+
+            self.assertEqual(self.env['printnode.computer'].search_count([]), 1)
+            self.assertEqual(self.env['printnode.printer'].search_count([]), 1)
+            self.assertEqual(self.env['printnode.printer.bin'].search_count([]), 1)
+            self.assertEqual(self.env['printnode.printjob'].search_count([]), 1)
+            self.assertEqual(self.env['printnode.scales'].search_count([]), 1)
+            self.assertEqual(self.env['printnode.rule'].search_count([]), 0)
+
+            self.assertFalse(self.action_button.printer_id)
+            self.assertFalse(self.delivery_carrier.printer_id)
+            self.assertFalse(self.scenario.printer_id)
+            mock_import_devices.assert_called_once()
 
     def test_account_write(self):
         """
@@ -343,7 +469,7 @@ class TestPrintNodeAccount(TestPrintNodeCommon):
         """
 
         # Check _send_dpc_request() with wrong params
-        # Expected UserError
+        # Expected ValueError
         with self.assertRaises(ValueError):
             self.account._send_dpc_request('DEL', 'something')
 
@@ -415,7 +541,7 @@ class TestPrintNodeAccount(TestPrintNodeCommon):
             self.assertEqual(limits, 5)
             mock_send_dpc_request.assert_called_once_with(
                 'GET',
-                'api-keys/{}'.format(self.account.api_key))
+                f'api-keys/{self.account.api_key}')
 
         # Check _get_limits_dpc with response status_code - 404
         # Expected: printed-0, limits-0
@@ -430,7 +556,7 @@ class TestPrintNodeAccount(TestPrintNodeCommon):
 
             mock_send_dpc_request.assert_called_once_with(
                 'GET',
-                'api-keys/{}'.format(self.account.api_key))
+                f'api-keys/{self.account.api_key}')
 
     def test_get_limits_printnode(self):
         """

@@ -26,7 +26,7 @@
             <field name="model">printnode.computer</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree string="Computers" editable="bottom" create="false" edit="false" delete="false">
+                <tree string="Computers" editable="bottom" create="false" edit="false" delete="true">
                     <field name="printnode_id" />
                     <field name="name" />
                     <field name="status" />

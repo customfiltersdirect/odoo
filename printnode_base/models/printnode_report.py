@@ -29,6 +29,18 @@ class PrintNodeReportPolicy(models.Model):
         readonly=True,
     )
 
+    printer_id = fields.Many2one(
+        'printnode.printer',
+        string='Printer',
+        ondelete='set null',
+    )
+
+    printer_bin = fields.Many2one(
+        'printnode.printer.bin',
+        string='Printer Bin',
+        domain='[("printer_id", "=", printer_id)]',
+    )
+
     report_paper_id = fields.Many2one(
         'printnode.paper',
         string='Report Paper'
@@ -61,7 +73,7 @@ class PrintNodeReportPolicy(models.Model):
     def _compute_print_rules(self):
 
         def _html(message, icon='fa fa-question-circle-o'):
-            return '<span class="{}" title="{}"></span>'.format(icon, message)
+            return f'<span class="{icon}" title="{message}"></span>'
 
         def _ok(message):
             return False, _html(message, 'fa fa-circle-o')
@@ -78,6 +90,8 @@ class PrintNodeReportPolicy(models.Model):
                 ('report_id', '=', report.report_id.id)
             ]).mapped('printer_id')
 
+            printers |= report.printer_id
+
             errors = list(set(filter(None, [
                 printer.printnode_check_report(report.report_id, False)
                 for printer in printers
@@ -87,3 +101,11 @@ class PrintNodeReportPolicy(models.Model):
                 report.error, report.notes = _error('\n'.join(errors))
             else:
                 report.error, report.notes = _ok(_('Configuration is valid.'))
+
+    @api.onchange('printer_id')
+    def _onchange_printer(self):
+        """
+        Reset printer_bin field to avoid bug with printing
+        in wrong bin
+        """
+        self.printer_bin = self.printer_id.default_printer_bin.id

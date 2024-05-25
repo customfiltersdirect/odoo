@@ -10,4 +10,4 @@ class PrintNodeMixin(models.AbstractModel):
     _name = 'printnode.mixin'
     _description = 'Abstract PrintNode mixin'
 
-    printnode_printed = fields.Boolean(default=False)
+    printnode_printed = fields.Boolean(default=False, copy=False)

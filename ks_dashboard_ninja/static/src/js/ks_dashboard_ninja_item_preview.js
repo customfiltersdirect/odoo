@@ -1,29 +1,26 @@
-odoo.define('ks_dashboard_ninja_list.ks_dashboard_item_preview', function(require) {
-    "use strict";
+/** @odoo-module */
 
-    var registry = require('web.field_registry');
-    var AbstractField = require('web.AbstractField');
-    var core = require('web.core');
-    var field_utils = require('web.field_utils');
-    var session = require('web.session');
-    var utils = require('web.utils');
+import { formatDate, parseDateTime } from "@web/core/l10n/dates";
+import { CharField } from "@web/views/fields/char/char_field";
+import { registry } from "@web/core/registry";
+import field_utils from 'web.field_utils';
+import { qweb } from 'web.core';
+import utils from 'web.utils';
+import session from 'web.session';
 
-    var QWeb = core.qweb;
+const { useEffect, useRef, xml, onWillUpdateProps} = owl;
 
-    var KsItemPreview = AbstractField.extend({
+class KsItemPreview extends CharField {
 
-        supportedFieldTypes: ['integer'],
-        resetOnAnyFieldChange: true,
-
-        file_type_magic_word: {
+        file_type_magic_word= {
             '/': 'jpg',
             'R': 'gif',
             'i': 'png',
             'P': 'svg+xml',
-        },
+        }
 
         //        Number Formatter into shorthand function
-        ksNumFormatter: function(num, digits) {
+        ksNumFormatter(num, digits) {
             var negative;
             var si = [{
                     value: 1,
@@ -70,9 +67,9 @@ odoo.define('ks_dashboard_ninja_list.ks_dashboard_item_preview', function(requir
             } else {
                 return (num / si[i].value).toFixed(digits).replace(rx, "$1") + si[i].symbol;
             }
-        },
+        }
 
-        ksNumColombianFormatter: function(num, digits, ks_precision_digits) {
+        ksNumColombianFormatter(num, digits, ks_precision_digits) {
             var negative;
             var si = [{
                     value: 1,
@@ -137,10 +134,10 @@ odoo.define('ks_dashboard_ninja_list.ks_dashboard_item_preview', function(requir
                     }
                 }
 
-        },
+        }
 
 //        Indian format shorthand function
-        ksNumIndianFormatter: function(num, digits) {
+        ksNumIndianFormatter(num, digits) {
             var negative;
             var si = [{
                 value: 1,
@@ -180,25 +177,46 @@ odoo.define('ks_dashboard_ninja_list.ks_dashboard_item_preview', function(requir
                 return (num / si[i].value).toFixed(digits).replace(rx, "$1") + si[i].symbol;
             }
 
-        },
+        }
 
-        ks_get_dark_color: function(color, opacity, percent) { // deprecated. See below.
+        ks_get_dark_color(color, opacity, percent) { // deprecated. See below.
             var num = parseInt(color.slice(1), 16),
                 amt = Math.round(2.55 * percent),
                 R = (num >> 16) + amt,
                 G = (num >> 8 & 0x00FF) + amt,
                 B = (num & 0x0000FF) + amt;
             return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 + (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 + (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1) + "," + opacity;
-        },
+        }
+        setup() {
+        super.setup();
+        const self = this;
+        const inputRef = useRef("input");
+        useEffect(
+            (input) => {
+                if (input) {
+                    self.tile_render();
+                }
+            },
+            () => [inputRef.el]
 
-        _render: function() {
+        );
+        onWillUpdateProps(this.onWillUpdateProps);
+
+    }
+    onWillUpdateProps(){
+        this.tile_render()
+    }
+
+        tile_render() {
             var self = this;
-            var field = self.recordData;
+            var field = self.props.record.data;
             var $val;
             var item_info;
+            $(this.input.el.parentElement).find('div').remove()
+            $(this.input.el.parentElement).find('input').addClass('d-none')
             var ks_rgba_background_color, ks_rgba_font_color, ks_rgba_icon_color;
-            self.$el.empty();
             ks_rgba_background_color = self._get_rgba_format(field.ks_background_color)
+
             ks_rgba_font_color = self._get_rgba_format(field.ks_font_color)
             ks_rgba_icon_color = self._get_rgba_format(field.ks_default_icon_color)
             item_info = {
@@ -215,21 +233,21 @@ odoo.define('ks_dashboard_ninja_list.ks_dashboard_item_preview', function(requir
 
                 if (!utils.is_bin_size(field.ks_icon)) {
                     // Use magic-word technique for detecting image type
-                    item_info['img_src'] = 'data:image/' + (self.file_type_magic_word[field.ks_icon[0]] || 'png') + ';base64,' + field.ks_icon;
+                    item_info['img_src'] = 'data:image/' + (self.file_type_magic_word[field.ks_icon] || 'png') + ';base64,' + field.ks_icon;
                 } else {
                     item_info['img_src'] = session.url('/web/image', {
-                        model: self.model,
-                        id: JSON.stringify(self.res_id),
+                        model: self.env.model.root.resModel,
+                        id: JSON.stringify(this.props.record.data.id),
                         field: "ks_icon",
                         // unique forces a reload of the image when the record has been updated
-                        unique: field_utils.format.datetime(self.recordData.__last_update).replace(/[^0-9]/g, ''),
+                        unique: String(this.props.record.data.__last_update.ts),
                     });
                 }
 
             }
             if (!field.name) {
                 if (field.ks_model_name) {
-                    item_info['name'] = field.ks_model_id.data.display_name;
+                    item_info['name'] = field.ks_model_id[1];
                 } else {
                     item_info['name'] = "Name";
                 }
@@ -247,7 +265,7 @@ odoo.define('ks_dashboard_ninja_list.ks_dashboard_item_preview', function(requir
 
             switch (field.ks_layout) {
                 case 'layout1':
-                    $val = $(QWeb.render('ks_db_list_preview_layout1', item_info));
+                    $val = $(qweb.render('ks_db_list_preview_layout1', item_info));
                     $val.css({
                         "background-color": ks_rgba_background_color,
                         "color": ks_rgba_font_color
@@ -255,7 +273,7 @@ odoo.define('ks_dashboard_ninja_list.ks_dashboard_item_preview', function(requir
                     break;
 
                 case 'layout2':
-                    $val = $(QWeb.render('ks_db_list_preview_layout2', item_info));
+                    $val = $(qweb.render('ks_db_list_preview_layout2', item_info));
                     var ks_rgba_dark_background_color_l2 = self._get_rgba_format(self.ks_get_dark_color(field.ks_background_color.split(',')[0], field.ks_background_color.split(',')[1], -10));
                     $val.find('.ks_dashboard_icon_l2').css({
                         "background-color": ks_rgba_dark_background_color_l2,
@@ -267,7 +285,7 @@ odoo.define('ks_dashboard_ninja_list.ks_dashboard_item_preview', function(requir
                     break;
 
                 case 'layout3':
-                    $val = $(QWeb.render('ks_db_list_preview_layout3', item_info));
+                    $val = $(qweb.render('ks_db_list_preview_layout3', item_info));
                     $val.css({
                         "background-color": ks_rgba_background_color,
                         "color": ks_rgba_font_color
@@ -275,7 +293,7 @@ odoo.define('ks_dashboard_ninja_list.ks_dashboard_item_preview', function(requir
                     break;
 
                 case 'layout4':
-                    $val = $(QWeb.render('ks_db_list_preview_layout4', item_info));
+                    $val = $(qweb.render('ks_db_list_preview_layout4', item_info));
                     $val.find('.ks_dashboard_icon_l4').css({
                         "background-color": ks_rgba_background_color,
                     });
@@ -292,7 +310,7 @@ odoo.define('ks_dashboard_ninja_list.ks_dashboard_item_preview', function(requir
                     break;
 
                 case 'layout5':
-                    $val = $(QWeb.render('ks_db_list_preview_layout5', item_info));
+                    $val = $(qweb.render('ks_db_list_preview_layout5', item_info));
                     $val.css({
                         "background-color": ks_rgba_background_color,
                         "color": ks_rgba_font_color
@@ -301,7 +319,7 @@ odoo.define('ks_dashboard_ninja_list.ks_dashboard_item_preview', function(requir
 
                 case 'layout6':
                     //                        item_info['icon_color'] = self._get_rgba_format(self.ks_get_dark_color(field.ks_background_color.split(',')[0],field.ks_background_color.split(',')[1],-10));
-                    $val = $(QWeb.render('ks_db_list_preview_layout6', item_info));
+                    $val = $(qweb.render('ks_db_list_preview_layout6', item_info));
                     $val.css({
                         "background-color": ks_rgba_background_color,
                         "color": ks_rgba_font_color
@@ -310,16 +328,16 @@ odoo.define('ks_dashboard_ninja_list.ks_dashboard_item_preview', function(requir
                     break;
 
                 default:
-                    $val = $(QWeb.render('ks_db_list_preview'));
+                    $val = $(qweb.render('ks_db_list_preview'));
                     break;
 
             }
 
-            self.$el.append($val);
-            self.$el.append(QWeb.render('ks_db_item_preview_footer_note'));
-        },
+            $(this.input.el.parentElement).append($val);
+            $(this.input.el.parentElement).append(qweb.render('ks_db_item_preview_footer_note'));
+        }
 
-        _onKsGlobalFormatter: function(ks_record_count, ks_data_format, ks_precision_digits){
+        _onKsGlobalFormatter(ks_record_count, ks_data_format, ks_precision_digits){
             var self = this;
             if (ks_data_format == 'exact'){
 //                return ks_record_count;
@@ -333,24 +351,12 @@ odoo.define('ks_dashboard_ninja_list.ks_dashboard_item_preview', function(requir
                     return self.ksNumFormatter(ks_record_count, 1);
                 }
             }
-        },
-
-        _renderReadonly: function($val) {
-            var self = this;
-            var ks_icon_url;
-            this._rpc({
-                model: 'ks_dashboard_ninja.item',
-                method: 'ks_set_preview_image',
-                args: [self.res_id],
-            }).then(function(data) {
-                ks_icon_url = 'data:image/' + (self.file_type_magic_word[data[0]] || 'png') + ';base64,' + data;
-                $val.find('.ks_db_list_image').attr('src', ks_icon_url)
-                self.$el.append($val)
-            });
-        },
+        }
 
 
-        _get_rgba_format: function(val) {
+
+
+        _get_rgba_format(val) {
             var rgba = val.split(',')[0].match(/[A-Za-z0-9]{2}/g);
             rgba = rgba.map(function(v) {
                 return parseInt(v, 16)
@@ -359,11 +365,9 @@ odoo.define('ks_dashboard_ninja_list.ks_dashboard_item_preview', function(requir
         }
 
 
-    });
-    registry.add('ks_dashboard_item_preview', KsItemPreview);
+ }
+ registry.category("fields").add('ks_dashboard_item_preview_owl', KsItemPreview);
 
     return {
         KsItemPreview: KsItemPreview
-    };
-
-});
+    }

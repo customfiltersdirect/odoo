@@ -11,8 +11,7 @@ class KsDashboardNInjaImport(models.TransientModel):
     _description = 'Import Dashboard'
 
     ks_import_dashboard = fields.Binary(string="Upload Dashboard", attachment=True)
-    ks_top_menu_id = fields.Many2one('ir.ui.menu', string="Show Under Menu",
-                                     domain="['|',('action','=',False),('parent_id','=',False)]",
+    ks_top_menu_id = fields.Many2one('ir.ui.menu', string="Show Under Menu", domain="[('parent_id','=',False)]",
                                      required=True,
                                      default=lambda self: self.env['ir.ui.menu'].search(
                                          [('name', '=', 'My Dashboard')]))

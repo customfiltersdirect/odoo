@@ -8,6 +8,8 @@ class Base(models.AbstractModel):
     _inherit = 'base'
 
     def run_printnode_universal_wizard(self):
+        """ Returns action window with 'Print Attachments Wizard'
+        """
         return {
             'type': 'ir.actions.act_window',
             'name': _('Print Attachments Wizard'),
@@ -19,6 +21,8 @@ class Base(models.AbstractModel):
         }
 
     def run_printnode_print_reports_universal_wizard(self):
+        """ Returns action window with 'Print Reports Wizard'
+        """
         return {
             'type': 'ir.actions.act_window',
             'name': _('Print Reports Wizard'),

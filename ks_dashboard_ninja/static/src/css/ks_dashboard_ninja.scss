@@ -507,6 +507,17 @@ ul.nav li.dropdown:hover ul.dropdown-menu{ display: block; }
 #ks_dashboard_title{
     padding-left: 1rem !important;
 }
+#ks_dashboard_title{
+    position: absolute;
+    left: 60px !important;
+}
+
+.ks_preview_item {
+    width: calc(50% - 30px);
+    position: fixed;
+    margin-left:53%;
+    margin-top:3%;
+}
 
 
 .ks_dashboard_ninja_toggle_menu{
@@ -630,13 +641,27 @@ ul.nav li.dropdown:hover ul.dropdown-menu{ display: block; }
         z-index: 11
     }
 }
-
-.grid-stack-item[gs-w="3"] {
-    .ks_dashboard_item_chart_info, .ks_dashboard_item_action,
-    .ks_dashboard_quick_edit_action_popup,
-    .ks_dashboard_item_customize,
-    .ks_dashboard_item_delete{
-        padding-left: 5px;
-        padding-right: 5px;
+@media (max-width: 575px){
+    #ks_date_filter_selection{
+        display:none;
     }
+}
+@media (max-width: 575px){
+    #play_button{
+        display:none;
+    }
+}
+@media (max-width: 575px){
+    #print_dashboard{
+        display:none;
+    }
+}
+
+
+.ks_dashboard_quick_edit_action .ks_qe_form_view .o_field_translate.btn.btn-link {
+    display: none;
+}
+
+.ks_import_dashboard_d_none .btn.btn-secondary.fa.fa-download {
+    display:none;
 }

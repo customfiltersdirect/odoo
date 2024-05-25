@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="printnode_logging_tree_view" model="ir.ui.view">
+            <field name="name">printnode_logging_tree_view</field>
+            <field name="model">ir.logging</field>
+            <field name="inherit_id" ref="base.ir_logging_tree_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree" position="attributes">
+                    <attribute name="create">false</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="printnode_logging_action" model="ir.actions.act_window">
+            <field name="name">PrintNode Logs</field>
+            <field name="res_model">ir.logging</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="printnode_base.printnode_logging_tree_view" />
+            <field name="domain">[('name', 'like', 'printnode_base.')]</field>
+        </record>
+
+        <menuitem id="menu_printnode_logging"
+                  name="Logs"
+                  parent="menu_printnode_service"
+                  action="printnode_logging_action"
+                  sequence="65"
+                  groups="base.group_no_one"
+        />
+
+    </data>
+</odoo>

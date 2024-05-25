@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="lot_label_layout_form_picking" model="ir.ui.view">
+        <field name="name">lot.label.layout.form</field>
+        <field name="model">lot.label.layout</field>
+        <field name="inherit_id" ref="stock.lot_label_layout_form_picking"/>
+        <field name="arch" type="xml">
+            <xpath expr="//footer" position="before">
+                <group>
+                    <group>
+                        <field name="is_dpc_enabled" invisible="1" />
+                        <field name="printer_id" invisible="is_dpc_enabled == False"/>
+                        <field name="printer_bin" invisible="is_dpc_enabled == False"/>
+                        <field name="status" invisible="1"/>
+                    </group>
+                    <group>
+                         <span class="text-danger" invisible="status != 'offline'">
+                            Printer is not available. Please, choose another printer.
+                        </span>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

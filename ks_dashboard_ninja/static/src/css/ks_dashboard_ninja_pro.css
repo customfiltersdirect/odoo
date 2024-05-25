@@ -197,7 +197,7 @@ table#ksListViewTable {
 
 
 .ks_date_filters_menu_drop_down {
-    max-height: 300px !important;
+    max-height: 270px !important;
     overflow: auto !important;
     background-clip:unset;
 }

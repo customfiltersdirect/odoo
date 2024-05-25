@@ -227,7 +227,7 @@ class TestPrintNodeScenario(TestPrintNodeCommon):
         self.assertTrue('UserError' in err.exception.args[0])
 
         # Expect return False
-        self.assertFalse(self.sale_order.with_context(from_cron=True).print_scenarios(
+        self.assertFalse(self.sale_order.with_context(printnode_from_cron=True).print_scenarios(
             'print_something',
         ))
 

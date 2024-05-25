@@ -9,6 +9,8 @@ class AccountMove(models.Model):
     _inherit = ['account.move', 'printnode.mixin', 'printnode.scenario.mixin']
 
     def action_post(self):
+        """ Overriding the default method to add custom logic with print scenarios for account moves
+        """
         res = super(AccountMove, self).action_post()
 
         # action_post method do not return anything. So in case no error was raised,
