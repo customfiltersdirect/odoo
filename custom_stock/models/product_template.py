@@ -12,6 +12,4 @@ class ProductTemplate(models.Model):
     @api.depends('qty_available')
     def _compute_quantity_cy(self):
         for rec in self:
-            rec.write({
-                'qty_available_cy': rec.qty_available
-            })
+            rec.write({'qty_available_cy': rec.qty_available})

@@ -4,6 +4,7 @@
 from odoo import models, api, _
 from odoo.exceptions import UserError
 from odoo.osv import expression
+from odoo.tools.safe_eval import safe_eval
 
 SECURITY_GROUP = 'printnode_base.printnode_security_group_user'
 
@@ -11,15 +12,18 @@ SECURITY_GROUP = 'printnode_base.printnode_security_group_user'
 class ChooseDeliveryPackage(models.TransientModel):
     _inherit = 'choose.delivery.package'
 
-    @api.model
-    def default_get(self, fields_list):
-        defaults = super().default_get(fields_list)
-        if 'shipping_weight' in fields_list:
-            measured_weight = self._measure_weight(defaults.get('picking_id'))
-            if measured_weight:
-                defaults['shipping_weight'] = measured_weight
+    @api.depends('delivery_package_type_id')
+    def _compute_shipping_weight(self):
+        """
+        Override to measure weight from scales
+        """
+        measured_weight = self._measure_weight(self.picking_id.id)
 
-        return defaults
+        if measured_weight:
+            for rec in self:
+                rec.shipping_weight = measured_weight
+        else:
+            super()._compute_shipping_weight()
 
     def _measure_weight(self, picking_id):
         # Step 1. Check if we have enabled all settings
@@ -60,5 +64,5 @@ class ChooseDeliveryPackage(models.TransientModel):
         if domain == '[]':
             return self.env['stock.picking'].browse(picking_id)
         return self.env['stock.picking'].search(
-            expression.AND([[('id', '=', picking_id)], eval(domain)])
+            expression.AND([[('id', '=', picking_id)], safe_eval(domain)])
         )

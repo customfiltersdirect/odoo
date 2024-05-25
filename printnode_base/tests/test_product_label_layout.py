@@ -28,7 +28,7 @@ class TestProductLabelLayout(TestPrintNodeCommon):
         action = prods.action_open_label_layout()
         ctx = action['context'].copy()
         ctx['active_model'] = 'product.product'
-        form_wizard = Form(self.env['product.label.layout'].with_context(ctx))
+        form_wizard = Form(self.env['product.label.layout'].with_context(**ctx))
         wiz = form_wizard.save()
         self.assertEqual(self.env.user.printnode_printer.id, wiz.printer_id.id)
         self.assertEqual(wiz.product_line_ids.mapped('product_id'), prods)
@@ -48,7 +48,7 @@ class TestProductLabelLayout(TestPrintNodeCommon):
         action = templs.action_open_label_layout()
         ctx = action['context'].copy()
         ctx['active_model'] = 'product.template'
-        form_wizard = Form(self.env['product.label.layout'].with_context(ctx))
+        form_wizard = Form(self.env['product.label.layout'].with_context(**ctx))
         wiz = form_wizard.save()
 
         self.assertEqual(self.env.user.printnode_printer.id, wiz.printer_id.id)
@@ -65,7 +65,7 @@ class TestProductLabelLayout(TestPrintNodeCommon):
 
         for i in range(1, 6):
             product = self.env['product.product'].create({
-                'name': 'product_{}'.format(i),
+                'name': f'product_{i}',
                 'type': 'product',
             })
             qty = randint(1, 5)
@@ -81,9 +81,9 @@ class TestProductLabelLayout(TestPrintNodeCommon):
         wh_out = self.sale_order.picking_ids[:1]
         action = wh_out.action_open_label_layout()
         ctx = action['context'].copy()
-        form_wizard = Form(self.env['product.label.layout'].with_context(ctx))
+        form_wizard = Form(self.env['product.label.layout'].with_context(**ctx))
         wiz = form_wizard.save()
-        self.assertEqual(wiz.picking_quantity, 'picking')
+        self.assertEqual(wiz.move_quantity, 'move')
         self.assertEqual(self.env.user.printnode_printer.id, wiz.printer_id.id)
         self.assertEqual(
             sorted(wiz.product_line_ids.mapped('product_id.id')),

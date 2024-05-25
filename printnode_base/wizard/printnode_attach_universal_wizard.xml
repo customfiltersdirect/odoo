@@ -14,7 +14,7 @@
                             <field name="date" readonly="1"/>
                             <field name="bin_data" readonly="1"/>
                             <field name="with_custom_qty" invisible="1"/>
-                            <field name="quantity" attrs="{'readonly': [('with_custom_qty', '!=', True)]}"/>
+                            <field name="quantity" readonly="with_custom_qty != True"/>
                         </tree>
                     </field>
                 </group>
@@ -23,7 +23,7 @@
                     <field name="with_custom_qty" />
                 </group>
 
-                <group attrs="{'invisible': [('with_custom_qty', '=', True)]}">
+                <group invisible="with_custom_qty == True">
                     <field name="number_copy" required="1"/>
                 </group>
 

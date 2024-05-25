@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="printnode_workstation_tree" model="ir.ui.view">
+            <field name="name">printnode_workstation.tree</field>
+            <field name="model">printnode.workstation</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Workstations" editable="bottom">
+                    <field name="name" />
+                    <field name="printer_id" options="{'no_create': True}" />
+                    <field name="label_printer_id" options="{'no_create': True}" />
+                    <field name="scales_id" options="{'no_create': True}" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="printnode_workstation_action" model="ir.actions.act_window">
+            <field name="name">Workstations</field>
+            <field name="res_model">printnode.workstation</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="printnode_workstation_tree" />
+        </record>
+
+        <menuitem id="menu_printnode_workstations"
+                  name="Workstations"
+                  parent="menu_printnode_service"
+                  sequence="38"
+                  action="printnode_workstation_action"
+                  groups="printnode_security_group_user"
+        />
+    </data>
+</odoo>

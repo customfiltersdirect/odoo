@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="printnode_log_type_action_buttons" model="printnode.log.type">
+            <field name="name">ACTION BUTTONS</field>
+        </record>
+        <record id="printnode_log_type_reports" model="printnode.log.type">
+            <field name="name">REPORTS</field>
+        </record>
+        <record id="printnode_log_type_requests" model="printnode.log.type">
+            <field name="name">REQUESTS</field>
+        </record>
+        <record id="printnode_log_type_scenarios" model="printnode.log.type">
+            <field name="name">SCENARIOS</field>
+        </record>
+
+    </data>
+</odoo>

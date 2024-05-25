@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <template id="report_reception_report_label_mrp_inherit" inherit_id="mrp.report_reception_report_label_mrp">
+    <template id="report_reception_report_label_inherit" inherit_id="stock.report_reception_report_label">
 
         <xpath expr="//div[@class='page']" position="replace">
 

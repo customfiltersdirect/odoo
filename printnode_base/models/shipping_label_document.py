@@ -34,4 +34,6 @@ class ShippingLabelDocument(models.Model):
     )
 
     def print_label_with_package_via_printnode(self):
+        """ Print Shipping Labels with package via the printnode service
+        """
         self.shipping_id.with_context(label=self).print_via_printnode()

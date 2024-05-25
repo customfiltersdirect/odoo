@@ -24,7 +24,7 @@ odoo.define('ks_dashboard_ninja.quick_edit_view', function(require) {
 
             this.ksOriginalItemData = $.extend({}, options.item);
             this.item = options.item;
-            this.item_name = options.item.name;
+            this.item_name = options.item ? options.item.name:false;
 
         },
 
@@ -162,7 +162,6 @@ odoo.define('ks_dashboard_ninja.quick_edit_view', function(require) {
             this._super();
         },
     });
-
 
     return {
         QuickEditView: QuickEditView,

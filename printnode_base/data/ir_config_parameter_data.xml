@@ -17,5 +17,11 @@
             <field name="value">https://print.api.ventor.tech</field>
         </record>
 
+        <!-- Printjob content urls lifespan in minutes -->
+        <record model="ir.config_parameter" id="printjob_content_url_lifespan">
+            <field name="key">printnode_base.printjob_content_url_lifespan</field>
+            <field name="value">10</field>
+        </record>
+
     </data>
 </odoo>

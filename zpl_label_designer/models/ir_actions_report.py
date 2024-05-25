@@ -5,14 +5,14 @@ class IrActionsReport(models.Model):
     _inherit = 'ir.actions.report'
 
     @api.model
-    def _render_qweb_text(self, docids, data=None):
+    def _render_qweb_text(self, report_ref, docids, data=None):
         """
         :rtype: bytes
         """
         if data and data.get('is_zld_product_label', False):
             docids = self._get_docids_for_zld_product_label(data)
 
-        return super()._render_qweb_text(docids, data)
+        return super()._render_qweb_text(report_ref, docids, data)
 
     def _get_docids_for_zld_product_label(self, data):
         """

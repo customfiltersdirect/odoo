@@ -4,12 +4,16 @@
 from odoo import models, fields, api, _
 from odoo.osv import expression
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools.safe_eval import safe_eval
+
+from .constants import Constants
 
 
 class PrintNodeActionButton(models.Model):
     """ Call Button
     """
     _name = 'printnode.action.button'
+    _inherit = 'printnode.logger.mixin'
     _description = 'PrintNode Action Button'
 
     _rec_name = 'report_id'
@@ -118,7 +122,13 @@ class PrintNodeActionButton(models.Model):
         if self.domain == '[]':
             return related_model.browse(ids_list)
         return related_model.search(
-            expression.AND([[('id', 'in', ids_list)], eval(self.domain)])
+            expression.AND([
+                [
+                    ('id', 'in', ids_list),
+                    # TODO: Perhaps we need to add this ('printnode_printed', '=', False),
+                ],
+                safe_eval(self.domain),
+            ])
         )
 
     def _get_action_printer(self):
@@ -138,6 +148,8 @@ class PrintNodeActionButton(models.Model):
         return printer, printer_bin
 
     def edit_domain(self):
+        """ Returns action window with 'Domain Editor'
+        """
         domain_editor = self.env.ref(
             'printnode_base.printnode_domain_editor',
             raise_if_not_found=False,
@@ -152,3 +164,49 @@ class PrintNodeActionButton(models.Model):
             'target': 'self',
         }
         return action
+
+    def _get_post_pre_action_button_ids(self, model, method):
+        """ Returns action button ids (pre_ & post_)
+        """
+        actions = self.env[self._name].sudo().search([
+            ('model_id.model', '=', model),
+            ('method_id.method', '=', method),
+            ('report_id', '!=', False),
+        ])
+        post_ids, pre_ids = [], []
+
+        for action in actions:
+            if action.preprint:
+                pre_ids.append(action.id)
+                action.printnode_logger(
+                    Constants.ACTION_BUTTONS_LOG_TYPE,
+                    f"Printing will occur before the {action} action is executed")
+            else:
+                post_ids.append(action.id)
+
+        return post_ids, pre_ids
+
+    def print_reports(self, action_object_ids):
+        """ Print reports for action buttons
+        """
+        for action in self:
+            action.printnode_logger(Constants.ACTION_BUTTONS_LOG_TYPE, f'Action button: {action}')
+            objects = action._get_model_objects(action_object_ids)
+            if not objects:
+                continue
+
+            action.printnode_logger(
+                Constants.ACTION_BUTTONS_LOG_TYPE,
+                f'Model objects to printing: {objects}')
+
+            printer, printer_bin = action._get_action_printer()
+            action.printnode_logger(Constants.ACTION_BUTTONS_LOG_TYPE,
+                                    f'Printer defined: {printer}')
+
+            options = {'bin': printer_bin.name} if printer_bin else {}
+            printer.printnode_print(
+                action.report_id,
+                objects,
+                copies=action.number_of_copies,
+                options=options,
+            )

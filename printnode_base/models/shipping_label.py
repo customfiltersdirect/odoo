@@ -88,6 +88,8 @@ class ShippingLabel(models.Model):
         return attachment_list
 
     def print_via_printnode(self):
+        """ Print Shipping Labels via the printnode service
+        """
         user = self.env.user
 
         for shipping_label in self:

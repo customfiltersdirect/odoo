@@ -8,12 +8,14 @@
     position: relative;
     display: flex;
     align-items: center;
+    margin-right:14px;
 }
 .ks_date_apply_clear_print,.ks_dashboard_top_menu{
     display: flex;
     align-items: center;
     justify-content: flex-end;
     flex-wrap: wrap;
+    margin-top:-6px;
 }
 i.ks-options-plus {
     color: white;

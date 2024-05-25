@@ -11,6 +11,8 @@
                     <field name="report_id" options="{'no_create': True}" />
                     <field name="report_model" />
                     <field name="report_type" />
+                    <field name="printer_id" options="{'no_create': True}" />
+                    <field name="printer_bin" options="{'no_create': True}" />
                     <field name="report_paper_id" />
                     <field name="exclude_from_auto_printing" />
                     <field name="error" invisible="1" />

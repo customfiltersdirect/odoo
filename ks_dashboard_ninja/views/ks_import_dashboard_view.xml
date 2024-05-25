@@ -5,7 +5,7 @@
             <field name="name">ks_dashboard_ninja.import form</field>
             <field name="model">ks_dashboard_ninja.import</field>
             <field name="arch" type="xml">
-                 <form string="Import Dashboard">
+                 <form string="Import Dashboard" class="ks_import_dashboard_d_none">
                 <group>
                     <group>
                         <field name="ks_import_dashboard" string="Upload Dashboard Json" required="1"/>

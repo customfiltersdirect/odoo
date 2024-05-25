@@ -66,7 +66,7 @@ class PrintNodeRule(models.Model):
     def _compute_print_rules(self):
 
         def _html(message, icon='fa fa-question-circle-o'):
-            return '<span class="{}" title="{}"></span>'.format(icon, message)
+            return f'<span class="{icon}" title="{message}"></span>'
 
         def _ok(message):
             return False, _html(message, 'fa fa-circle-o')

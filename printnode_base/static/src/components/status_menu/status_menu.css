@@ -1,0 +1,19 @@
+.o-printnode_base-StatusMenu {
+    width: 500px;
+}
+
+.DirectPrintStatusMenu_badge {
+    position: relative;
+    transform: translate(-5px, -5px);
+    background-color: #017e84;
+    margin-right: -10px;
+}
+
+.DirectPrintStatusMenu_loading {
+    width: 100%;
+    text-align: center;
+}
+
+.DirectPrintStatusMenu_rate_us {
+    text-align: right;
+}

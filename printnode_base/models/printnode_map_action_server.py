@@ -88,9 +88,12 @@ class PrintnodeMapActionServer(models.Model):
                     _("No reports found for this model!")
                 )
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals):
         rec = super(PrintnodeMapActionServer, self).create(vals)
+
+        if not rec:
+            return rec
 
         action_server = self.env['ir.actions.server'].sudo().create({
             'state': 'code',

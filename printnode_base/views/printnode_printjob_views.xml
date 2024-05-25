@@ -13,6 +13,7 @@
                         <field name="description" />
                         <field name="printer_id" />
                         <field name="printnode_id" />
+                        <field name="attachment_id" />
                     </group>
                 </form>
             </field>
@@ -28,6 +29,7 @@
                     <field name="description" />
                     <field name="printer_id" />
                     <field name="printnode_id" />
+                    <field name="attachment_id" />
                 </tree>
             </field>
         </record>

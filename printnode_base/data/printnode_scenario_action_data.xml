@@ -70,28 +70,28 @@
             <field name="name">Print single lot labels on Transfer (after validation)</field>
             <field name="code">print_single_lot_labels_on_transfer_after_validation</field>
             <field name="model_id" eval="ref('stock.model_stock_picking')"/>
-            <field name="reports_model_id" eval="ref('stock.model_stock_production_lot')"/>
+            <field name="reports_model_id" eval="ref('stock.model_stock_lot')"/>
         </record>
 
         <record id="print_multiple_lot_labels_on_transfer_after_validation" model="printnode.scenario.action">
             <field name="name">Print multiple lot labels on Transfer (after validation)</field>
             <field name="code">print_multiple_lot_labels_on_transfer_after_validation</field>
             <field name="model_id" eval="ref('stock.model_stock_picking')"/>
-            <field name="reports_model_id" eval="ref('stock.model_stock_production_lot')"/>
+            <field name="reports_model_id" eval="ref('stock.model_stock_lot')"/>
         </record>
 
         <record id="print_single_lot_label_on_transfer" model="printnode.scenario.action">
             <field name="name">Print single lot label on Transfer (real time)</field>
             <field name="code">print_single_lot_label_on_transfer</field>
             <field name="model_id" eval="ref('stock.model_stock_picking')"/>
-            <field name="reports_model_id" eval="ref('stock.model_stock_production_lot')"/>
+            <field name="reports_model_id" eval="ref('stock.model_stock_lot')"/>
         </record>
 
         <record id="print_multiple_lot_labels_on_transfer" model="printnode.scenario.action">
             <field name="name">Print multiple lot labels on Transfer (real time)</field>
             <field name="code">print_multiple_lot_labels_on_transfer</field>
             <field name="model_id" eval="ref('stock.model_stock_picking')"/>
-            <field name="reports_model_id" eval="ref('stock.model_stock_production_lot')"/>
+            <field name="reports_model_id" eval="ref('stock.model_stock_lot')"/>
         </record>
 
         <record id="print_packages_label_on_transfer" model="printnode.scenario.action">
@@ -120,6 +120,13 @@
             <field name="code">print_package_on_put_in_pack</field>
             <field name="model_id" eval="ref('stock.model_stock_picking')"/>
             <field name="reports_model_id" eval="ref('stock.model_stock_quant_package')"/>
+        </record>
+
+        <record id="print_operations_document_on_transfer" model="printnode.scenario.action">
+            <field name="name">Print Operations document on Transfer (after validation)</field>
+            <field name="code">print_operations_document_on_transfer</field>
+            <field name="model_id" eval="ref('stock.model_stock_picking')"/>
+            <field name="reports_model_id" eval="ref('stock.model_stock_move')"/>
         </record>
 
     </data>

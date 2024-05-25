@@ -18,7 +18,7 @@
 {
     "name": "Label Report Changes",
     "summary": "Changes for ",
-    "version": "15.0.1.0.0",
+    "version": "17.0.1.0.0",
     "category": 'Reporting',
     "website": "https://www.cybrosys.com",
     "description": """Order Line Images In Sale and Sale Report, odoo 14, order line images""",
@@ -26,7 +26,7 @@
     'company': 'Ashish',
     'maintainer': 'Ashish',
     "depends": [
-        'mrp'
+        'mrp', 'stock'
     ],
     "data": [
 

@@ -13,7 +13,10 @@ from dateutil.relativedelta import relativedelta
 
 
 def ks_get_date(ks_date_filter_selection, self, type):
-    timezone = self._context.get('tz') or self.env.user.tz
+    try:
+        timezone = self._context.get('tz')
+    except Exception as e:
+        timezone = self.env.user.tz
 
     if not timezone:
         ks_tzone = os.environ.get('TZ')
@@ -34,69 +37,7 @@ def ks_get_date(ks_date_filter_selection, self, type):
     if ks_date_filter_selection in ['t_fiscal_year', 'n_fiscal_year', 'ls_fiscal_year']:
         return eval("ks_date_series_" + series.split("_")[0])(series.split("_")[1], timezone, type,self)
     else:
-        return eval("ks_date_series_" + series.split("_")[0])(series.split("_")[1], timezone, type, self)
-def ks_date_series_td(ks_date_selection, timezone, type, self=None):
-    return eval("ks_get_date_range_from_td_" + ks_date_selection)(timezone, type, self)
-
-def ks_get_date_range_from_td_year(timezone, type,self):
-    ks_date_data = {}
-    date = datetime.now(pytz.timezone(timezone))
-    year = date.year
-    start_date = datetime(year, 1, 1)
-    end_date = date
-    if type == 'date':
-        ks_date_data["selected_start_date"] = datetime.strptime(start_date.strftime("%Y-%m-%d"), '%Y-%m-%d')
-        ks_date_data["selected_end_date"] = datetime.strptime(end_date.strftime("%Y-%m-%d"), '%Y-%m-%d')
-    else:
-        ks_date_data["selected_start_date"] = ks_convert_into_utc(start_date, timezone)
-        ks_date_data["selected_end_date"] = ks_convert_into_utc(end_date, timezone)
-    return ks_date_data
-
-def ks_get_date_range_from_td_month(timezone, type,self):
-    ks_date_data = {}
-
-    date = datetime.now(pytz.timezone(timezone))
-    year = date.year
-    month = date.month
-    start_date = datetime(year, month, 1)
-    end_date = date
-    if type == 'date':
-        ks_date_data["selected_start_date"] = datetime.strptime(start_date.strftime("%Y-%m-%d"), '%Y-%m-%d')
-        ks_date_data["selected_end_date"] = datetime.strptime(end_date.strftime("%Y-%m-%d"), '%Y-%m-%d')
-    else:
-        ks_date_data["selected_start_date"] = ks_convert_into_utc(start_date, timezone)
-        ks_date_data["selected_end_date"] = ks_convert_into_utc(end_date, timezone)
-    return ks_date_data
-def ks_get_date_range_from_td_week(timezone, type,self):
-    ks_date_data = {}
-    lang = self.env['res.lang']._lang_get(self.env.user.lang)
-    week_start = lang.week_start
-    start_Date = rrule.weekday(int(week_start) - 1)
-    start_date = datetime.today() + relativedelta(weekday=start_Date(-1))
-    end_date = datetime.now(pytz.timezone(timezone))
-    start_date = datetime.strptime(start_date.strftime("%Y-%m-%d"), '%Y-%m-%d')
-    if type == 'date':
-        ks_date_data["selected_start_date"] = start_date
-        end_date = datetime.strptime(end_date.strftime("%Y-%m-%d"), '%Y-%m-%d')
-        ks_date_data["selected_end_date"] = end_date
-    else:
-        ks_date_data["selected_start_date"] = ks_convert_into_utc(start_date, timezone)
-        ks_date_data["selected_end_date"] = ks_convert_into_utc(end_date, timezone)
-    return ks_date_data
-def ks_get_date_range_from_td_quarter(timezone, type,self):
-    ks_date_data = {}
-    date = datetime.now(pytz.timezone(timezone))
-    year = date.year
-    quarter = int((date.month - 1) / 3) + 1
-    start_date = datetime(year, 3 * quarter - 2, 1)
-    end_date = date
-    if type == 'date':
-        ks_date_data["selected_start_date"] = datetime.strptime(start_date.strftime("%Y-%m-%d"), '%Y-%m-%d')
-        ks_date_data["selected_end_date"] = datetime.strptime(end_date.strftime("%Y-%m-%d"), '%Y-%m-%d')
-    else:
-        ks_date_data["selected_start_date"] = ks_convert_into_utc(start_date, timezone)
-        ks_date_data["selected_end_date"] = ks_convert_into_utc(end_date, timezone)
-    return ks_date_data
+        return eval("ks_date_series_" + series.split("_")[0])(series.split("_")[1], timezone, type,self)
 
 
 # Last Specific Days Ranges : 7, 30, 90, 365

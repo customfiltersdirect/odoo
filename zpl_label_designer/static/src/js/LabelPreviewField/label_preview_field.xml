@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+    <t t-name="zpl_label_designer.LabelPreviewField">
+        <div class="zld-preview-container">
+            <t t-if="imageSrc.value">
+                <img
+                t-att-src="imageSrc.value"
+                t-att-alt="alt"
+                t-att-title="title"
+                t-att-class="className"
+                t-att-style="style"
+                />
+            </t>
+            <t t-else="">
+                <span>Loading...</span>
+            </t>
+        </div>
+    </t>
+</templates>

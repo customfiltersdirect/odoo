@@ -1,11 +1,11 @@
-import json
-import re
-import requests
+from typing import Any, Dict, List, Union
 
 from odoo import api, exceptions, fields, models, _
 from odoo.tools.safe_eval import safe_eval
 
-from .constants import Constants
+
+LABEL_VIEW_XMLID = 'zpl_label_designer.{model}_label_{label_id}'
+LABEL_ACTION_REPORT_XMLID = 'zpl_label_designer.{model}_label_action_{label_id}'
 
 
 class Label(models.Model):
@@ -15,73 +15,67 @@ class Label(models.Model):
     name = fields.Char(
         string='Name',
         required=True,
-    )
-
-    blob = fields.Text(
-        string='Blob',
-        default='{}',
+        readonly=True,
     )
 
     zpl = fields.Text(
         string="ZPL",
         default='',
+        readonly=True,
     )
 
     preview = fields.Text(
         string="Preview (with demo data)",
         default=False,
+        readonly=True,
     )
 
     width = fields.Float(
         string="Width, inch",
         default=5,
         required=True,
+        readonly=True,
     )
 
     height = fields.Float(
         string="Height, inch",
         default=2.5,
         required=True,
+        readonly=True,
     )
 
-    dpi = fields.Selection(
+    dpi = fields.Float(
         string="DPI",
-        default='152',
-        selection=[
-            ('152', '6dpmm (152 dpi)'),
-            ('203', '8dpmm (203 dpi)'),
-            ('300', '12dpmm (300 dpi)'),
-            ('600', '24dpmm (600 dpi)'),
-        ],
         required=True,
+        readonly=True,
     )
 
-    orientation = fields.Selection(
+    orientation = fields.Char(
         string="Orientation",
-        default="normal",
-        selection=[
-            ('normal', 'Normal'),
-            ('inverted', 'Inverted'),
-        ],
+        readonly=True,
     )
 
     is_published = fields.Boolean(
         string="Is Published?",
+        default=False,
+        copy=False,
     )
 
     is_modified = fields.Boolean(
         string="Is Modified After Publishing?",
-        compute='_compute_is_modified',
+        default=False,
     )
 
     action_report_id = fields.Many2one(
         comodel_name='ir.actions.report',
-        string='Related ir.actions.report ID'
+        string='Related ir.actions.report ID',
+        copy=False,
     )
 
     view_id = fields.Many2one(
         comodel_name='ir.ui.view',
-        string='Related ir.ui.view ID'
+        string='Related ir.ui.view ID',
+        copy=False,
     )
 
     model_id = fields.Many2one(
@@ -89,10 +83,9 @@ class Label(models.Model):
         string='Label Model',
         ondelete='cascade',
         required=True,
-        domain=[("model", "in", Constants.ALLOWED_MODELS)],
+        readonly=True,
     )
 
-    # This is experimental functionality: allow to set custom print report name
     print_report_name = fields.Char(
         string='Report Name',
         help=(
@@ -107,11 +100,16 @@ class Label(models.Model):
         compute='_compute_print_report_name_preview',
     )
 
+    designer_label_id = fields.Char(
+        string='Designer Label ID',
+        readonly=True,
+    )
+
     @api.depends('name', 'print_report_name')
     def _compute_print_report_name_preview(self):
         for rec in self:
             if rec.print_report_name:
-                random_record = rec._get_random_record()
+                random_record = rec.env[rec.model_id.model].search([], limit=1)
                 rec.print_report_name_preview = safe_eval(
                     rec.print_report_name,
                     {'object': random_record}
@@ -130,61 +128,218 @@ class Label(models.Model):
                     _('Invalid Print Report Name expression: {}').format(e)
                 )
 
-    @api.constrains('width', 'height')
-    def _check_dimensions(self):
-        """
-        Do now allow to set negative width.
-        """
-        if self.width <= 0 or self.height <= 0:
-            raise exceptions.ValidationError(_('Width and height must be positive'))
-
     def copy(self, default=None):
-        default = dict(default or {})
-        default['name'] = "Copy of " + self.name
-
-        return super().copy(default=default)
+        raise exceptions.UserError(_(
+            "You can't duplicate a label. Please, go to the ZPL Label Designer to create labels."
+        ))
 
     def unlink(self):
         for label in self:
             if label.is_published:
                 raise exceptions.UserError(_('Cannot delete published label'))
 
+            if not self.env.is_superuser() and label.designer_label_id:
+                raise exceptions.UserError(_(
+                    "You can't delete a label from Odoo that is synced with labels.ventor.tech. "
+                    "Please, go to the labels.ventor.tech to do this."
+                ))
+
         return super().unlink()
 
-    def generate_zpl(self):
-        """
-        Generate ZPL content for current state of label. Used as button callback.
-        """
-        self.ensure_one()
-
-        self.zpl = self._get_zpl_label()
-        # TODO: Refactor? Looks like we can easily miss validation of label fields with
-        # this approach
-        self._validate_placeholders()
-        self.preview = self._generate_preview()
-
+    #
+    # Button actions
+    #
     def publish(self):
         """
-        This method publish label to Odoo. It creates (or updates) ir.action.report and ir.ui.view.
+        Create or update report and view for label
         """
         self.ensure_one()
 
-        # Update label
-        self.generate_zpl()
+        if not self.view_id:
+            raise exceptions.UserError(_(
+                'To publish this label, please go to the Designer (using "Open in Designer" button)'
+                ' and publish it there'
+            ))
 
-        if not self.zpl.strip():  # Strip is just in case
-            raise exceptions.UserError(
-                _('Label is empty. Please add at least one element to the label'))
+        self.view_id.active = True
 
         if self.action_report_id:
-            # Do update of label content and exit
-            self._update_label()
-            return
+            # Update action report
+            self.action_report_id.name = self.name
+            self.action_report_id.print_report_name = self.print_report_name or f"'{self.name}'"
+        else:
+            # Create action report
+            self.action_report_id = self._create_label_action_report()
 
-        view_xmlid = f'zpl_label_designer.{self.model_id.model.replace(".", "_")}_label_{self.id}'
+        self.is_published = True
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Label was published'),
+                'message': _('Label {} was successfully published').format(self.name),
+                'type': 'success',
+                'sticky': False,
+                'next': {  # Refresh the page after publishing
+                    'type': 'ir.actions.client',
+                    'tag': 'reload',
+                }
+            },
+        }
+
+    def unpublish(self):
+        self.ensure_one()
+
+        if self.action_report_id:
+            self.action_report_id.unlink()
+            self.view_id.active = False
+
+        self.is_published = False
+
+        return True
+
+    def update_published_label(self):
+        self.publish()
+        self.is_modified = False
+
+    def open_view(self):
+        self.ensure_one()
+
+        if not self.view_id:
+            raise exceptions.UserError(_('Label is not published'))
+
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'ir.ui.view',
+            'res_id': self.view_id.id,
+            'view_mode': 'form',
+            'target': 'current',
+            'context': {
+                'no_breadcrumbs': False,
+            }
+        }
+
+    def open_in_designer(self):
+        self.ensure_one()
+
+        return {
+            'type': 'ir.actions.act_url',
+            'url': self.get_label_designer_url(self.designer_label_id),
+            'target': 'blank',
+        }
+
+    #
+    # Public methods
+    #
+    @api.model
+    def create_label(self, attrs):
+        qweb_xml, label_fields, prepared_attrs = self._prepare_data_for_label(attrs)
+
+        label = self.create([prepared_attrs])
+        label._publish_label(qweb_xml)
+        label._update_preview(label_fields)
+
+        return label.id
+
+    @api.model
+    def update_label(self, label_id, attrs):
+        # Use exists to make sure that label really exists
+        label = self.browse(label_id).exists()
+
+        if not label:
+            # Create new label if it doesn't exist
+            label_id = self.create_label(attrs)
+            return label_id
+
+        qweb_xml, label_fields, prepared_attrs = self._prepare_data_for_label(attrs)
+
+        label.write(prepared_attrs)
+        label.view_id.arch = qweb_xml
+        label._update_preview(label_fields)
+
+        return label.id
+
+    @api.model
+    def delete_label(self, label_id):
+        label = self.browse(label_id).exists()
+
+        if not label:
+            # TODO: Maybe it's better just to return success?
+            raise ValueError(_('Not label with such ID found in Odoo'))
+
+        # This will raise exception if label published
+        label.unlink()
+
+    @api.model
+    def get_preview_data(self, model_name, fields):
+        """
+        Returns example of data to populate label for preview
+        """
+        # Validate fields
+        self._validate_label_fields(model_name, fields)
+
+        # Try to find objects with not empty fields
+        domain = [(f, '!=', False) for f in fields.keys()]
+        random_record = self.env[model_name].search(domain, limit=1)
+
+        if not random_record:
+            # If no object found, try to find any object
+            random_record = self.env[model_name].search([], limit=1)
+
+        # Example of fields: [{"order_line": ["product_id.name", "product_uom_qty"]}, "state"]
+        # We need to leave only fields that are in fields list
+        data = self._get_data_from_record(random_record, fields)
+
+        return data
+
+    #
+    # Internal methods
+    #
+    def _update_preview(self, label_fields: Dict[str, Union[None, List[Any], Dict[str, Any]]]):
+        """
+        Generate label preview from Qweb template based on random record
+        """
+        random_record_id = self._get_random_record(self.model_id.model, label_fields)
+        self.preview = self._render_qweb_text([random_record_id.id]).decode("utf-8")
+
+    def _publish_label(self, qweb_xml: str):
+        """ Internal method to create report and view for label
+        """
+        label_view_id = self._create_label_view(qweb_xml)
+
+        self.view_id = label_view_id
+
+        label_action_report = self._create_label_action_report()
+
+        self.action_report_id = label_action_report
+        self.is_published = True
+
+    def _get_random_record(self, model_name: str, fields: Dict[str, Union[None, List[Any], Dict[str, Any]]]):  # NOQA
+        """
+        This method returns random record from model
+        (tries to find record with fields that are not empty)
+        """
+        domain = [(f, '!=', False) for f in fields.keys()]
+        random_record = self.env[model_name].search(domain, limit=1)
+
+        if not random_record:
+            # If no object found, try to find any object
+            random_record = self.env[model_name].search([], limit=1)
+
+        return random_record
+
+    def _create_label_view(self, view_content: str):
+        """ This method creates view for current label
+        """
+        self.ensure_one()
+
+        view_xmlid = LABEL_VIEW_XMLID.format(
+            model=self.model_id.model.replace(".", "_"), label_id=self.id)
+
         label_view_id = self.env['ir.ui.view'].create({
             'type': 'qweb',
-            'arch': self._prepare_label_template(),
+            'arch': view_content,
             'name': view_xmlid,
             'key': view_xmlid
         })
@@ -197,9 +352,24 @@ class Label(models.Model):
             'noupdate': True,
         })
 
-        self.view_id = label_view_id
+        return label_view_id
 
-        action_xmlid = f'zpl_label_designer.{self.model_id.model.replace(".", "_")}_label_action_{self.id}'  # NOQA
+    def _create_label_action_report(self):
+        """ This method creates actions report for current label
+        """
+        self.ensure_one()
+
+        action_xmlid = LABEL_ACTION_REPORT_XMLID.format(
+            model=self.model_id.model.replace(".", "_"), label_id=self.id)
+
+        view_xmlid = self.view_id.get_external_id()[self.view_id.id]
+
+        if not view_xmlid:
+            raise exceptions.UserError(_(
+                "View have not been created for the label - have not view - it's not possible to "
+                "create an action report for this label."
+            ))
+
         label_action_report = self.env['ir.actions.report'].create({
             'xml_id': action_xmlid,
             'name': self.name,
@@ -220,270 +390,116 @@ class Label(models.Model):
             'noupdate': True,
         })
 
-        self.action_report_id = label_action_report
-        self.is_published = True
+        return label_action_report
 
-        return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': _('Label was published'),
-                'message': _('Label {} was successfully published').format(self.name),
-                'type': 'success',
-                'sticky': False,
-            },
+    def _prepare_data_for_label(self, attrs):
+        """ Prepare attributes to create (update) label
+        """
+        qweb_xml = attrs.pop('qweb_xml', None)
+        if not qweb_xml:
+            raise exceptions.UserError(
+                _('Label is empty. Please add at least one element to the label'))
+
+        model_name = attrs.pop('model', None)
+        if not model_name:
+            raise exceptions.UserError(_('Model is not specified'))
+
+        # Replace model with model_id. It's a bit hacky but for now it's the easiest way
+        attrs['model_id'] = self.env['ir.model'].search([('model', '=', model_name)]).id
+
+        label_fields = attrs.pop('label_fields', None)
+
+        self._validate_label_fields(model_name, label_fields)
+
+        return qweb_xml, label_fields, attrs
+
+    def _render_qweb_text(self, docids: list):
+        """
+        Render Qweb template to text
+        """
+        self.ensure_one()
+
+        docs = self.env[self.model_id.model].browse(docids)
+        view_xmlid = self.view_id.get_external_id()[self.view_id.id]
+        data = {
+            'doc_ids': docids,
+            'doc_model': self.model_id.model,
+            'docs': docs,
         }
+        return self.env['ir.actions.report'] \
+            .with_context(minimal_qcontext=True) \
+            ._render_template(view_xmlid, data)
 
-    def unpublish(self):
-        self.ensure_one()
-
-        if self.action_report_id:
-            self.action_report_id.unlink()
-            self.view_id.unlink()
-
-        self.is_published = False
-
-        return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': _('Label was unpublished'),
-                'message': _('Label {} was successfully unpublished').format(self.name),
-                'type': 'success',
-                'sticky': False,
-            },
-        }
-
-    def open_view(self):
-        self.ensure_one()
-
-        if not self.view_id:
-            raise exceptions.UserError(_('Label is not published'))
-
-        return {
-            'type': 'ir.actions.act_window',
-            'res_model': 'ir.ui.view',
-            'res_id': self.view_id.id,
-            'view_mode': 'form',
-            'target': 'current',
-        }
-
-    @api.depends('view_id')
-    def _compute_is_modified(self):
-        for label in self:
-            label.is_modified = bool(label.view_id and label.view_id.write_date < label.write_date)
-
-    def _get_allowed_fields(self):
+    @classmethod
+    def _get_data_from_record(cls, random_record, fields: Dict[str, Union[None, List[Any], Dict[str, Any]]]):  # NOQA
         """
-        This method returns list of fields to use in label design (sorted by label)
+        Recursive method to get fields values from record
         """
-        self.ensure_one()
+        data = {}
 
-        if not self.model_id:
-            return {}
+        for field, subfields in fields.items():
+            if subfields is None:
+                # Simple field
+                data[field] = getattr(random_record, field)
+            elif isinstance(subfields, dict):
+                # Dict means that the field is many2one field
+                data[field] = cls._get_data_from_record(getattr(random_record, field), subfields)
+            elif isinstance(subfields, list):
+                # List means that the field is many2many or one2many field
+                data[field] = []
 
-        model_fields = self.env[self.model_id.model]._fields
-
-        def _is_allowed_field_type(field):
-            return any([isinstance(field, cls) for cls in Constants.ALLOWED_FIELDS])
-
-        def _prepare_dict_with_allowed_fields(fields_, prefix='', label_prefix='', with_nested=True):  # NOQA
-            """
-            Returns list with allowed fields like pairs [(name, label), ...]
-            """
-            result = []
-            for field_name, field in fields_.items():
-                if field_name in Constants.FIELDS_TO_IGNORE or field_name.startswith('_'):
-                    continue
-
-                if _is_allowed_field_type(field):
-                    if type(field) == fields.Many2one:
-                        if not with_nested:
-                            continue
-
-                        comodel = self.env[field.comodel_name]
-                        nested_fields = _prepare_dict_with_allowed_fields(
-                            comodel._fields,
-                            prefix + field_name + '.',
-                            label_prefix + field.string + ' → ',
-                            with_nested=False)
-
-                        result += nested_fields
-                    else:
-                        if label_prefix:
-                            result.append([prefix + field_name, label_prefix + field.string])
-                        else:
-                            result.append([prefix + field_name, field.string])
-
-            return result
-
-        fields_ = _prepare_dict_with_allowed_fields(model_fields)
-        fields_.sort(key=lambda i: i[1])
-
-        return fields_
-
-    def _generate_preview(self):
-        """
-        This method replaces placeholders with demo data.
-        """
-        self.ensure_one()
-
-        label_preview = self.zpl
-        placeholders = re.findall(Constants.PLACEHOLDER_REGEX, label_preview)
-
-        random_record = self._get_random_record()
-
-        # Replace placeholders with data
-        for placeholder in placeholders:
-            placeholder_attr = placeholder[2:-2]  # Remove %% from start and end
-
-            # We allow single level of nesting
-            if '.' in placeholder_attr:
-                field, nested_field = placeholder_attr.split('.')
-                nested_model = getattr(random_record, field)
-                placeholder_value = str(getattr(nested_model, nested_field, ''))
+                for record in getattr(random_record, field):
+                    data[field].append(cls._get_data_from_record(record, subfields[0]))
             else:
-                placeholder_value = str(getattr(random_record, placeholder_attr, ''))
+                raise ValueError('Something is wrong with used fields')
 
-            label_preview = label_preview.replace(placeholder, placeholder_value)
+        return data
 
-        return label_preview
-
-    def _validate_placeholders(self):
+    @api.model
+    def _validate_label_fields(self, model_name: str, fields: Dict[str, Union[None, List[Any], Dict[str, Any]]]):  # NOQA
         """
-        This method validates placeholders in label design.
+        Recursive method to validate existance of specified fields
         """
-        self.ensure_one()
+        Model = self.env[model_name]
+        model_label = Model._description
 
-        placeholders = re.findall(Constants.PLACEHOLDER_REGEX, self.zpl)
-        Model = self.env[self.model_id.model]
-
-        for placeholder in placeholders:
-            placeholder_attr = placeholder[2:-2]  # Remove %% from start and end
-
-            field = placeholder_attr
-            nested_field = None
-
-            # We allow single level of nesting
-            if '.' in placeholder_attr:
-                field, nested_field = placeholder_attr.split('.')
-
-                if not nested_field:
-                    raise exceptions.ValidationError(
-                        _('Invalid placeholder: "{}"').format(placeholder))
-
+        for field, subfields in fields.items():
             if field not in Model._fields:
-                raise exceptions.UserError(
-                    _('Field "{}" does not exist in "{}" model').format(
-                        placeholder_attr, self.model_id.name)
-                )
+                    raise exceptions.UserError(_(
+                        f"Field '{field}' does not exist in model '{model_label}' ({model_name})"
+                    ))
 
-            if nested_field:
+            if subfields is None:
+                # Simple field, checked above
+                pass
+            elif isinstance(subfields, dict):
+                # Dict means that the field is many2one field
                 if Model._fields[field].type != 'many2one':
-                    raise exceptions.UserError(
-                        _(
-                            'Field "{}" is not a many2one field and '
-                            'can not be used to get nested fields'
-                        ).format(field)
-                    )
+                    raise exceptions.UserError(_(
+                        f"Field '{field}' is not many2one field in model '{model_label}' ({model_name})"  # NOQA
+                    ))
 
-                Comodel = self.env[Model._fields[field].comodel_name]
+                self._validate_label_fields(Model._fields[field].comodel_name, subfields)
+            elif isinstance(subfields, list):
+                # List means that the field is many2many or one2many field
+                if Model._fields[field].type not in ('many2many', 'one2many'):
+                    raise exceptions.UserError(_(
+                        f"Field '{field}' is not many2many or one2many field in model '{model_label}' ({model_name})"  # NOQA
+                    ))
 
-                if nested_field not in Comodel._fields:
-                    raise exceptions.UserError(
-                        _('Field "{}" does not exist in "{}" relation').format(
-                            nested_field, field)
-                    )
+                self._validate_label_fields(Model._fields[field].comodel_name, subfields[0])
+            else:
+                raise ValueError('Something is wrong with used fields')
 
-        return True
+    #
+    # Method to call from UI
+    #
+    @api.model
+    def get_label_designer_url(self, label_id: str = None):
+        base_url = self.env['ir.config_parameter'].sudo() \
+            .get_param('zpl_label_designer.designer_url')
 
-    def _get_random_record(self):
-        """
-        This method returns random record from model
-        (tries to find record with fields that are not empty)
-        """
-        self.ensure_one()
+        if not label_id:
+            return f'{base_url}/'
 
-        placeholders = re.findall(Constants.PLACEHOLDER_REGEX, self.zpl)
-
-        # Try to find objects with not empty fields
-        not_empty_fields = [p[2:-2] for p in placeholders]
-        domain = [(f, '!=', False) for f in not_empty_fields]
-        random_record = self.env[self.model_id.model].search(domain, limit=1)
-
-        if not random_record:
-            # If no object found, try to find any object
-            random_record = self.env[self.model_id.model].search([], limit=1)
-
-        return random_record
-
-    def _get_zpl_label(self):
-        self.ensure_one()
-
-        payload = {
-            "name": self.name,
-            "inverted": self.orientation == 'inverted',
-            "dpi": self.dpi,
-            "content": json.loads(self.blob),
-        }
-        resp = requests.post(self._get_converter_url('convert-label'), json=payload)
-
-        if resp.status_code >= 500:  # Can be 500 or 502 if server is down
-            raise exceptions.UserError(Constants.SERVER_DOWN_MESSAGE)
-
-        data = resp.json()
-        if data.get('status_code') != 200:
-            raise exceptions.UserError(data.get('message', Constants.SERVER_DOWN_MESSAGE))
-
-        return resp.json().get('data', {})
-
-    def _prepare_label_template(self):
-        self.ensure_one()
-
-        # Replace placeholders with qweb fields
-        label_content = self.zpl
-
-        # Replace special characters in placeholders with html entities
-        for char, replacement in Constants.SPECIAL_CHARACTERS.items():
-            label_content = label_content.replace(char, replacement)
-
-        placeholders = re.findall(Constants.PLACEHOLDER_REGEX, label_content)
-
-        for placeholder in placeholders:
-            placeholder_attr = placeholder[2:-2]  # Remove %% from start and end
-            placeholder_value = Constants.FIELD_PLACEHOLDER.format(placeholder_attr)
-
-            label_content = label_content.replace(placeholder, placeholder_value)
-
-        template = Constants.TEMPLATE_BASE.format(content=label_content)
-
-        return template
-
-    def _update_label(self):
-        self.ensure_one()
-
-        # Update label with new content
-        self.view_id.arch = self._prepare_label_template()
-
-        # Update action report
-        self.action_report_id.name = self.name
-        self.action_report_id.print_report_name = self.print_report_name or f"'{self.name}'"
-
-    def _get_converter_url(self, uri=''):
-        base_url = self.env['ir.config_parameter'].sudo()\
-            .get_param('zpl_label_designer.zld_converter_url')
-        return f'{base_url}/{uri}' if uri else base_url
-
-    def _get_quick_fields(self):
-        self.ensure_one()
-
-        return Constants.FIELDS_FOR_QUICK_BUTTONS.get(self.model_id.model, {})
-
-    def get_settings(self):
-        self.ensure_one()
-
-        return {
-            'converter_url': self._get_converter_url(),
-            'allowed_fields': self._get_allowed_fields(),
-            'quick_fields': self._get_quick_fields(),
-        }
+        return f'{base_url}/{label_id}'

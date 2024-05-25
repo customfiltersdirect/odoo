@@ -5,6 +5,8 @@ from . import test_account
 from . import test_activate_account
 from . import test_action_button
 from . import test_ir_attachment
+from . import test_ir_cron
+from . import test_logging
 from . import test_printer
 from . import test_printnode_printjob
 from . import test_printnode_rule

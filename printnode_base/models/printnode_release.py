@@ -42,7 +42,7 @@ class PrintNodeRelease(models.Model):
         odoo_version = release.major_version
 
         resp = requests.get(
-            '{}/{}'.format(dpc_url, 'releases'),
+            f"{dpc_url}/{'releases'}",
             {'module_version': module_version, 'odoo_version': odoo_version})
 
         if resp.status_code == 200:
@@ -62,7 +62,7 @@ class PrintNodeRelease(models.Model):
         else:
             # Something went wrong
             _logger.warning(
-                "Direct Print: Can't fetch list of releases ({})".format(resp.status_code))
+                f"Direct Print: Can't fetch list of releases ({resp.status_code})")
 
     @api.model
     def clean(self):
@@ -76,3 +76,10 @@ class PrintNodeRelease(models.Model):
         self.env['printnode.release'].search([]).unlink()
 
         return True
+
+    @api.model
+    def get_releases(self):
+        """
+        Returns all releases
+        """
+        return self.search_read([])

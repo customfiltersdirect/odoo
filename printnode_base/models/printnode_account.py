@@ -3,9 +3,10 @@
 
 import re
 import requests
-import psycopg2
 
-from odoo import api, exceptions, fields, models, registry, SUPERUSER_ID, _
+from odoo import api, exceptions, fields, models, _
+
+from .constants import Constants
 
 # Copied from request library to provide compatibility with the library
 try:
@@ -18,6 +19,7 @@ class PrintNodeAccount(models.Model):
     """ PrintNode Account entity
     """
     _name = 'printnode.account'
+    _inherit = 'printnode.logger.mixin'
     _description = 'PrintNode Account'
 
     alias = fields.Char(
@@ -45,13 +47,6 @@ class PrintNodeAccount(models.Model):
     name = fields.Char(
         string='Name',
         default='Default Account',
-    )
-
-    debug_logging = fields.Boolean(
-        string='Debug logging',
-        default=False,
-        help='By enabling this feature, all requests will be logged. '
-             'You can find them in "Settings - Technical - Logging" menu.',
     )
 
     password = fields.Char(
@@ -93,7 +88,7 @@ class PrintNodeAccount(models.Model):
         ('api_key', 'unique(api_key)', 'API Key (token) must be unique.'),
     ]
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals):
         account = super(PrintNodeAccount, self).create(vals)
 
@@ -117,6 +112,8 @@ class PrintNodeAccount(models.Model):
         return res
 
     def activate_account(self):
+        """ Activate the current account through the DPC service with the API Key provided.
+        """
         # Remove computers and devices connected to current account
         self.unlink_devices()
 
@@ -189,6 +186,12 @@ class PrintNodeAccount(models.Model):
 
     @api.model
     def get_limits(self):
+        """
+        Get print limits for the current account.
+
+        This is used to display information about the limits of the current account on UI
+        in the main menu of the Printnod.
+        """
         limits = []
         for rec in self.env['printnode.account'].search([]):
             if rec.status == 'OK':
@@ -213,7 +216,7 @@ class PrintNodeAccount(models.Model):
 
         for computer in computers:
             odoo_computer = self._get_node('computer', computer, self.id)
-            get_printers_url = 'computers/{}/printers'.format(computer['id'])
+            get_printers_url = f"computers/{computer['id']}/printers"
 
             # Downloading printers with tray bins
             for printer in self._send_printnode_request(get_printers_url):
@@ -222,18 +225,23 @@ class PrintNodeAccount(models.Model):
                 # Splitted to 2 checks because capabilities can include None values in some cases
                 if printer.get('capabilities') and printer.get('capabilities').get('bins'):
                     for bin_name in printer.get('capabilities', {}).get('bins'):
-                        bin_values = {'name': bin_name, 'printer_id': odoo_printer.id}
-                        existing_bin = self.env['printnode.printer.bin'].search(
-                            [('name', '=', bin_name), ('printer_id', '=', odoo_printer.id)],
-                            limit=1,
-                        )
-                        if not existing_bin:
-                            self.env['printnode.printer.bin'].create(bin_values)
+                        self._create_printer_bin(bin_name, odoo_printer)
 
             # Downloading scales
-            get_scales_url = 'computer/{}/scales'.format(computer['id'])
+            get_scales_url = f"computer/{computer['id']}/scales"
             for scales in self._send_printnode_request(get_scales_url):
                 self._create_or_update_scales(scales, odoo_computer)
+
+    def _create_printer_bin(self, bin_name, odoo_printer):
+        existing_bin = self.env['printnode.printer.bin'].search(
+            [('name', '=', bin_name), ('printer_id', '=', odoo_printer.id)],
+            limit=1,
+        )
+        if not existing_bin:
+            self.env['printnode.printer.bin'].create({
+                'name': bin_name,
+                'printer_id': odoo_printer.id,
+            })
 
     def _create_or_update_scales(self, scales, odoo_computer):
         scales_env = self.env['printnode.scales']
@@ -260,15 +268,19 @@ class PrintNodeAccount(models.Model):
     def recheck_printer(self, printer, print_sample_report=False):
         """ Re-check particular printer status
         """
-        uri = 'printers/{}'.format(printer.printnode_id)
+        uri = f'printers/{printer.printnode_id}'
 
         resp = self._send_printnode_request(uri)
-        printer.write({
-            'status': resp
-                and resp[0]['computer']['state'] == 'connected'  # NOQA
-                and resp[0]['state']  # NOQA
-                or 'offline'  # NOQA
-        })
+
+        if resp:
+            printer_status = resp[0].get('state', 'offline')
+            computer_status = resp[0]['computer'].get('state', 'disconnected')
+
+            if printer.status != printer_status:
+                printer.status = printer_status
+
+            if printer.computer_id.status != computer_status:
+                printer.computer_id.status = computer_status
 
         return printer.online
 
@@ -315,12 +327,9 @@ class PrintNodeAccount(models.Model):
         Update an existing or create a new main account.
         The main account is the account with lowest ID.
         """
-        main_account = None
-        accounts = self.env['printnode.account'].search([]).sorted(key=lambda r: r.id)
+        main_account = self.get_main_printnode_account()
 
-        if accounts:
-            main_account = accounts[0]
-
+        if main_account:
             if not api_key:
                 # Remove account
                 main_account.unlink()
@@ -329,6 +338,7 @@ class PrintNodeAccount(models.Model):
                 if main_account.api_key != api_key:
                     main_account.api_key = api_key
                     main_account.is_allowed_to_collect_data = is_allowed_to_collect_data
+
         else:
             if api_key:
                 main_account = self.env['printnode.account'].create({
@@ -349,7 +359,7 @@ class PrintNodeAccount(models.Model):
     def _get_node(self, node_type, node_id, parent_id):
         """ Parse and update PrintNode nodes (printer and computers)
         """
-        node = self.env['printnode.{}'.format(node_type)].with_context(active_test=False).search([
+        node = self.env[f'printnode.{node_type}'].with_context(active_test=False).search([
             ('printnode_id', '=', node_id['id']),
         ], limit=1)
 
@@ -373,32 +383,6 @@ class PrintNodeAccount(models.Model):
 
         return node
 
-    def log_debug(self, log_string, function_name):
-        self.ensure_one()
-
-        if self.debug_logging:
-            self.flush()
-            db_name = self._cr.dbname
-
-            # Use a new cursor to avoid rollback that could be caused by an upper method
-            try:
-                db_registry = registry(db_name)
-                with db_registry.cursor() as cr:
-                    env = api.Environment(cr, SUPERUSER_ID, {})
-                    logging_object = env['ir.logging']
-                    logging_object.sudo().create({
-                        'name': 'direct.print',
-                        'type': 'server',
-                        'dbname': db_name,
-                        'level': 'DEBUG',
-                        'message': log_string,
-                        'path': 'odoo_direct_print_pro',
-                        'func': function_name,
-                        'line': 1}
-                    )
-            except psycopg2.Error:
-                pass
-
     def _send_printnode_request(self, uri):
         """
         Send request with basic authentication and API key
@@ -408,10 +392,9 @@ class PrintNodeAccount(models.Model):
             self.endpoint = self.endpoint[:-1]
 
         try:
-            function_name = uri.replace('/', '_')
-            request_url = '{}/{}'.format(self.endpoint, uri)
-            self.log_debug(request_url, 'printnode_get_request_%s' % function_name)
-            resp = requests.get(request_url, auth=auth)
+            request_url = f'{self.endpoint}/{uri}'
+            self.printnode_logger(Constants.REQUESTS_LOG_TYPE, f'GET request: {request_url}')
+            resp = requests.get(request_url, auth=auth, timeout=20)
 
             # 403 is a HTTP status code which can be returned for child accounts in some cases
             # like checking printing limits on PrintNode
@@ -423,20 +406,32 @@ class PrintNodeAccount(models.Model):
 
             json_response = resp.json()
 
-            self.log_debug(json_response, 'printnode_get_response_%s' % function_name)
+            self.printnode_logger(
+                Constants.REQUESTS_LOG_TYPE,
+                f'Response from ({request_url}): {json_response}'
+            )
 
             return json_response
 
-        except requests.exceptions.ConnectionError as e:
+        except requests.exceptions.Timeout as err:
             # Deactivate printers only from current account
             self._deactivate_printers()
 
-            self.status = e
-        except requests.exceptions.RequestException as e:
+            self.status = err
+            self.printnode_logger(Constants.REQUESTS_LOG_TYPE, 'Request timed out')
+
+        except requests.exceptions.ConnectionError as err:
             # Deactivate printers only from current account
             self._deactivate_printers()
 
-            self.status = e
+            self.status = err
+            self.printnode_logger(Constants.REQUESTS_LOG_TYPE, f'ConnectionError: {err}')
+        except requests.exceptions.RequestException as err:
+            # Deactivate printers only from current account
+            self._deactivate_printers()
+
+            self.status = err
+            self.printnode_logger(Constants.REQUESTS_LOG_TYPE, f'RequestException: {err}')
 
         return None
 
@@ -456,23 +451,32 @@ class PrintNodeAccount(models.Model):
         dpc_url = self.env['ir.config_parameter'].sudo().get_param('printnode_base.dpc_api_url')
 
         try:
-            resp = methods[method]('{}/{}'.format(dpc_url, uri), **kwargs)
+            resp = methods[method](f'{dpc_url}/{uri}', **kwargs)
 
             if self.status != 'OK':
                 self.status = 'OK'
-            return resp.json()
-        except requests.exceptions.ConnectionError as e:
+
+            json_resp = resp.json()
+            self.printnode_logger(
+                Constants.REQUESTS_LOG_TYPE,
+                f'Response from ({dpc_url}): {json_resp}'
+            )
+            return json_resp
+        except requests.exceptions.ConnectionError as err:
             self._deactivate_printers()
 
-            self.status = e
-        except requests.exceptions.RequestException as e:
+            self.status = err
+            self.printnode_logger(Constants.REQUESTS_LOG_TYPE, f'ConnectionError: {err}')
+        except requests.exceptions.RequestException as err:
             self._deactivate_printers()
 
-            self.status = e
-        except JSONDecodeError as e:
+            self.status = err
+            self.printnode_logger(Constants.REQUESTS_LOG_TYPE, f'RequestException: {err}')
+        except JSONDecodeError as err:
             self._deactivate_printers()
 
-            self.status = e
+            self.status = err
+            self.printnode_logger(Constants.REQUESTS_LOG_TYPE, f'JSONDecodeError: {err}')
 
         return None
 
@@ -522,8 +526,8 @@ class PrintNodeAccount(models.Model):
             raw_limits = plan['current'].get('printCurve')
             if raw_limits:
                 # Parse with regex value like '("{0,5000}","{0,0}",0.0018)
-                m = re.match(r'\(\"{(?P<_>\d+),(?P<limits>\d+)}\",.*\)', raw_limits)
-                limits = (m and m.group('limits')) or 0
+                match = re.match(r'\(\"{(?P<_>\d+),(?P<limits>\d+)}\",.*\)', raw_limits)
+                limits = (match and match.group('limits')) or 0
 
         return printed, limits
 
@@ -531,7 +535,7 @@ class PrintNodeAccount(models.Model):
         """
         Check conditions and notify the customer if limits are close to exceed
         """
-        company = self.env.user.company_id
+        company = self.env.company
 
         if company.printnode_notification_email and company.printnode_notification_page_limit:
             accounts_to_notify = self.env['printnode.account'].search([]).filtered(
@@ -543,7 +547,7 @@ class PrintNodeAccount(models.Model):
                 context.update({'accounts': accounts_to_notify})
 
                 mail_template = self.env.ref('printnode_base.reaching_limit_notification_email')
-                mail_template.with_context(context).send_mail(company.id, force_send=True)
+                mail_template.with_context(**context).send_mail(company.id, force_send=True)
 
     def _deactivate_printers(self):
         """
@@ -562,3 +566,64 @@ class PrintNodeAccount(models.Model):
         self.env['printnode.scales'].search([]).write(
             {'status': 'offline'},
         )
+
+    def get_main_printnode_account(self):
+        """
+        The main account is the account with lowest ID.
+        """
+        accounts = self.env['printnode.account'].search([]).sorted(key=lambda r: r.id)
+
+        return accounts[0] if accounts else False
+
+    def clear_devices_from_odoo(self):
+        """
+        Delete devices from Odoo if it is not connected to Printnode Account
+        """
+
+        self.import_devices()
+
+        def unset_printers(model_name, printer_ids):
+            """ Unset printers for all records of model
+
+            :param str model_name: 'printnode.scenario', 'delivery.carrier', ...
+            :param list[int] printer_ids: list of printer ids
+            """
+            domain = [('printer_id', 'in', printer_ids)]
+            records = self.env[model_name].sudo().with_context(active_test=False).search(domain)
+            for rec in records:
+                rec.printer_id = None
+
+        # Step 1: Find computers that are not in Printnode and delete them.
+        list_printnode_computer_ids = list(map(
+            lambda pc: pc.get('id'),
+            self._send_printnode_request('computers') or []
+        ))
+        odoo_computer_ids = self.with_context(active_test=False).computer_ids
+
+        odoo_computers_to_delete = odoo_computer_ids.filtered(
+            lambda comp: comp.printnode_id not in list_printnode_computer_ids
+        )
+
+        # Unset printers
+        for model in ['printnode.scenario', 'delivery.carrier', 'printnode.action.button']:
+            unset_printers(model, odoo_computers_to_delete.printer_ids.ids)
+
+        odoo_computers_to_delete.unlink()
+
+        # Step 2: Find printers that are not in Printnode and delete them.
+        list_printnode_printer_ids = list(map(
+            lambda pp: pp.get('id'),
+            self._send_printnode_request('printers'),
+        ))
+        odoo_printer_ids = self.env['printnode.printer'].sudo().with_context(active_test=False). \
+            search([('account_id', '=', self.id)])
+
+        odoo_printers_to_delete = odoo_printer_ids.filtered(
+            lambda printer: printer.printnode_id not in list_printnode_printer_ids
+        )
+
+        # Unset printers
+        for model in ['printnode.scenario', 'delivery.carrier', 'printnode.action.button']:
+            unset_printers(model, odoo_printers_to_delete.ids)
+
+        odoo_printers_to_delete.unlink()

@@ -7,8 +7,9 @@
             <field name="print_wizard_type">attachments</field>
             <field name="name">Print Attachments</field>
         </record>
+
         <record id="printnode_map_action_server_lot" model="printnode.map.action.server">
-            <field name="model_id" eval="ref('stock.model_stock_production_lot')"/>
+            <field name="model_id" eval="ref('stock.model_stock_lot')"/>
             <field name="print_wizard_type">reports</field>
             <field name="name">Print Reports</field>
         </record>

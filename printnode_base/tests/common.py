@@ -6,6 +6,7 @@ from odoo.tests import common
 
 
 SECURITY_GROUP = 'printnode_base.printnode_security_group_user'
+BASE_INTERNAL_USER_GROUP = 'base.group_user'
 
 # Devices from api.printnode
 TEST_COMPUTERS_FROM_PRINTNODE = [
@@ -53,15 +54,14 @@ class TestPrintNodeCommon(common.TransactionCase):
 
         self.company = self.env.ref('base.main_company')
 
-        self.user = self.env['res.users'].with_context({
-            'no_reset_password': True
-        }).create({
+        self.user = self.env['res.users'].with_context(no_reset_password=True).create({
             'name': 'Direct Print User',
             'company_id': self.company.id,
             'login': 'user',
             'email': 'user@print.node',
             'groups_id': [(6, 0, [
-                self.env.ref(SECURITY_GROUP).id
+                self.env.ref(SECURITY_GROUP).id,
+                self.env.ref(BASE_INTERNAL_USER_GROUP).id,
             ])]
         })
 
@@ -96,34 +96,40 @@ class TestPrintNodeCommon(common.TransactionCase):
             'status': 'connected',
             'account_id': self.account.id,
         })
+
         self.printer = self.env['printnode.printer'].create({
             'name': 'Local Printer',
             'status': 'offline',
             'computer_id': self.computer.id,
         })
+
         self.printer_bin = self.env['printnode.printer.bin'].create({
             'name': 'Test Bin',
             'printer_id': self.printer.id,
         })
+
         self.company_printer = self.env['printnode.printer'].create({
             'name': 'Company Printer',
             'status': 'online',
             'computer_id': self.computer.id,
         })
+
         self.user_printer = self.env['printnode.printer'].create({
             'name': 'User Printer',
             'status': 'online',
             'computer_id': self.computer.id,
         })
+
         self.action_printer = self.env['printnode.printer'].create({
             'name': 'Action Printer',
             'status': 'online',
             'computer_id': self.computer.id,
         })
+
         self.scales = self.env['printnode.scales'].create({
             'name': 'Local Scales',
-            'device_num': '1',
-            'printnode_id': '1',
+            'device_num': 1,
+            'printnode_id': 1,
             'status': 'offline',
             'computer_id': self.computer.id,
         })
@@ -133,6 +139,7 @@ class TestPrintNodeCommon(common.TransactionCase):
             ('model_id', '=', self.so_model.id),
             ('method', '=', 'action_confirm'),
         ])
+
         self.action_method = (printnode_action_method if printnode_action_method else
                               self.env['printnode.action.method'].create({
                                   'name': 'SO Print',
@@ -155,13 +162,14 @@ class TestPrintNodeCommon(common.TransactionCase):
             'report_id': self.so_report.id,
         })
 
-        # Scenario
+        # Scenarios
         self.scenario_action = self.env['printnode.scenario.action'].create({
             'name': "Test Printnode Scenario Action",
             'code': 'test_scenario_action',
             'model_id': self.so_model.id,
             'reports_model_id': self.so_model.id,
         })
+
         self.scenario = self.env['printnode.scenario'].create({
             'action': self.scenario_action.id,
             'report_id': self.so_report.id,
@@ -189,10 +197,49 @@ class TestPrintNodeCommon(common.TransactionCase):
             }).id,
         })
 
+        # Products
+        self.product_id = self.env['product.product'].create({
+            'name': 'Test Product',
+            'type': 'product',
+        })
+
+        # Locations
+        self.location_dest = self.env['stock.location'].create({
+            'name': 'Test_dest_location',
+            'usage': 'customer'
+        })
+
+        # Picking type
+        self.picking_type_incoming = \
+            self.env['stock.picking.type'].sudo().with_context(active_test=False).search([
+                ('code', '=', 'incoming'),
+            ], limit=1)
+
+        # Stock picking
+        self.stock_picking = self.env['stock.picking'].create({
+            'location_id': self.env.ref('stock.stock_location_suppliers').id,
+            'location_dest_id': self.location_dest.id,
+            'move_type': 'direct',
+            'picking_type_id': self.picking_type_incoming.id,
+            'name': "Test Stock Picking",
+        })
+
+        # Stock move
+        self.stock_move = self.env['stock.move'].create({
+            'name': 'Test move',
+            'product_id': self.product_id.id,
+            'location_id': self.env.ref('stock.stock_location_suppliers').id,
+            'location_dest_id': self.location_dest.id,
+            'product_uom': self.env.ref('uom.product_uom_unit').id,
+            'product_uom_qty': 2,
+            'picking_type_id': self.picking_type_incoming.id,
+            'picking_id': self.stock_picking.id,
+        })
+
     def _create_patch_object(self, target, attribute):
         """
         Improved object patcher method from
-        'https://docs.python.org/3/library/unittest.mock-examples.html?highlight=object%20patcher%20method#nesting-patches'
+        'https://docs.python.org/3/library/unittest.mock-examples.html#nesting-patches'
 
         This method makes it easier to work with unittest.mock.patch()<.object()> functions.
         It avoids extra nested indentation as when using patch() with the "with" context manager.
@@ -202,3 +249,16 @@ class TestPrintNodeCommon(common.TransactionCase):
         thing = patcher.start()
         self.addCleanup(patcher.stop)
         return thing
+
+    def _create_workstation(self):
+        """
+        Create a test workstation and define printers and scales.
+        """
+        workstation_id = self.env['printnode.workstation'].create({
+            'name': 'Test Workstation',
+            'printer_id': self.printer.id,
+            'label_printer_id': self.label_printer.id,
+            'scales_id': self.scales.id,
+        })
+
+        return workstation_id

@@ -23,7 +23,7 @@
 {
     "name": "Custom Stock",
     "summary": "Customisation in Stock Module",
-    "version": "15.0.1.0.0",
+    "version": "17.0.1.0.0",
     "website": "https://www.cybrosys.com",
     "description": """
         Customisation in Stock Module
@@ -31,10 +31,10 @@
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
+    'depends': ['base', 'stock', 'product'],
     "data": [
         'views/product_template.xml'
     ],
-    'depends': ['base', 'stock', 'product'],
     'license': 'OPL-1',
     'installable': True,
     'auto_install': False,

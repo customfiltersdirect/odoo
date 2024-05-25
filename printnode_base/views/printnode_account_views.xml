@@ -36,7 +36,6 @@
                     <field name="name" />
                     <field name="api_key" />
                     <field name="is_dpc_account" readonly="1" />
-                    <field name="debug_logging" />
                     <field name="printed" readonly="1" />
                     <field name="limits" readonly="1" />
                     <field name="status" />
