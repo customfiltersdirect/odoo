@@ -1,2 +1,6 @@
+<<<<<<< HEAD
 this is  for testing purpose 
 this is for testing
+=======
+this is  for testing purpose...
+>>>>>>> 4821f768889916eb920769de89ac5f906b0cd157
