@@ -230,7 +230,7 @@ class SaleOrder(models.Model):
                 for picking in self.picking_ids.filtered(lambda x: x.state != 'cancel'):
                     if picking.state in ('waiting', 'confirmed'):
                         picking.action_assign()
-                    picking.action_set_quantities_to_reservation()
+                    # picking.action_set_quantities_to_reservation()
                     # for mv in picking.move_ids_without_package:
                     #     if mv.product_uom_qty != 0.0:
                     #         mv.quantity_done = mv.product_uom_qty
