@@ -19,8 +19,8 @@ class MRP_Production(models.Model):
         for rec in self:
             lines.append((0,0,{
                 'product_id' : rec.product_id.id,
-                'location_id': 8,
-                'location_dest_id' : 8,
+                'location_id': 54,
+                'location_dest_id' : 54,
                 'quantity': rec.qty_producing,
             }))
             obj = {
