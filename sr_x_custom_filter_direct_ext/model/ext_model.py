@@ -19,14 +19,14 @@ class MRP_Production(models.Model):
         for rec in self:
             lines.append((0,0,{
                 'product_id' : rec.product_id.id,
-                'location_id': 54,
-                'location_dest_id' : 54,
+                'location_id': self.location_dest_id.id,
+                'location_dest_id' : self.location_dest_id.id,
                 'quantity': rec.qty_producing,
             }))
             obj = {
                 'picking_type_id' : 142,
-                'location_id' : 54,
-                'location_dest_id': 54,
+                'location_id' : self.location_dest_id.id,
+                'location_dest_id': self.location_dest_id.id,
                 'origin': rec.id,
                 'production_order': rec.id,
                 'move_line_ids_without_package' : lines
