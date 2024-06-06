@@ -108,6 +108,13 @@ class SaleOrder(models.Model):
     goflow_shipped_last_call_check = fields.Boolean('Goflow Last Call check', index=True)
     goflow_full_invoiced = fields.Boolean('Goflow Total invoiced', index=True)
 
+    @api.constrains('goflow_shipped_at')
+    def _goflow_shipped_at(self):
+        picking = []
+        for record in self:
+            rec = self.env['stock.picking'].search([('sale_id', '=', record.id)])
+            rec.write({'scheduled_date': record.goflow_shipped_at, 'date_deadline': record.goflow_shipped_at})
+
     def _create_batch_transfers(self, in_picking_orders):
         in_picking_orders = in_picking_orders.filtered(lambda rin_o: rin_o.goflow_pick_list_number).sorted(key=lambda rin_o: rin_o.goflow_pick_list_number)
         pick_list_number = in_picking_orders[0].goflow_pick_list_number
