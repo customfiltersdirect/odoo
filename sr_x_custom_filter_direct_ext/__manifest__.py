@@ -9,7 +9,7 @@
    
 
     'data': [
-        'view/ext_views.xml',
+        # 'view/ext_views.xml',
         # 'view/template_inheritance_view.xml'
      
     ]
