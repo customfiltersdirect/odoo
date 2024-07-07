@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record model="ir.ui.view" id="product_variants_view">
+        <field name="name">product.product.variants.form</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view" />
+        <field name="arch" type="xml">
+            <field name="name" position="attributes">
+                <attribute
+                    name="readonly"
+                >False</attribute>
+            </field>
+            <xpath expr="//field[@name='product_tmpl_id']/.." position="after">
+                <p class="oe_grey" invisible="id != False">
+                    Click on the field Below the name to select a template for a variant. 
+                    Keep empty for a new full product.
+                </p>
+            </xpath>
+            <xpath expr="//field[@name='product_tmpl_id']/.." position="after">
+                <field name="my_product_tmpl_id" placeholder="Product Template" invisible="id != False"/>
+            </xpath>
+                
+        </field>
+    </record>
+    <record model="ir.ui.view" id="product_variants_view_2">
+        <field name="name">product.product.variants.form</field>
+        <field name="model">product.product</field>
+        <field
+            name="inherit_id"
+            ref="create_variants_manually.product_variants_view"
+        />
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('oe_title')]" position="after">
+                <group>
+                    <field
+                        name="product_template_attribute_value_ids"
+                        nolabel="1"
+                        colspan="2"
+                        invisible="id != False or my_product_tmpl_id == False"
+                        context="{'default_product_tmpl_id': my_product_tmpl_id, 'default_owner_model': 'product.product', 'show_price_extra': True, 'show_attribute': False}"
+                    >
+                        <tree>
+                            <field name="attribute_id"/>
+                            <field name="name"/>
+                        </tree>
+                    </field>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="overholt_attribute_line_tree_view" model="ir.ui.view">
+        <field name="name">overholt.attribute.line.tree.view</field>
+        <field name="model">overholt.attribute.line</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="attribute_id"/>
+                <field name="value_ids" widget="many2many_tags" options="{'no_create_edit': True, 'color_field': 'color'}" context="{'default_attribute_id': attribute_id, 'show_attribute': False}"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="create_variants_overholt_wizard_form" model="ir.ui.view">
+        <field name="name">create.variants.overholt.wizard.form</field>
+        <field name="model">create.variants.overholt</field>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group>
+                        <field name="product_tmpl_id"/>
+                        
+                    </group>
+                    <group>
+                    </group>
+                </group>
+                <p>REMEMBER TO FIRST PUT THE VALUES IN THE PRODUCT TEMPLATE FORM: "Attributes and Variants"</p>
+                <field name="attribute_line_ids" context="{'show_attribute': False}" force_save='1'/>
+                <group>
+                    <group>
+                        <field name="number_of_variants_to_create"/>
+                        
+                    </group>
+                    <group>
+                    </group>
+                </group>
+                <footer>
+                    <button name="create_variants" string="Generate Variants" type="object" class="btn-primary"/>
+                    <button string="Discard" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
