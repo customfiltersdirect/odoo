@@ -6,6 +6,13 @@ _logger = logging.getLogger(__name__)
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
+    regenerate_variants = fields.Boolean("Regenerate Variants after changing attributes?")
+
+    def _create_variant_ids(self):
+        if not self.regenerate_variants:
+            return False
+        return super()._create_variant_ids()
+
     def action_create_variants_overholt(self):
         return {
             'view_type': 'form',

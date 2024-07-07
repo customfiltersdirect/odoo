@@ -13,6 +13,7 @@
                                 invisible="not attribute_line_ids"/>
                         </group>
                         <group>
+                            <field name="regenerate_variants"/>
                         </group>
                     </group>
                 </xpath>
