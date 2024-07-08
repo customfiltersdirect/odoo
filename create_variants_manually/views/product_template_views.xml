@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="create_variants_button" model="ir.ui.view">
+            <field name="name">create.variants.button</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_only_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='variants']//field[@name='attribute_line_ids']" position="before">
+                    <group>
+                        <group>
+                            <button name="action_create_variants_overholt" 
+                                string="Create Variants Manually" class="oe_highlight" type="object"
+                                invisible="not attribute_line_ids"/>
+                        </group>
+                        <group>
+                            <field name="regenerate_variants"/>
+                        </group>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+</odoo>

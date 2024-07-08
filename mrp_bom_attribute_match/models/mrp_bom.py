@@ -142,6 +142,15 @@ class MrpBomLine(models.Model):
 class MrpBom(models.Model):
     _inherit = "mrp.bom"
 
+    @api.depends(
+        'product_tmpl_id.attribute_line_ids.value_ids',
+        'product_tmpl_id.attribute_line_ids.attribute_id.create_variant',
+        'product_tmpl_id.attribute_line_ids.product_template_value_ids.ptav_active',
+    )
+    def _compute_possible_product_template_attribute_value_ids(self):
+        for bom in self:
+            bom.possible_product_template_attribute_value_ids = bom.product_tmpl_id.valid_product_template_attribute_line_ids.product_template_value_ids._only_active()
+
     def explode(self, product, quantity, picking_type=False):
         """
             Explodes the BoM and creates two lists with all the information you need: bom_done and line_done
