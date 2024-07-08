@@ -31,3 +31,11 @@ class ProductProduct(models.Model):
             if result:
                 match_rec = self.env['product.product'].search([('asin_var', '=', self.asin_var)], limit=1)
                 raise ValidationError("The Operation cannot be completed: this Asin ID has already assiigned to [" + str(match_rec.default_code) + "] [" + match_rec.name+ "]")
+
+class InheritSaleOrder(models.Model):
+    _inherit = 'sale.order'
+    @api.constrains('goflow_store_latest_ship')
+    def _goflow_store_latest_ship(self):
+        picking = []
+        for record in self:
+            record.write({'commitment_date': record.goflow_store_latest_ship})
