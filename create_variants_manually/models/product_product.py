@@ -18,15 +18,15 @@ class ProductProduct(models.Model):
         if self.my_product_tmpl_id:
             self.name = self.my_product_tmpl_id.name
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        res = super(ProductProduct, self).create(vals_list)
-        for product in res:
-            if product.my_product_tmpl_id:
-                last_template = product.product_tmpl_id
-                product.product_tmpl_id = product.my_product_tmpl_id
-                last_template.unlink()
-        return res
+    # @api.model_create_multi
+    # def create(self, vals_list):
+    #     res = super(ProductProduct, self).create(vals_list)
+    #     for product in res:
+    #         if product.my_product_tmpl_id:
+    #             last_template = product.product_tmpl_id
+    #             product.product_tmpl_id = product.my_product_tmpl_id
+    #             last_template.unlink()
+    #     return res
 
     def action_unlink_and_do_nothing(self):
         if self.product_tmpl_id.product_variant_ids and len(self.product_tmpl_id.product_variant_ids) == 1:
