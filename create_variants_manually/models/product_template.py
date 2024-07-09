@@ -6,11 +6,12 @@ _logger = logging.getLogger(__name__)
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
-    regenerate_variants = fields.Boolean("Regenerate Variants after changing attributes?", default=True)
-
     def _create_variant_ids(self):
-        if not self.regenerate_variants:
-            return False
+        line_attributes = self.valid_product_template_attribute_line_ids
+        if line_attributes:
+            all_never = all([line.attribute_id.create_variant == "no_variant" for line in line_attributes if line.active])
+            if all_never:
+                return False
         return super()._create_variant_ids()
 
     def action_create_variants_overholt(self):

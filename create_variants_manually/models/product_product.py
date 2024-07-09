@@ -13,10 +13,10 @@ class ProductProduct(models.Model):
 
     my_product_tmpl_id = fields.Many2one("product.template")
 
-    # @api.onchange("my_product_tmpl_id")
-    # def onchange_my_product_tmpl_id(self):
-    #     if self.my_product_tmpl_id:
-    #         self.name = self.my_product_tmpl_id.name
+    @api.onchange("my_product_tmpl_id")
+    def onchange_my_product_tmpl_id(self):
+        if self.my_product_tmpl_id:
+            self.name = self.my_product_tmpl_id.name
 
     # @api.model_create_multi
     # def create(self, vals_list):
