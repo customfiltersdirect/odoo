@@ -886,3 +886,8 @@ class SaleOrder(models.Model):
             self.env.cr.commit()
             if order_ids:
                 self.env['goflow.sync.index'].sudo().create({'name': goflow_state, 'order_ids': order_ids})
+
+    @api.constrains('goflow_store_latest_ship')
+    def _goflow_store_latest_ship(self):
+        for record in self:
+            record.write({'commitment_date': record.goflow_store_latest_ship})
