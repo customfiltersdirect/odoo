@@ -117,6 +117,7 @@ class SaleOrder(models.Model):
     goflow_store_latest_delivery = fields.Date('Goflow Store Latest Delivery')
     goflow_shipped_last_call_check = fields.Boolean('Goflow Last Call check', index=True)
     goflow_full_invoiced = fields.Boolean('Goflow Total invoiced', index=True)
+    active = fields.Boolean('Active', default=True, index=True)
 
     def _create_batch_transfers(self, in_picking_orders):
         in_picking_orders = in_picking_orders.filtered(lambda rin_o: rin_o.goflow_pick_list_number).sorted(key=lambda rin_o: rin_o.goflow_pick_list_number)
