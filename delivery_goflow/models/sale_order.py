@@ -779,6 +779,9 @@ class SaleOrder(models.Model):
         warehouse_obj_id = warehouse_obj.id
         tracking_line_list = []
         check_if_order_exists = self.search([('goflow_id', '=', goflow_id)], limit=1)
+        _logger.info("------------GO FLOW ORDER ID--------------------")
+        _logger.info(goflow_id)
+        goflow_id
         # print('check_if_order_exists', check_if_order_exists)
         order_array = order
 
