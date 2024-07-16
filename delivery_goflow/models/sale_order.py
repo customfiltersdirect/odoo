@@ -556,9 +556,9 @@ class SaleOrder(models.Model):
 
     def _prepare_order_lines(self, line, so, tracking_line_list, company_for_glow):
         goflow_product_id = line["product"]["id"]
-        product_obj = self.env["product.product"].search([('goflow_id', '=', goflow_product_id)], limit=1)
+        product_obj = self.env["product.product"].search([('goflow_id_var', '=', goflow_product_id)], limit=1)
         if not product_obj:
-            product_vals = {'name': line["product"]["description"], 'goflow_id': goflow_product_id,
+            product_vals = {'name': line["product"]["description"], 'goflow_id_var': goflow_product_id,
                             'goflow_item_no': line["product"]["item_number"], 'detailed_type': 'product',
                             'company_id': company_for_glow and company_for_glow.id or False}
             product_obj = self.env['product.product'].create(product_vals)
