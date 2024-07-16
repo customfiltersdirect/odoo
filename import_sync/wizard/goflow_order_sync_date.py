@@ -5,6 +5,10 @@ class GoflowOrderSyncDate(models.TransientModel):
     _name = "goflow.order.sync.date"
     _description = "Sale Order Sync Goflow Using Dates"
 
+    sync_style = fields.Selection([('use_last_sync_date', 'Last Sync Date'),
+                                  ('date_range', 'Date Range'),
+                                  ('order_list', 'GoFlow Order List')],
+                                 default='use_last_sync_date', required=True)
     use_last_sync_date = fields.Boolean(string='Use last sync date', default=True)
     last_sync_date = fields.Date('Last sync date', compute="_compute_last_sync_date")
 
@@ -14,6 +18,7 @@ class GoflowOrderSyncDate(models.TransientModel):
                              ('in_picking', 'in_picking')], required=True)
     from_date = fields.Date('From', default=fields.Date.context_today)
     to_date = fields.Date('To', default=fields.Date.context_today)
+    specific_orders = fields.Text(string='GoFlow Orders')
 
     @api.depends('sync_mode')
     def _compute_last_sync_date(self):
@@ -34,14 +39,18 @@ class GoflowOrderSyncDate(models.TransientModel):
 
     def action_sync_now(self):
         date_range = False
-        if not self.use_last_sync_date:
+        if self.sync_style == 'date_range':
             date_range = {
                 'date_from': self.from_date,
                 'date_to': self.to_date,
             }
-        if self.sync_mode == 'shipped':
-            self.env['sale.order'].sudo().api_call_for_sync_orders_shipped(call_for_index=True, date_range=date_range)
-        elif self.sync_mode == 'ready_to_pick':
-            self.env['sale.order'].sudo().api_call_for_sync_orders_ready_to_pick(call_for_index=True, date_range=date_range)
+        if self.sync_style in ['date_range', 'use_last_sync_date']:
+            if self.sync_mode == 'shipped':
+                self.env['sale.order'].sudo().api_call_for_sync_orders_shipped(call_for_index=True, date_range=date_range)
+            elif self.sync_mode == 'ready_to_pick':
+                self.env['sale.order'].sudo().api_call_for_sync_orders_ready_to_pick(call_for_index=True, date_range=date_range)
+            else:
+                self.env['sale.order'].sudo().api_call_for_sync_orders_in_picking(call_for_index=True, date_range=date_range)
         else:
-            self.env['sale.order'].sudo().api_call_for_sync_orders_in_picking(call_for_index=True, date_range=date_range)
+            goflow_list = set(self.specific_orders.split())
+            self.env['sale.order'].sudo().sync_so_goflow_specific_orders(goflow_list, self.sync_mode)

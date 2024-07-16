@@ -86,6 +86,16 @@ class SaleOrderLine(models.Model):
     goflow_tracking_number = fields.Char('Goflow Tracking Ref')
 
 
+def get_order_list_param(order_list):
+    order_args_list = []
+    order_args = None
+    for order in order_list:
+        order_args_list.append('filters[order_number]=%s' % (order))
+    if order_args_list:
+        order_args = "&".join(order_args_list)
+    return order_args
+
+
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
@@ -611,7 +621,7 @@ class SaleOrder(models.Model):
             print(date_range)
             date_from_str = date_from.strftime('%Y-%m-%dT%H:%M:%SZ')
             date_to_str = date_to.strftime('%Y-%m-%dT23:59:59Z')
-            if goflow_state=='shipped' :
+            if goflow_state == 'shipped':
                 url = 'https://%s.api.goflow.com/v1/orders?filters[date:gte]=%s&filters[date:lte]=%s' % (
             goflow_subdomain, str(date_from_str), str(date_to_str))
             else:
@@ -717,10 +727,97 @@ class SaleOrder(models.Model):
                 url += '&' + warehouse_args
             return url
 
+    def _preparing_url_specific_orders(self, company_for_glow, goflow_state, order_list):
+        goflow_subdomain = self.env['ir.config_parameter'].get_param('delivery_goflow.subdomain_goflow')
+        store_args = self.get_store_param()
+        warehouse_args = self.get_warehouse_param(company_for_glow)
+        order_list_params = get_order_list_param(order_list)
+        url = 'https://%s.api.goflow.com/v1/orders?filters[status]=%s&%s' % (goflow_subdomain, str(goflow_state), str(order_list_params))
+        # print('url',url)
+        if store_args:
+            url = url.rstrip()
+            url += '&' + store_args
+        if warehouse_args:
+            url = url.rstrip()
+            url += '&' + warehouse_args
+        return url
+
     def _split_batch(self, ids):
         batch_size = 500
         for batch in tools.split_every(batch_size, ids):
             yield batch
+
+    def _split_batch_100(self, ids):
+        batch_size = 100
+        for batch in tools.split_every(batch_size, ids):
+            yield batch
+
+    def insert_update_api_order(self, order, company_for_glow):
+        # print(i)
+        return_order_id = False
+        goflow_store_id = order["store"]["id"]
+        goflow_store_obj = self.env['goflow.store'].search([('goflow_id', '=', goflow_store_id)], limit=1)
+        goflow_store_obj_partner_id, goflow_store_obj_id = goflow_store_obj.partner_id.id, goflow_store_obj.id
+
+        # vals_partner_ship = self._prepare_partner_values(order)
+        # partner_ship_obj = self.env['res.partner'].search([('name', '=', vals_partner_ship['name'])], limit=1)
+        # if not partner_ship_obj:
+        #     partner_ship_obj = self.env['res.partner'].create(vals_partner_ship)
+        #     partner_ship_obj.parent_id = goflow_store_obj_partner_id
+        order_lines = order["lines"]
+        goflow_id = order["id"]
+        # goflow_ship_boxes = order["shipment"]["boxes"]
+        goflow_warehouse_id = order["warehouse"]["id"]
+        goflow_warehouse_name = order["warehouse"]["name"]
+        warehouse_obj = self.env['stock.warehouse'].search([('goflow_id', '=', goflow_warehouse_id)], limit=1)
+        if not warehouse_obj:
+            warehouse_obj = self.env['stock.warehouse'].create(
+                {'name': goflow_warehouse_name, 'goflow_id': goflow_warehouse_id,
+                 'code': goflow_warehouse_name[:2],
+                 'company_id': company_for_glow and company_for_glow.id or False, 'sync_orders': True})
+        warehouse_obj_id = warehouse_obj.id
+        tracking_line_list = []
+        check_if_order_exists = self.search([('goflow_id', '=', goflow_id)], limit=1)
+        # print('check_if_order_exists', check_if_order_exists)
+        order_array = order
+
+        print("Processing order# %s | Date: %s" % (order["order_number"], order["date"]))
+
+        if check_if_order_exists:
+            order = check_if_order_exists
+            # if order.warehouse_id != warehouse_obj:
+            #     order.action_cancel()
+            #     order.action_draft()
+            #     order.warehouse_id = warehouse_obj_id
+            #     order.action_confirm()
+            order.write(self._prepare_edit_order_values(order_array))
+            # order_ids.append(order.id)
+            return_order_id = order.id
+
+            for line in tracking_line_list:
+                goflow_line_id = line['order_line_id']
+                line_obj = self.env['sale.order.line'].search([('goflow_id', '=', goflow_line_id)], limit=1)
+                if line_obj:
+                    line_obj.goflow_tracking_number = line['tracking_number']
+
+        if not check_if_order_exists:
+            order_values = self._prepare_order_values(order, company_for_glow, warehouse_obj_id)
+            so = self.env['sale.order'].create(order_values)
+            so.partner_id = goflow_store_obj_partner_id
+            so.partner_invoice_id = goflow_store_obj_partner_id
+            so.partner_shipping_id = goflow_store_obj_partner_id
+            so.goflow_id = order["id"]
+            so.goflow_store_id = goflow_store_obj_id
+            # so.company_id = company_for_glow and company_for_glow.id or False
+            # so.warehouse_id = warehouse_obj_id
+            # order_ids.append(so.id)
+            return_order_id = so.id
+            for line in order_lines:
+                self.env['sale.order.line'].create(self._prepare_order_lines(line, so, tracking_line_list,
+                                                                             company_for_glow))
+            self.update_shipped_so_order_status(so)
+
+        return return_order_id
 
     def sync_so_goflow(self, lastcall, goflow_state, date_range, update_sync_index=False):
 
@@ -748,69 +845,46 @@ class SaleOrder(models.Model):
             for order in batch_ids:
                 i += 1
                 # print(i)
-                goflow_store_id = order["store"]["id"]
-                goflow_store_obj = self.env['goflow.store'].search([('goflow_id', '=', goflow_store_id)], limit=1)
-                goflow_store_obj_partner_id, goflow_store_obj_id = goflow_store_obj.partner_id.id, goflow_store_obj.id
-
-                # vals_partner_ship = self._prepare_partner_values(order)
-                # partner_ship_obj = self.env['res.partner'].search([('name', '=', vals_partner_ship['name'])], limit=1)
-                # if not partner_ship_obj:
-                #     partner_ship_obj = self.env['res.partner'].create(vals_partner_ship)
-                #     partner_ship_obj.parent_id = goflow_store_obj_partner_id
-                order_lines = order["lines"]
-                goflow_id = order["id"]
-                # goflow_ship_boxes = order["shipment"]["boxes"]
-                goflow_warehouse_id = order["warehouse"]["id"]
-                goflow_warehouse_name = order["warehouse"]["name"]
-                warehouse_obj = self.env['stock.warehouse'].search([('goflow_id', '=', goflow_warehouse_id)], limit=1)
-                if not warehouse_obj:
-                    warehouse_obj = self.env['stock.warehouse'].create(
-                        {'name': goflow_warehouse_name, 'goflow_id': goflow_warehouse_id,
-                         'code': goflow_warehouse_name[:2],
-                         'company_id': company_for_glow and company_for_glow.id or False, 'sync_orders': True})
-                warehouse_obj_id = warehouse_obj.id
-                tracking_line_list = []
-                check_if_order_exists = self.search([('goflow_id', '=', goflow_id)], limit=1)
-                # print('check_if_order_exists', check_if_order_exists)
-                order_array = order
-
-                print("Processing order# %s | Date: %s" % (order["order_number"], order["date"]))
-
-                if check_if_order_exists:
-                    order = check_if_order_exists
-                    # if order.warehouse_id != warehouse_obj:
-                    #     order.action_cancel()
-                    #     order.action_draft()
-                    #     order.warehouse_id = warehouse_obj_id
-                    #     order.action_confirm()
-                    order.write(self._prepare_edit_order_values(order_array))
-                    order_ids.append(order.id)
-
-                    for line in tracking_line_list:
-                        goflow_line_id = line['order_line_id']
-                        line_obj = self.env['sale.order.line'].search([('goflow_id', '=', goflow_line_id)], limit=1)
-                        if line_obj:
-                            line_obj.goflow_tracking_number = line['tracking_number']
-                if not check_if_order_exists:
-                    order_values = self._prepare_order_values(order, company_for_glow, warehouse_obj_id)
-                    so = self.env['sale.order'].create(order_values)
-                    so.partner_id = goflow_store_obj_partner_id
-                    so.partner_invoice_id = goflow_store_obj_partner_id
-                    so.partner_shipping_id = goflow_store_obj_partner_id
-                    so.goflow_id = order["id"]
-                    so.goflow_store_id = goflow_store_obj_id
-                    # so.company_id = company_for_glow and company_for_glow.id or False
-                    # so.warehouse_id = warehouse_obj_id
-                    order_ids.append(so.id)
-                    for line in order_lines:
-                        self.env['sale.order.line'].create(self._prepare_order_lines(line, so, tracking_line_list,
-                                                                                     company_for_glow))
-                    self.update_shipped_so_order_status(so)
+                order = self.insert_update_api_order(order, company_for_glow)
+                if order:
+                    order_ids.append(order)
 
             self.env.cr.commit()
             if order_ids and update_sync_index:
                 self.env['goflow.sync.index'].sudo().create({'name': goflow_state, 'order_ids': order_ids})
 
+    def sync_so_goflow_specific_orders(self, order_list, goflow_state):
+        order_ids = []
+        company_for_glow = self.env['res.company'].search([('use_for_goflow_api', '=', True)], limit=1)
+        goflow_token = self.env['ir.config_parameter'].get_param('delivery_goflow.token_goflow')
+        # goflow_cutoff_date = self.env['ir.config_parameter'].get_param('delivery_goflow.goflow_cutoff_date')
+        headers = {
+            'X-Beta-Contact': self.env.user.partner_id.email
+        }
+        for chunk_list in self._split_batch_100(order_list):
+            url = self._preparing_url_specific_orders(company_for_glow, goflow_state, chunk_list)
+            result = requests.get(url, auth=BearerAuth(goflow_token), headers=headers, verify=True)
+            # print(result.json())
+            goflow_api = result.json()
+            orders = goflow_api["data"]
+            whileCounter = 1
+            while goflow_api["next"]:
+                # print("whileCounter:",whileCounter)
+                goflow_api = requests.get(goflow_api["next"], auth=BearerAuth(goflow_token), headers=headers).json()
+                orders.extend(goflow_api["data"])
+                whileCounter = whileCounter + 1
+            # print(len(orders))
+            i = 1
+            for batch_ids in self._split_batch(orders):
+                for order in batch_ids:
+                    i += 1
+                    order = self.insert_update_api_order(order, company_for_glow)
+                    if order:
+                        order_ids.append(order)
+                self.env.cr.commit()
+                if order_ids:
+                    self.env['goflow.sync.index'].sudo().create({'name': goflow_state, 'order_ids': order_ids})
+        return order_ids
 
     def sync_update_so_goflow(self, lastcall, goflow_state, date_range, update_sync_index=False, orders=False):
 

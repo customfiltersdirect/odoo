@@ -7,19 +7,22 @@
                 <form>
                     <group>
                         <group>
-                            <label for="use_last_sync_date" string="Use last sync date?"/>
+                            <label for="sync_style" string="Use last sync date?"/>
                             <div class="o_row">
-                                <field name="use_last_sync_date"/>
+                                <field name="sync_style"/>
                                 <i class="fa fa-long-arrow-right mx-2 oe_edit_only" aria-label="Arrow icon" title="Arrow"
-                                  invisible="use_last_sync_date == False" />
-                                <field name="last_sync_date" invisible="use_last_sync_date == False"/>
+                                  invisible="sync_style != 'use_last_sync_date'" />
+                                <field name="last_sync_date" invisible="sync_style != 'use_last_sync_date'"/>
                             </div>
                             <field name="sync_mode" invisible="1"/>
-                            <label for="from_date" string="Date Ranges"  invisible="use_last_sync_date == True"/>
-                            <div class="o_row" invisible="use_last_sync_date == True">
-                                <field name="from_date" widget="daterange" options='{"related_end_date": "to_date"}'/>
-                                <i class="fa fa-long-arrow-right mx-2 oe_edit_only" aria-label="Arrow icon" title="Arrow"/>
-                                <field name="to_date" widget="daterange" options='{"related_start_date": "from_date"}'/>
+                            <label for="from_date" string="Date Ranges" invisible="sync_style != 'date_range'"/>
+                            <div class="o_row" invisible="sync_style != 'date_range'">
+                                <field name="from_date" widget="daterange" options='{"end_date_field": "to_date"}'/>
+                                <field name="to_date" invisible="1"/>
+                            </div>
+                            <label for="specific_orders" string="Go Flow Orders" invisible="sync_style != 'order_list'"/>
+                            <div class="o_row" invisible="sync_style != 'order_list'">
+                                <field name="specific_orders" placeholder="Copy paste go flow order id here.&#10;Q3dgktVN1&#10;QKkKgtVN1&#10;J81ktVN1"/>
                             </div>
                         </group>
                     </group>
