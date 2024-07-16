@@ -570,7 +570,7 @@ class SaleOrder(models.Model):
         product_obj = self.env["product.product"].search([('goflow_id_var', '=', goflow_product_id)], limit=1)
         if not product_obj:
             product_vals = {'name': line["product"]["description"], 'goflow_id_var': goflow_product_id,
-                            'goflow_item_no': line["product"]["item_number"], 'detailed_type': 'product',
+                            'goflow_item_no_var': line["product"]["item_number"], 'detailed_type': 'product',
                             'company_id': company_for_glow and company_for_glow.id or False}
             product_obj = self.env['product.product'].create(product_vals)
         try:
@@ -814,6 +814,8 @@ class SaleOrder(models.Model):
             # order_ids.append(so.id)
             return_order_id = so.id
             for line in order_lines:
+                _logger.info("--------------------------------")
+                _logger.info(line)
                 self.env['sale.order.line'].create(self._prepare_order_lines(line, so, tracking_line_list,
                                                                              company_for_glow))
             self.update_shipped_so_order_status(so)
