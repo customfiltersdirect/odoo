@@ -206,6 +206,8 @@ class SaleOrder(models.Model):
         for sync_index in sync_indexes:
             order_ids = sync_index.order_ids
             for order in order_ids:
+                _logger.info("------------GO FLOW ORDER ID--------------------")
+                _logger.info(order)
                 order.create_invoice_delivery()
                 order.env.cr.commit()
             sync_index.synced_orders = True
