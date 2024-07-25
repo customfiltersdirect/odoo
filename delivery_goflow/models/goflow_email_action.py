@@ -8,7 +8,16 @@ class SaleOrder(models.Model):
     def update_so_invoice_delivery_cron(self):
         try:
             self.sudo().update_so_invoice_delivery()
-            self.send_success_email()
+            # self.send_success_email()
+        except Exception as e:
+            error_message = traceback.format_exc()
+            self.send_error_email(error_message)
+            raise
+    
+    def update_so_import_shipped_orders_cron(self):
+        try:
+            self.sudo().api_call_for_sync_orders_shipped()
+            # self.send_success_email()
         except Exception as e:
             error_message = traceback.format_exc()
             self.send_error_email(error_message)
