@@ -169,3 +169,4 @@ class stock_picking(models.Model):
     _inherit = 'stock.picking'
 
     production_order = fields.Many2one('mrp.production' , string='Manufacturing Order')
+
