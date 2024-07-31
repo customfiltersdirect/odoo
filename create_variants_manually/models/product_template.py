@@ -16,6 +16,7 @@ class ProductTemplate(models.Model):
 
     def action_create_variants_overholt(self):
         return {
+            'name': "Generate Product Variants",
             'view_type': 'form',
             'view_mode': 'form',
             'res_model': 'create.variants.overholt',

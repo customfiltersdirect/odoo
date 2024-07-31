@@ -9,7 +9,7 @@
                     <group>
                         <group>
                             <button name="action_create_variants_overholt" 
-                                string="Create Variants Manually" class="oe_highlight" type="object"
+                                string="Generate Variants" class="oe_highlight text-nowrap" type="object"
                                 invisible="not attribute_line_ids"/>
                         </group>
                         <group>

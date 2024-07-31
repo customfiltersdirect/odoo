@@ -38,6 +38,8 @@
                         colspan="2"
                         invisible="id != False or my_product_tmpl_id == False"
                         context="{'default_product_tmpl_id': my_product_tmpl_id, 'default_owner_model': 'product.product', 'show_price_extra': True, 'show_attribute': False}"
+                        domain="[('product_tmpl_id', '=', my_product_tmpl_id)]"
+                        options="{'no_create': True}"
                     >
                         <tree>
                             <field name="attribute_id"/>

@@ -8,7 +8,7 @@ class CreateVariantsOverholt(models.TransientModel):
     _name = "create.variants.overholt"
     _description = "Create Variants Overholt Wizard"
 
-    product_tmpl_id = fields.Many2one("product.template", required=True)
+    product_tmpl_id = fields.Many2one("product.template", required=True, string="Product")
     attribute_line_ids = fields.Many2many('overholt.attribute.line', 'wizard_tmpl_attribute_lines', copy=True, required=True, string="Product Attributes")
     product_variant_ids = fields.One2many(related="product_tmpl_id.product_variant_ids")
     number_of_variants_to_create = fields.Integer("Approximate number of new variants to create (MAXIMUM)", compute="_compute_number_of_variants_to_create")
@@ -20,7 +20,7 @@ class CreateVariantsOverholt(models.TransientModel):
             for attr_line in self.product_tmpl_id.attribute_line_ids:
                 self.attribute_line_ids += self.attribute_line_ids.create(
                     {'attribute_id': attr_line.attribute_id.id,
-                    'value_ids': attr_line.value_ids
+                    'value_ids': False #attr_line.value_ids
                     })
                 
     @api.depends("attribute_line_ids", "product_tmpl_id")
@@ -31,7 +31,7 @@ class CreateVariantsOverholt(models.TransientModel):
 
             tmpl_id = wizard.product_tmpl_id
             lines_without_no_variants = tmpl_id.valid_product_template_attribute_line_ids
-            Product_Attribute = self.env["product.attribute.value"]
+            Product_Attribute = self.env["product.template.attribute.value"]
             for atl in wizard.attribute_line_ids:
                 Product_Attribute += atl.value_ids
 
@@ -48,8 +48,6 @@ class CreateVariantsOverholt(models.TransientModel):
             # Technical note: if there is no attribute, a variant is still created because
             # 'not any([])' and 'set([]) not in set([])' are True.
             if not tmpl_id.has_dynamic_attributes():
-                _logger.info("Product_Attribute")
-                _logger.info(Product_Attribute)
                 # Iterator containing all possible `product.template.attribute.value` combination
                 # The iterator is used to avoid MemoryError in case of a huge number of combination.
 
@@ -58,9 +56,7 @@ class CreateVariantsOverholt(models.TransientModel):
                 for ptal in lines_without_no_variants:
                     ptav_filtered = self.env["product.template.attribute.value"]
                     for ptav in ptal.product_template_value_ids._only_active():
-                        if ptav.product_attribute_value_id.id in Product_Attribute.ids:
-                            _logger.info("ptav.product_attribute_value_id in Product_Attribute")
-                            _logger.info(ptav.product_attribute_value_id in Product_Attribute)
+                        if ptav.id in Product_Attribute.ids:
                             ptav_filtered += ptav
                     if ptav_filtered:
                         combs.append(ptav_filtered)
@@ -68,12 +64,11 @@ class CreateVariantsOverholt(models.TransientModel):
                 approximate = 1
                 for comb in combs:
                     approximate *= len(comb)
-                variants_to_create += approximate - len(existing_variants) + 1
+                if not combs:
+                    approximate = 0
+                variants_to_create += approximate
 
             # variants_to_unlink += all_variants - current_variants_to_activate
-
-        _logger.info("variants_to_create")
-        _logger.info(variants_to_create)
 
         if variants_to_create:
             wizard.number_of_variants_to_create = variants_to_create
@@ -93,15 +88,9 @@ class CreateVariantsOverholt(models.TransientModel):
 
             tmpl_id = wizard.product_tmpl_id
             lines_without_no_variants = tmpl_id.valid_product_template_attribute_line_ids
-            Product_Attribute = self.env["product.attribute.value"]
-            match_all_attributes = self.env["product.attribute.value"]
+            Product_Attribute = self.env["product.template.attribute.value"]
             for atl in wizard.attribute_line_ids:
-                if not atl.match_all:
-                    _logger.info("not matchall")
-                    Product_Attribute += atl.value_ids
-                else:
-                    _logger.info("else matchall")
-                    match_all_attributes += atl.value_ids
+                Product_Attribute += atl.value_ids
 
             all_variants = tmpl_id.with_context(active_test=False).product_variant_ids.sorted(lambda p: (p.active, -p.id))
 
@@ -120,32 +109,19 @@ class CreateVariantsOverholt(models.TransientModel):
             # Technical note: if there is no attribute, a variant is still created because
             # 'not any([])' and 'set([]) not in set([])' are True.
             if not tmpl_id.has_dynamic_attributes():
-                _logger.info("Product_Attribute")
-                _logger.info(Product_Attribute)
-                # Iterator containing all possible `product.template.attribute.value` combination
                 # The iterator is used to avoid MemoryError in case of a huge number of combination.
                 combs = []
                 attributes_to_match = self.env["product.template.attribute.value"]
                 for ptal in lines_without_no_variants:
-                    _logger.info("ptal")
-                    _logger.info(ptal)
                     ptav_filtered = self.env["product.template.attribute.value"]
                     for ptav in ptal.product_template_value_ids._only_active():
-                        _logger.info("ptav")
-                        _logger.info(ptav)
-                        if ptav.product_attribute_value_id in Product_Attribute:
-                            _logger.info("ptav.product_attribute_value_id in Product_Attribute")
-                            _logger.info(ptav.product_attribute_value_id in Product_Attribute)
+                        if ptav in Product_Attribute:
                             ptav_filtered += ptav
-                        if ptav.product_attribute_value_id in match_all_attributes:
-                            attributes_to_match += ptav
                     if ptav_filtered:
                         combs.append(ptav_filtered)
                 attributes_to_match = tuple(attributes_to_match)
                 all_combinations = [comb + attributes_to_match for comb in itertools.product(*combs)]
 
-                _logger.info("all_combinations list")
-                _logger.info(all_combinations)
                 # For each possible variant, create if it doesn't exist yet.
                 for combination_tuple in all_combinations:
                     combination = self.env['product.template.attribute.value'].concat(*combination_tuple)

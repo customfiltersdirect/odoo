@@ -10,12 +10,12 @@ _log = logging.getLogger(__name__)
 class MrpBomLine(models.Model):
     _inherit = "mrp.bom.line"
 
-    product_id = fields.Many2one("product.product", "Component", required=False)
+    product_id = fields.Many2one("product.product", "Product Variant", required=False)
     product_backup_id = fields.Many2one(
         "product.product", help="Technical field to store previous value of product_id"
     )
     component_template_id = fields.Many2one(
-        "product.template", "Component (product template)"
+        "product.template", "Product"
     )
     match_on_attribute_ids = fields.Many2many(
         "product.attribute",
