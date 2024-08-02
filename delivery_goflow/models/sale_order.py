@@ -818,7 +818,7 @@ class SaleOrder(models.Model):
             so.goflow_id = order["id"]
             so.goflow_store_id = goflow_store_obj_id
             # so.company_id = company_for_glow and company_for_glow.id or False
-            # so.warehouse_id = warehouse_obj_id
+            so.warehouse_id = warehouse_obj_id
             # order_ids.append(so.id)
             return_order_id = so.id
             for line in order_lines:
