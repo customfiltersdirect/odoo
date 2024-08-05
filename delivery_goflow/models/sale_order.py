@@ -295,7 +295,7 @@ class SaleOrder(models.Model):
         else:
             lastcall_delay = cron_job_id.lastcall
 
-        lastcall_delay_new = lastcall_delay - timedelta(days=10)
+        lastcall_delay_new = lastcall_delay - timedelta(days=1)
         self.sync_so_goflow(lastcall_delay_new, goflow_state, date_range, update_sync_index=True)
         if not date_range:
             self.env['ir.config_parameter'].sudo().set_param('delivery_goflow.last_inpicking_sync', calling_date_time)
@@ -407,7 +407,7 @@ class SaleOrder(models.Model):
         else:
             lastcall_delay = cron_job_id.lastcall
 
-        lastcall_delay_new = lastcall_delay - timedelta(days=10)
+        lastcall_delay_new = lastcall_delay - timedelta(days=1)
         self.sync_so_goflow(lastcall_delay_new, goflow_state, date_range, update_sync_index=True)
         if not date_range:
             self.env['ir.config_parameter'].sudo().set_param('delivery_goflow.last_readytopick_sync', calling_date_time)
