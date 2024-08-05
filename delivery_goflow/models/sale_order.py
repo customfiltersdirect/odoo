@@ -113,7 +113,7 @@ class SaleOrder(models.Model):
     goflow_shipping_method = fields.Char('Goflow Shipping Method')
     goflow_scac = fields.Char('Goflow SCAC')
     goflow_shipped_at = fields.Datetime('Goflow Shipped At')
-    goflow_store_latest_ship = fields.Date('Goflow Store Latest Ship')
+    goflow_store_latest_ship = fields.Datetime('Goflow Store Latest Ship')
     goflow_store_latest_delivery = fields.Date('Goflow Store Latest Delivery')
     goflow_shipped_last_call_check = fields.Boolean('Goflow Last Call check', index=True)
     goflow_full_invoiced = fields.Boolean('Goflow Total invoiced', index=True)
