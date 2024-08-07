@@ -202,14 +202,19 @@ class SaleOrder(models.Model):
                 order.create_invoice_delivery()
 
     def update_so_invoice_delivery(self):
-        sync_indexes = self.env['goflow.sync.index'].search([('synced_orders', '=', False)])
+        count = 0
+        sync_indexes = self.env['goflow.sync.index'].search([('synced_orders', '=', False)],limit=1)
+
         for sync_index in sync_indexes:
             order_ids = sync_index.order_ids
             for order in order_ids:
-                _logger.info("------------GO FLOW ORDER ID--------------------")
-                _logger.info(order)
-                order.create_invoice_delivery()
-                order.env.cr.commit()
+                if count != 100:
+                    count = count + 1
+                    _logger.info(count)
+                    _logger.info("------------GO FLOW ORDER ID--------------------")
+                    _logger.info(order)
+                    order.create_invoice_delivery()
+                    order.env.cr.commit()
             sync_index.synced_orders = True
 
     def update_so_batch_transfers(self):
@@ -351,7 +356,7 @@ class SaleOrder(models.Model):
             lastcall_delay = cron_job_id.lastcall
 
 
-        lastcall_delay_new = lastcall_delay - timedelta(days=3)
+        lastcall_delay_new = lastcall_delay - timedelta(days=1)
         self.sync_so_goflow(lastcall_delay_new, goflow_state, date_range, update_sync_index=True)
         if not date_range:
             self.env['ir.config_parameter'].sudo().set_param('delivery_goflow.last_shipped_sync', calling_date_time)
