@@ -208,7 +208,7 @@ class SaleOrder(models.Model):
         for sync_index in sync_indexes:
             order_ids = sync_index.order_ids
             for order in order_ids:
-                if count != 100:
+                if count != 500:
                     count = count + 1
                     _logger.info(count)
                     _logger.info("------------GO FLOW ORDER ID--------------------")
