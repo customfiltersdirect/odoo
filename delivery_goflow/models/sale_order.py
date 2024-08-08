@@ -202,7 +202,7 @@ class SaleOrder(models.Model):
                 order.create_invoice_delivery()
 
     def update_so_invoice_delivery(self):
-        sync_indexes = self.env['goflow.sync.index'].search([('synced_orders', '=', False)],limit=1)
+        sync_indexes = self.env['goflow.sync.index'].search([('synced_orders', '=', False)])
 
         for sync_index in sync_indexes:
             order_ids = sync_index.order_ids
