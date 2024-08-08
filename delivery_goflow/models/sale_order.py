@@ -202,19 +202,16 @@ class SaleOrder(models.Model):
                 order.create_invoice_delivery()
 
     def update_so_invoice_delivery(self):
-        count = 0
         sync_indexes = self.env['goflow.sync.index'].search([('synced_orders', '=', False)],limit=1)
 
         for sync_index in sync_indexes:
             order_ids = sync_index.order_ids
             for order in order_ids:
-                if count != 100000:
-                    count = count + 1
-                    _logger.info(count)
-                    _logger.info("------------GO FLOW ORDER ID--------------------")
-                    _logger.info(order)
-                    order.create_invoice_delivery()
-                    order.env.cr.commit()
+                # _logger.info(count)
+                _logger.info("------------GO FLOW ORDER ID--------------------")
+                _logger.info(order)
+                order.create_invoice_delivery()
+                # order.env.cr.commit()
             sync_index.synced_orders = True
 
     def update_so_batch_transfers(self):
