@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
-    'name': 'Sky Rocket X Custom Filter Direct EXT',
+    'name': 'Sky Rocket X CFD Shop Floor',
     'version': '1.0',
     'sequence': 160,
     'category': 'Productivity',
@@ -16,6 +16,8 @@
     'license': 'LGPL-3',
     'assets': {
         'web.assets_backend': [
+            'sr_x_custom_filter_direct_ext/static/src/**/*.js',
+
         ],
     }
 }
