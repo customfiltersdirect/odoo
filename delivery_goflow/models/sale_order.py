@@ -203,15 +203,19 @@ class SaleOrder(models.Model):
 
     def update_so_invoice_delivery(self):
         sync_indexes = self.env['goflow.sync.index'].search([('synced_orders', '=', False)])
-
+        counter = 1
         for sync_index in sync_indexes:
+            _logger.info("------------Running Invoice Delivery by Index ID--------------------")
+            _logger.info("Index Progress %s/%s" % (counter, len(sync_indexes.ids)))
+            counter += 1
+
             order_ids = sync_index.order_ids
             for order in order_ids:
                 # _logger.info(count)
                 _logger.info("------------GO FLOW ORDER ID--------------------")
                 _logger.info(order)
                 order.create_invoice_delivery()
-                # order.env.cr.commit()
+                self.env.cr.commit()
             sync_index.synced_orders = True
 
     def update_so_batch_transfers(self):
