@@ -751,7 +751,7 @@ class SaleOrder(models.Model):
         return url
 
     def _split_batch(self, ids):
-        batch_size = 500
+        batch_size = 100
         for batch in tools.split_every(batch_size, ids):
             yield batch
 
