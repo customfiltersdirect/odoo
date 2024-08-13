@@ -215,7 +215,8 @@ class SaleOrder(models.Model):
                 _logger.info("------------GO FLOW ORDER ID--------------------")
                 _logger.info(order)
                 order.create_invoice_delivery()
-                self.env.cr.commit()
+
+            self.env.cr.commit()
             sync_index.synced_orders = True
 
     def update_so_batch_transfers(self):
