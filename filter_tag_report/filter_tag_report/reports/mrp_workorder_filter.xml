@@ -1,22 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <data>
-        <!-- Paper Format Definition -->
-        <record id="filter_tag_report_invoice_paperformat_event_badge" model="report.paperformat">
-            <field name="name">report_filter_template</field>
-            <field name="default" eval="False"/>
-            <field name="disable_shrinking" eval="False"/>
-<!--            <field name="format">A4</field>-->
-            <field name="page_height">297</field>
-            <field name="page_width">210</field>
-            <field name="orientation">Portrait</field>
-            <field name="margin_top">5</field>
-            <field name="margin_bottom">10</field>
-            <field name="margin_left">7</field>
-            <field name="margin_right">7</field>
-            <field name="header_spacing">10</field>
-            <field name="dpi">90</field>
-        </record>
 
         <!-- Report Action -->
         <record id="custom_invoice_report_test" model="ir.actions.report">
