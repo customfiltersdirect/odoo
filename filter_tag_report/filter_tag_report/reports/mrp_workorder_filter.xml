@@ -27,7 +27,7 @@
             <field name="report_file">filter_tag_report.report_invoice_template_filter</field>
             <field name="print_report_name">'FilterTags ' + object.name</field>
             <field name="binding_model_id" ref="mrp_workorder.model_mrp_workorder"/>
-            <field name="paperformat_id" ref="filter_tag_report_invoice_paperformat_event_badge"/>
+            <!-- <field name="paperformat_id" ref="filter_tag_report_invoice_paperformat_event_badge"/> -->
         </record>
     </data>
 </odoo>
