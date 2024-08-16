@@ -5,6 +5,7 @@ class work_order(models.Model):
     _inherit = 'mrp.workorder'
 
     attribute_values = fields.Char(string='Attribute Values', compute='_compute_attribute_values', store=True)
+    Product_internal_reference = fields.Char(related='product_id.default_code', string="Product Internal Reference")
 
     # @api.depends('product_id')
     # def _compute_attribute_values(self):

@@ -9,4 +9,14 @@
             </xpath>
         </field>
     </record>
+    <record id="mrp_workorder_view_form_inherit_workorder" model="ir.ui.view">
+    <field name="name">mrp.workorder.view.form.inherit.workorder</field>
+    <field name="model">mrp.workorder</field>
+    <field name="inherit_id" ref="mrp.mrp_production_workorder_form_view_inherit"/>
+    <field name="arch" type="xml">
+        <xpath expr="//field[@name='workcenter_id']" position="after">
+            <field name="Product_internal_reference"/>
+        </xpath>
+            </field>
+</record>
 </odoo>
