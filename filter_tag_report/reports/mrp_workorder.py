@@ -31,14 +31,20 @@ class FilterTagReport(models.AbstractModel):
                     elif attribute_name == 'Filter Length':
                         clean_value = attribute_value.replace('L:', '').replace('"', '').strip()
                         length = float(clean_value)
+                        if length.is_integer():
+                            length = int(length)
 
                     elif attribute_name == 'Filter Height':
                         clean_value = attribute_value.replace('H:', '').replace('"', '').strip()
                         height = float(clean_value)
+                        if height.is_integer():
+                            height = int(height)
 
                     elif attribute_name == 'FIlter Width':
                         clean_value = attribute_value.replace('W:', '').replace('"', '').strip()
                         width = float(clean_value)
+                        if width.is_integer():
+                            width = int(width)
 
             total = workorder.qty_production * pack_quantity * 2
 

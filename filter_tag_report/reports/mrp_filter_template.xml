@@ -8,19 +8,19 @@
                     <t t-if="doc['total'] and doc['total'] > 0">
 
                         <t t-set="total_as_int" t-value="int(doc['total'])"/>
-
-                        <t t-set="width_as_int" t-value="int(doc['width'])"/>
-                        <t t-set="length_as_int" t-value="int(doc['length'])"/>
-                        <t t-set="height_as_int" t-value="int(doc['height'])"/>
                         <div class='col' style="text-align:center;font-size:35px">
+                        <t t-set='count' t-value='0'/>
                             <t t-foreach="range(total_as_int)" t-as="i">
+                            <t t-set='count' t-value='count + 1'/>
                                 <b>
-                                <t t-esc="width_as_int"/>
+                                <t t-esc="doc['width']"/>
                                 x
-                                <t t-esc="length_as_int"/>
+                                <t t-esc="doc['length']"/>
                                 x
-                                    <t t-esc="height_as_int"/></b>
-                                <p style="page-break-after: always;"/>
+                                    <t t-esc="doc['height']"/></b>
+                                <t t-if='count != total_as_int'>
+                                    <p style="page-break-after: always;"/>
+                                </t>
 
                             </t>
                         </div>
