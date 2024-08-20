@@ -1,12 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-
-    <menuitem id="menu_reporting_stock"
-              name="Stock On-Hand"
-              action="action_sale_stock_report"
-              parent="sale.menu_sale_report"
-              sequence="10"/>
-
     <record id="view_sale_stock_pivot" model="ir.ui.view">
         <field name="name">sale.stock.pivot</field>
         <field name="model">sale.stock.report</field>
@@ -28,9 +21,6 @@
         <field name="arch" type="xml">
             <graph string="Stock Sale Report" type="line">
                 <field name="product_id" type="line"/>
-<!--                <field name="bb" type="measure"/>-->
-<!--                <field name="on_hand" type="measure"/>-->
-<!--                <field name="difference" type="measure"/>-->
             </graph>
         </field>
     </record>
@@ -45,7 +35,6 @@
                 <attribute name="type">pie</attribute>
                 <attribute name="order">DESC</attribute>
                 <field name="product_id" type="pie"/>
-<!--                <field name="difference" type="measure"/>-->
             </graph>
         </field>
     </record>
@@ -60,7 +49,6 @@
                 <attribute name="type">bar</attribute>
                 <attribute name="order">DESC</attribute>
                 <field name="product_id" type="bar"/>
-<!--                <field name="bb" type="measure"/>-->
             </graph>
         </field>
     </record>
@@ -72,25 +60,29 @@
         <field name="arch" type="xml">
             <tree string="Stock Sale Report">
                 <field name="product_id"/>
-<!--                <field name="bb"/>-->
-<!--                <field name="on_hand"/>-->
-<!--                <field name="difference"/>-->
             </tree>
         </field>
     </record>
 
-    <!-- Search View -->
+
     <record id="sale_stock_search" model="ir.ui.view">
         <field name="name">sale.stock.search</field>
         <field name="model">sale.stock.report</field>
         <field name="arch" type="xml">
             <search string="Stock Sale Report">
-                <!-- Update search fields here if needed -->
+                <field name="product_id"/>
+                <field name="difference_status"/>
+                <filter string="Short" name="short" domain="[('difference_status', '=', 'SHORT')]"/>
+                <filter string="OK" name="ok" domain="[('difference_status', '=', 'OK')]"/>
+                <filter string="On Hand > 0" name="on_hand_positive" domain="[('on_hand', '&gt;', 0)]"/>
+                <filter string="On Hand = 0" name="on_hand_zero" domain="[('on_hand', '=', 0)]"/>
+                <filter string="BB > 0" name="bb_positive" domain="[('bb', '&gt;', 0)]"/>
+                <filter string="Difference &gt; 0" name="difference_positive" domain="[('difference', '&gt;', 0)]"/>
+                <filter string="Difference &lt; 0" name="difference_negative" domain="[('difference', '&lt;', 0)]"/>
             </search>
         </field>
     </record>
 
-    <!-- Action for Pivot and Graph -->
     <record id="action_sale_stock_report" model="ir.actions.act_window">
         <field name="name">Stock Sale Report</field>
         <field name="res_model">sale.stock.report</field>
@@ -100,7 +92,6 @@
         <field name="help">This report performs analysis on your stock sales...</field>
     </record>
 
-    <!-- Action for Detailed Report -->
     <record id="action_sale_stock_report_detailed" model="ir.actions.act_window">
         <field name="name">Detailed Stock Sale Report</field>
         <field name="res_model">sale.stock.report</field>
@@ -109,5 +100,11 @@
         <field name="search_view_id" ref="sale_stock_search"/>
         <field name="help">This report provides a detailed view of stock sales...</field>
     </record>
+
+    <menuitem id="menu_reporting_stock"
+              name="Stock On-Hand"
+              action="action_sale_stock_report"
+              parent="sale.menu_sale_report"
+              sequence="10"/>
 
 </odoo>
