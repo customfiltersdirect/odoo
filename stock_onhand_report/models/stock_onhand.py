@@ -15,7 +15,7 @@ class StockSale(models.Model):
     difference = fields.Float(string="Difference", readonly=True)
     difference_status = fields.Char(string="Difference Status", readonly=True)
 
-    date_order = fields.Date(string="Order Date", readonly=True)
+    date_deadline = fields.Date(string="Order Date", readonly=True)
 
 
     # date_from = fields.Date(string="From Date")
@@ -47,7 +47,7 @@ class StockSale(models.Model):
                         WHEN COALESCE(SQ.quantity, 0) - SUM(l.product_uom_qty) > 0 THEN 'OK'
                         ELSE 'SHORT'
                     END AS difference_status,
-                    MAX(so.date_order) AS date_order
+                    MAX(sp.date_deadline) AS date_deadline
                 FROM
                     unique_products p
                 LEFT JOIN
