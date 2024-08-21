@@ -28,41 +28,53 @@ class StockSale(models.Model):
 
         self.env.cr.execute("""
             CREATE OR REPLACE VIEW sale_stock_report AS (
+                WITH unique_products AS (
+                    SELECT DISTINCT l.product_id
+                    FROM sale_order_line l
+                    JOIN sale_order so ON l.order_id = so.id
+                    JOIN stock_picking sp ON so.id = sp.sale_id
+                    WHERE
+                        l.display_type IS NULL
+                        AND so.state NOT IN ('done', 'cancel')
+                        AND sp.state NOT IN ('done', 'cancel')
+                )
                 SELECT
-                    l.product_id AS product_id,  
-                    SUM(l.product_uom_qty) AS bb,  
-                    COALESCE(SQ.quantity, 0) AS on_hand,  
-                    COALESCE(SQ.quantity,0) - SUM(l.product_uom_qty) AS difference,
+                    p.product_id AS product_id,
+                    SUM(l.product_uom_qty) AS bb,
+                    COALESCE(SQ.quantity, 0) AS on_hand,
+                    COALESCE(SQ.quantity, 0) - SUM(l.product_uom_qty) AS difference,
                     CASE
                         WHEN COALESCE(SQ.quantity, 0) - SUM(l.product_uom_qty) > 0 THEN 'OK'
                         ELSE 'SHORT'
                     END AS difference_status,
-                    so.date_order AS date_order
+                    MAX(so.date_order) AS date_order
                 FROM
-                    sale_order_line l   
-                JOIN
+                    unique_products p
+                LEFT JOIN
+                    sale_order_line l ON l.product_id = p.product_id
+                LEFT JOIN
                     sale_order so ON l.order_id = so.id
-                JOIN
+                LEFT JOIN
                     stock_picking sp ON so.id = sp.sale_id
                 LEFT JOIN (
-                    SELECT 
-                        sq.product_id, 
-                        SUM(sq.quantity) AS quantity  
-                    FROM 
+                    SELECT
+                        sq.product_id,
+                        SUM(sq.quantity) AS quantity
+                    FROM
                         stock_quant sq
-                    JOIN 
+                    JOIN
                         stock_location sl ON sq.location_id = sl.id
-                    WHERE 
-                        sl.usage = 'internal' 
-                    GROUP BY 
-                        sq.product_id 
-                ) AS SQ ON l.product_id = SQ.product_id
+                    WHERE
+                        sl.usage = 'internal'
+                    GROUP BY
+                        sq.product_id
+                ) AS SQ ON p.product_id = SQ.product_id
                 WHERE
-                    l.display_type IS NULL 
+                    l.display_type IS NULL
                     AND so.state NOT IN ('done', 'cancel')
                     AND sp.state NOT IN ('done', 'cancel')
                 GROUP BY
-                    l.product_id, SQ.quantity, so.date_order
+                    p.product_id, SQ.quantity
                     
             )
         """)
