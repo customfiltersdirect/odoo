@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+    <record id="action_production_order_merge" model="ir.actions.server">
+        <field name="name">Bulk Merge</field>
+        <field name="model_id" ref="mrp.model_mrp_production"/>
+        <field name="binding_model_id" ref="mrp.model_mrp_production"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+        if records:
+            same_manufacture_orders = {}
+            for production in records:
+                if production.state not in ('draft', 'confirmed'): #Only manufacturing orders in either a draft or confirmed state can be merged
+                    continue
+                
+                if not production.bom_id: #Only manufacturing orders with a Bill of Materials can be merged
+                    continue
+                
+                if (production.product_id, production.bom_id, production.state, production.picking_type_id) in same_manufacture_orders:
+                    same_manufacture_orders[(production.product_id, production.bom_id, production.state, production.picking_type_id)] += production
+                else:
+                    same_manufacture_orders[(production.product_id, production.bom_id, production.state, production.picking_type_id)] = production
+                #You can only merge manufacturing orders of identical products with same BoM.
+                #You can only merge manufacturing with the same state.
+                #You can only merge manufacturing with the same operation type
+                #TODO: You can only merge manufacturing orders with no additional components or by-products.
+                
+            for productions in same_manufacture_orders.values():
+                if len(productions) &gt; 1: #You need at least two production orders to merge them.
+                    lowest_schedule_date = min(productions.mapped("date_start"))
+                    now = datetime.datetime.now()
+                    if lowest_schedule_date &lt; now:
+                        lowest_schedule_date = now
+                    result = productions.action_merge()
+                    env["mrp.production"].browse(result["res_id"]).sudo().write(
+                        {'date_start': lowest_schedule_date}
+                    )
+
+        </field>
+    </record>
+
+    </data>
+
+    <data noupdate="1">
+        <record forcecreate="True" id="ir_cron_merge_same_manufacture_orders" model="ir.cron">
+            <field name="name">merge_same_production_order: Merge Production Orders</field>
+            <field name="model_id" ref="model_mrp_production"/>
+            <field name="state">code</field>
+            <field name="code">model.merge_same_production_orders()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="False"/>
+            <field eval="False" name="doall"/>
+        </record>
+    </data>
+</odoo>
