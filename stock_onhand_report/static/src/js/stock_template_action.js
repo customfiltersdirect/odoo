@@ -48,7 +48,7 @@ patch(PivotRenderer.prototype, {
     _onTriggerCustomQuery() {
         this.actionService.doAction({
             type: 'ir.actions.server',
-            id: 1215,
+            id: 1197,
         });
     },
 
