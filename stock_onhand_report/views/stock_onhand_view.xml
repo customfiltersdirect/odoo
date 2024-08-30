@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+
+
+
     <record id="view_sale_stock_pivot" model="ir.ui.view">
         <field name="name">sale.stock.pivot</field>
         <field name="model">sale.stock.report</field>
         <field name="arch" type="xml">
             <pivot string="Stock Sale Report">
-                <field name="product_id" type="col"/>
+                <field name="product_id" type="row"/>
+<!--                <field name="product_name" type="measure"/>-->
                 <field name="bb" type="measure"/>
                 <field name="on_hand" type="measure"/>
                 <field name="difference" type="measure"/>
@@ -15,43 +19,58 @@
     </record>
 
     <!-- Graph View -->
-    <record id="view_sale_stock_graph" model="ir.ui.view">
-        <field name="name">sale.stock.graph</field>
-        <field name="model">sale.stock.report</field>
-        <field name="arch" type="xml">
-            <graph string="Stock Sale Report" type="line">
-                <field name="product_id" type="line"/>
-            </graph>
-        </field>
-    </record>
+<!--    <record id="view_sale_stock_graph" model="ir.ui.view">-->
+<!--        <field name="name">sale.stock.graph</field>-->
+<!--        <field name="model">sale.stock.report</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <graph string="Stock Sale Report" type="line">-->
+<!--                <field name="product_id" type="line"/>-->
+<!--                &lt;!&ndash;                <field name="bb" type="measure"/>&ndash;&gt;-->
+<!--                &lt;!&ndash;                <field name="on_hand" type="measure"/>&ndash;&gt;-->
+<!--                &lt;!&ndash;                <field name="difference" type="measure"/>&ndash;&gt;-->
+<!--            </graph>-->
+<!--        </field>-->
+<!--    </record>-->
 
     <!-- Pie Chart View -->
-    <record id="sale_stock_graph_pie" model="ir.ui.view">
-        <field name="name">sale.stock.graph.pie</field>
-        <field name="model">sale.stock.report</field>
-        <field name="inherit_id" ref="view_sale_stock_graph"/>
-        <field name="arch" type="xml">
-            <graph position="attributes">
-                <attribute name="type">pie</attribute>
-                <attribute name="order">DESC</attribute>
-                <field name="product_id" type="pie"/>
-            </graph>
+<!--    <record id="sale_stock_graph_pie" model="ir.ui.view">-->
+<!--        <field name="name">sale.stock.graph.pie</field>-->
+<!--        <field name="model">sale.stock.report</field>-->
+<!--        <field name="inherit_id" ref="view_sale_stock_graph"/>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <graph position="attributes">-->
+<!--                <attribute name="type">pie</attribute>-->
+<!--                <attribute name="order">DESC</attribute>-->
+<!--                <field name="product_id" type="pie"/>-->
+<!--                &lt;!&ndash;                <field name="difference" type="measure"/>&ndash;&gt;-->
+<!--            </graph>-->
+<!--        </field>-->
+<!--    </record>-->
+
+    <record id="action_execute_custom_query" model="ir.actions.server">
+        <field name="name">Execute Custom Query</field>
+        <field name="model_id" ref="model_sale_stock_report"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = env.ref('stock_onhand_report.action_sale_stock_report').read()[0]
+<!--            action-->
         </field>
     </record>
 
-    <!-- Bar Chart View -->
-    <record id="sale_stock_graph_bar" model="ir.ui.view">
-        <field name="name">sale.stock.graph.bar</field>
-        <field name="model">sale.stock.report</field>
-        <field name="inherit_id" ref="view_sale_stock_graph"/>
-        <field name="arch" type="xml">
-            <graph position="attributes">
-                <attribute name="type">bar</attribute>
-                <attribute name="order">DESC</attribute>
-                <field name="product_id" type="bar"/>
-            </graph>
-        </field>
-    </record>
+
+<!--    <record id="sale_stock_graph_bar" model="ir.ui.view">-->
+<!--        <field name="name">sale.stock.graph.bar</field>-->
+<!--        <field name="model">sale.stock.report</field>-->
+<!--        <field name="inherit_id" ref="view_sale_stock_graph"/>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <graph position="attributes">-->
+<!--                <attribute name="type">bar</attribute>-->
+<!--                <attribute name="order">DESC</attribute>-->
+<!--                <field name="product_id" type="bar"/>-->
+<!--                &lt;!&ndash;                <field name="bb" type="measure"/>&ndash;&gt;-->
+<!--            </graph>-->
+<!--        </field>-->
+<!--    </record>-->
 
     <!-- Tree View -->
     <record id="sale_stock_view_tree" model="ir.ui.view">
@@ -60,6 +79,9 @@
         <field name="arch" type="xml">
             <tree string="Stock Sale Report">
                 <field name="product_id"/>
+                <!--                <field name="bb"/>-->
+                <!--                <field name="on_hand"/>-->
+                <!--                <field name="difference"/>-->
             </tree>
         </field>
     </record>
@@ -71,7 +93,12 @@
         <field name="arch" type="xml">
             <search string="Stock Sale Report">
                 <field name="product_id"/>
+<!--                <field name="product_name"/>-->
                 <field name="difference_status"/>
+<!--                <field name="date_from"/>-->
+<!--                <field name="date_to"/>-->
+
+
                 <filter string="Short" name="short" domain="[('difference_status', '=', 'SHORT')]"/>
                 <filter string="OK" name="ok" domain="[('difference_status', '=', 'OK')]"/>
                 <filter string="On Hand > 0" name="on_hand_positive" domain="[('on_hand', '&gt;', 0)]"/>
@@ -79,18 +106,48 @@
                 <filter string="BB > 0" name="bb_positive" domain="[('bb', '&gt;', 0)]"/>
                 <filter string="Difference &gt; 0" name="difference_positive" domain="[('difference', '&gt;', 0)]"/>
                 <filter string="Difference &lt; 0" name="difference_negative" domain="[('difference', '&lt;', 0)]"/>
+
+
+<!--                <filter string="Date Range" name="date_range" domain="['&amp;', ('date_order', '&gt;=', 'date_from'), ('date_order', '&lt;=', 'date_to')]"/>-->
+
+
+
+
+
+
+<!--                <field name="date_from" string="Date From" filter_domain="[('date', '&gt;=', date_from)]"/>-->
+<!--                <field name="date_to" string="Date To" filter_domain="[('date', '&lt;=', date_to)]"/>-->
+
+<!--                <filter name="filter_date_range" string="Date Range" domain="[]" context="{'date_range': True}"/>-->
+
+        <!-- Other filters and fields -->
+<!--                <field name="date_from" string="Date From"/>-->
+<!--                <field name="date_to" string="Date To"/>-->
+<!--                <filter string="Order Date" name="group_by_date_day" context="{'group_by':'date:day'}"-->
+<!--                        />-->
+<!--                <group expand="0" string="Extended Filters">-->
+<!--                <filter name="date_from_me" domain="[('date_from', '&gt;=', 'date_order')]"/>-->
+<!--                <filter name="date_to_me" domain="[('date_to', '&lt;=', 'date_order')]"/>-->
+<!--                </group>-->
+<!--                <filter string="Date Range" name="date_range" >-->
+<!--                    &lt;!&ndash;                    <group expand="1" string="Date Range">&ndash;&gt;-->
+<!--&lt;!&ndash;                    </group>&ndash;&gt;-->
+<!--                </filter>-->
+
             </search>
         </field>
     </record>
 
+
     <record id="action_sale_stock_report" model="ir.actions.act_window">
         <field name="name">Stock Sale Report</field>
         <field name="res_model">sale.stock.report</field>
-        <field name="view_mode">graph,pivot</field>
-        <field name="view_id" ref="view_sale_stock_graph"/>
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="view_sale_stock_pivot"/>
         <field name="search_view_id" ref="sale_stock_search"/>
         <field name="help">This report performs analysis on your stock sales...</field>
     </record>
+
 
     <record id="action_sale_stock_report_detailed" model="ir.actions.act_window">
         <field name="name">Detailed Stock Sale Report</field>

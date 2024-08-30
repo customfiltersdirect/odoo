@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="stock_onhand_report.PivotView.buttons" t-inherit="web.PivotView.Buttons" t-inherit-mode="extension">
+        <xpath expr="//button[hasclass('o_pivot_flip_button')]" position="before">
+            <div class="btn-group" role="toolbar" aria-label="Pivot NewButtons">
+                <button class="btn btn-secondary o_pivot_custom_wizard"
+                        t-on-click="_onOpenCustomWizard">
+                    Date Range
+                </button>
+                <button class="btn btn-secondary o_pivot_custom_query"
+                        t-on-click="_onTriggerCustomQuery">
+                    Refresh
+                </button>
+            </div>
+        </xpath>
+    </t>
+
+</templates>
