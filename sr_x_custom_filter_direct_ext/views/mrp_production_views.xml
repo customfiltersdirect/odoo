@@ -1,0 +1,22 @@
+<odoo>
+    <record id="mrp_production_tree_view_inherit" model="ir.ui.view">
+        <field name="name">mrp.production.tree.view.inherit</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="inside">
+                <field name="attribute_values"/>
+            </xpath>
+        </field>
+    </record>
+    <!-- <record id="mrp_production_tree_view_inherit" model="ir.ui.view">
+    <field name="name">mrp.production.tree.view.inherit</field>
+    <field name="model">mrp.production</field>
+    <field name="inherit_id" ref="mrp.mrp_production_tree_view"/>
+    <field name="arch" type="xml">
+        <xpath expr="//field[@name='workcenter_id']" position="after">
+            <field name="Product_internal_reference"/>
+        </xpath>
+            </field>
+</record> -->
+</odoo>
