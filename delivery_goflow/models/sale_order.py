@@ -251,16 +251,16 @@ class SaleOrder(models.Model):
                     if picking.state in ('waiting', 'confirmed'):
                         picking.action_assign()
 
-                    for mv in picking.move_ids_without_package:
-                        if mv.product_uom_qty != 0.0:
-                            mv.quantity = mv.product_uom_qty
-                        for without_mvl in mv.move_line_ids:
-                            if without_mvl.result_package_id:
-                                without_mvl.result_package_id = None
+                    # for mv in picking.move_ids_without_package:
+                    #     if mv.product_uom_qty != 0.0:
+                    #         mv.quantity = mv.product_uom_qty
+                    #     for without_mvl in mv.move_line_ids:
+                    #         if without_mvl.result_package_id:
+                    #             without_mvl.result_package_id = None
 
-                    for mvl in picking.move_line_ids:
-                        if mvl.result_package_id:
-                            mvl.result_package_id = None
+                    # for mvl in picking.move_line_ids:
+                    #     if mvl.result_package_id:
+                    #         mvl.result_package_id = None
                             
                     if picking.state != 'done':
                         try:
