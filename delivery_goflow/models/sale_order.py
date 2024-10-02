@@ -248,19 +248,11 @@ class SaleOrder(models.Model):
 
             if self.picking_ids:
                 for picking in self.picking_ids.filtered(lambda x: x.state != 'cancel'):
-                    if picking.state in ('waiting', 'confirmed'):
-                        picking.action_assign()
-
-                    # for mv in picking.move_ids_without_package:
-                    #     if mv.product_uom_qty != 0.0:
-                    #         mv.quantity = mv.product_uom_qty
-                    #     for without_mvl in mv.move_line_ids:
-                    #         if without_mvl.result_package_id:
-                    #             without_mvl.result_package_id = None
-
-                    # for mvl in picking.move_line_ids:
-                    #     if mvl.result_package_id:
-                    #         mvl.result_package_id = None
+                    if picking.state in ('waiting', 'confirmed', 'assigned'):
+                        try:
+                            picking.action_assign()
+                        except Exception as e:
+                            picking.note = e
                             
                     if picking.state != 'done':
                         try:
