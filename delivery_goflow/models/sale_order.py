@@ -232,9 +232,7 @@ class SaleOrder(models.Model):
     def create_invoice_delivery(self):
         goflow_order_status = self.goflow_order_status or ''
         order_state = self.state
-        # if goflow_order_status == 'in_packing':
-        #     if order_state == 'draft':
-        #         self.action_confirm()
+
         if goflow_order_status == 'in_picking':
             if order_state == 'draft':
                 self.action_confirm()
@@ -242,32 +240,50 @@ class SaleOrder(models.Model):
                 for picking in self.picking_ids.filtered(lambda x: x.state != 'cancel'):
                     if picking.state in ('waiting', 'confirmed'):
                         picking.action_assign()
+
         if goflow_order_status == 'shipped':
             if order_state == 'draft':
                 self.action_confirm()
 
             if self.picking_ids:
                 for picking in self.picking_ids.filtered(lambda x: x.state != 'cancel'):
-                    if picking.state in ('waiting', 'confirmed'):
-                        picking.action_assign()
+                    if picking.state in ('waiting', 'confirmed', 'assigned'):
+                        try:
+                            picking.action_assign()
+                        except Exception as e:
+                            picking.note = e
 
-                    for mv in picking.move_ids_without_package:
-                        if mv.product_uom_qty != 0.0:
-                            mv.quantity = mv.product_uom_qty
-                        for without_mvl in mv.move_line_ids:
-                            if without_mvl.result_package_id:
-                                without_mvl.result_package_id = None
-
-                    for mvl in picking.move_line_ids:
-                        if mvl.result_package_id:
-                            mvl.result_package_id = None
-                            
                     if picking.state != 'done':
                         try:
                             if picking.picking_type_id.code == 'outgoing':
                                 picking.button_validate()
-                        except:
-                            # print("Except")
+                        except Exception as e:
+                            picking.note = str(e)
+
+                            for move in picking.move_ids:
+                                move.quantity = 0
+
+                            picking.action_assign()
+                            try:
+                                picking.button_validate()
+                            except Exception as e:
+                                picking.note += f"\n{str(e)}"
+
+                                if picking.state == 'confirmed':
+                                    try:
+                                        for move in picking.move_ids:
+                                            if move.quantity != move.product_uom_qty:
+                                                move.quantity = move.product_uom_qty
+                                                if picking.state == 'assigned':
+                                                    try:
+                                                        picking.action_assign()
+                                                        picking.button_validate()
+                                                    except Exception as e:
+                                                        picking.note = e
+
+                                    except Exception as e:
+                                        picking.note = str(e)
+
                             if not self.invoice_ids:
                                 self._create_invoices()
                             if self.invoice_ids:
