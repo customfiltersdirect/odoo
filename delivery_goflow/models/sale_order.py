@@ -229,12 +229,11 @@ class SaleOrder(models.Model):
                     self._create_batch_transfers(in_picking_orders)
             sync_index.synced_transfers = True
 
+    # create invoice delivery and reservation policy
     def create_invoice_delivery(self):
         goflow_order_status = self.goflow_order_status or ''
         order_state = self.state
-        # if goflow_order_status == 'in_packing':
-        #     if order_state == 'draft':
-        #         self.action_confirm()
+
         if goflow_order_status == 'in_picking':
             if order_state == 'draft':
                 self.action_confirm()
@@ -242,6 +241,7 @@ class SaleOrder(models.Model):
                 for picking in self.picking_ids.filtered(lambda x: x.state != 'cancel'):
                     if picking.state in ('waiting', 'confirmed'):
                         picking.action_assign()
+
         if goflow_order_status == 'shipped':
             if order_state == 'draft':
                 self.action_confirm()
@@ -253,13 +253,38 @@ class SaleOrder(models.Model):
                             picking.action_assign()
                         except Exception as e:
                             picking.note = e
-                            
+
                     if picking.state != 'done':
                         try:
                             if picking.picking_type_id.code == 'outgoing':
                                 picking.button_validate()
-                        except:
-                            # print("Except")
+                        except Exception as e:
+                            picking.note = str(e)
+
+                            for move in picking.move_ids:
+                                move.quantity = 0
+
+                            picking.action_assign()
+                            try:
+                                picking.button_validate()
+                            except Exception as e:
+                                picking.note += f"\n{str(e)}"
+
+                                if picking.state == 'confirmed':
+                                    try:
+                                        for move in picking.move_ids:
+                                            if move.quantity != move.product_uom_qty:
+                                                move.quantity = move.product_uom_qty
+                                                if picking.state == 'assigned':
+                                                    try:
+                                                        picking.action_assign()
+                                                        picking.button_validate()
+                                                    except Exception as e:
+                                                        picking.note = e
+
+                                    except Exception as e:
+                                        picking.note = str(e)
+
                             if not self.invoice_ids:
                                 self._create_invoices()
                             if self.invoice_ids:
