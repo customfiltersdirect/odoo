@@ -229,8 +229,62 @@ class SaleOrder(models.Model):
                     self._create_batch_transfers(in_picking_orders)
             sync_index.synced_transfers = True
 
-    # create invoice delivery and reservation policy
     def create_invoice_delivery(self):
+        goflow_order_status = self.goflow_order_status or ''
+        order_state = self.state
+        if goflow_order_status == 'in_picking':
+            if order_state == 'draft':
+                self.action_confirm()
+            if self.picking_ids:
+                for picking in self.picking_ids.filtered(lambda x: x.state != 'cancel'):
+                    if picking.state in ('waiting', 'confirmed'):
+                        picking.action_assign()
+
+        if goflow_order_status == 'shipped':
+            if order_state == 'draft':
+                self.action_confirm()
+
+            if self.picking_ids:
+                for picking in self.picking_ids.filtered(lambda x: x.state != 'cancel'):
+                    if picking.state in ('waiting', 'confirmed', 'assigned'):
+                        try:
+                            picking.action_assign()
+                        except Exception as e:
+                            picking['note'] = str(e)
+                            
+                    if picking.state != 'done':
+                        try:
+                            if picking.picking_type_id.code == 'outgoing':
+                                picking.button_validate()
+                        except:
+                            # print("Except")
+                            if not self.invoice_ids:
+                                self._create_invoices()
+                            if self.invoice_ids:
+                                for invoice in self.invoice_ids.filtered(lambda x: x.state == 'draft'):
+                                    ## copy goflow invoice no to invoice in odoo
+                                    invoice.goflow_invoice_no = self.goflow_invoice_no
+                                    invoice.action_post()
+                                self.goflow_full_invoiced = True
+                                # print("Invoiced")
+
+                if not self.invoice_ids:
+                    self._create_invoices()
+                if self.invoice_ids:
+                    unmarked_invoices = self.invoice_ids.filtered(lambda x: not x.goflow_invoice_no)
+                    if unmarked_invoices and self.goflow_invoice_no:
+                        for unmarked_invoice in unmarked_invoices:
+                            unmarked_invoice.goflow_invoice_no = self.goflow_invoice_no
+
+                    for invoice in self.invoice_ids.filtered(lambda x: x.state == 'draft'):
+                        ## copy goflow invoice no to invoice in odoo
+                        invoice.goflow_invoice_no = self.goflow_invoice_no
+                        invoice.action_post()
+
+                    self.goflow_full_invoiced = True
+
+    # create invoice delivery and reservation policy server action
+    def create_invoice_delivery_server_action(self):
         goflow_order_status = self.goflow_order_status or ''
         order_state = self.state
 
