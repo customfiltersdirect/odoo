@@ -14,6 +14,29 @@ Change Log
 
 |
 
+* 2.6.10 (2024-08-14)
+    - Fixed issue with scenario
+
+* 2.6.9 (2024-07-04)
+    - [NEW] Added the ability to use Report Rules and User Rules to define the default printer for Print Labels and other printing wizards.
+
+* 2.6.8 (2024-06-04)
+    - Fix issue with double printing for UPS Connector
+    - Ignoring the printing of attachments that are not shipping labels for the SendCloud Connector
+
+* 2.6.7 (2024-04-03)
+    - Fixed issue with "Print Reports" wizard (Odoo 17.0)
+
+* 2.6.6 (2024-03-12)
+    - Fixed issue with missed Download button to invoices (Odoo 17.0)
+
+* 2.6.5 (2024-02-16)
+    - Fixed issue with QUnit tests (Odoo 17.0)
+
+* 2.6.4 (2024-02-08)
+    - Fixed issue with scales integration
+    - Added support of debug scales to simplify testing of scales integration
+
 * 2.6.3 (2023-12-13)
     - Fixed issue with put in pack button
 

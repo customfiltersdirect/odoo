@@ -8,29 +8,17 @@
             <form>
                 <group>
                     <field name="report_id" required="1" options="{'no_create': True}"/>
+                    <field name="available_report_ids" invisible="1"/>
                 </group>
 
                 <group name="documents_for_printing">
+                    <field name="record_model" invisible="1"/>
+                    <field name="record_ids" invisible="1"/>
                     <field name="record_names" readonly="1"/>
                 </group>
 
                 <group name="quantity_to_print">
-                    <field name="with_custom_qty" />
-                </group>
-
-                <group invisible="with_custom_qty == True">
                     <field name="number_copy" required="1"/>
-                </group>
-
-                <group invisible="with_custom_qty != True">
-                    <div colspan="2" class="row justify-content-start">
-                            <field name="record_line_ids" nolabel="1">
-                                <tree editable="bottom" create="false">
-                                    <field name="record_id" readonly="1"/>
-                                    <field name="quantity"/>
-                                </tree>
-                            </field>
-                    </div>
                 </group>
 
                 <group name="printer">

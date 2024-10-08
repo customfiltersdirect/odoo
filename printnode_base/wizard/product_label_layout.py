@@ -95,7 +95,8 @@ class ProductLabelLayout(models.TransientModel):
         xml_id, data = super()._prepare_report_data()
 
         if (
-            self.move_quantity == 'move'
+            self._origin  # Not raise error on the first call
+            and self.move_quantity == 'move'
             and not self.move_ids
             and (self.product_line_ids or self.product_tmpl_line_ids)
         ):

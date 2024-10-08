@@ -2,8 +2,6 @@
 
 import { browser } from "@web/core/browser/browser";
 import { session } from "@web/session";
-import { ImStatus } from "@mail/core/common/im_status";
-import { NotificationItem } from "@mail/core/web/notification_item";
 
 import { Component, onWillRender, useState } from "@odoo/owl";
 
@@ -32,13 +30,12 @@ function useDirectPrintStatusMenuSystray() {
 }
 
 export class DirectPrintStatusMenu extends Component {
-    static components = { Dropdown, NotificationItem, ImStatus };
+    static components = { Dropdown };
     static props = [];
     static template = "printnode_base.DirectPrintStatusMenu";
 
     setup() {
         this.directPrintStatusMenuSystray = useDirectPrintStatusMenuSystray();
-        this.store = useState(useService("mail.store"));
         this.ui = useState(useService("ui"));
         this.state = useState({
             isOpen: false,
@@ -57,17 +54,20 @@ export class DirectPrintStatusMenu extends Component {
 
         onWillRender(async () => {
             if (!this.state.loaded) {
-                const data = await this.orm.call(
-                    "printnode.base",
-                    "get_status",
-                    [],
-                    { "only_releases": true });
-
                 this.state.isManager = await this.user.hasGroup(MANAGER_GROUP);
-                this.state.limits = data.limits;
-                this.state.releases = data.releases;
-                this.state.devices = data.devices;
-                this.state.workstations = data.workstations;
+
+                if (this.state.isManager) {
+                    const data = await this.orm.call(
+                        "printnode.base",
+                        "get_status",
+                        [],
+                        { "only_releases": true });
+
+                    this.state.limits = data.limits;
+                    this.state.releases = data.releases;
+                    this.state.devices = data.devices;
+                    this.state.workstations = data.workstations;
+                }
 
                 this.state.loaded = true;
             }

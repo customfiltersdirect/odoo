@@ -83,6 +83,11 @@ class PrintNodeAccount(models.Model):
         default=False,
     )
 
+    is_scales_debug_enabled = fields.Boolean(
+        "Is Scales Debug Enabled",
+        default=False,
+    )
+
     _sql_constraints = [
         ('printnode_id', 'unique(printnode_id)', 'Account already exists.'),
         ('api_key', 'unique(api_key)', 'API Key (token) must be unique.'),
@@ -92,7 +97,8 @@ class PrintNodeAccount(models.Model):
     def create(self, vals):
         account = super(PrintNodeAccount, self).create(vals)
 
-        account.import_devices()
+        if account:
+            account.import_devices()
 
         return account
 
@@ -219,7 +225,7 @@ class PrintNodeAccount(models.Model):
             get_printers_url = f"computers/{computer['id']}/printers"
 
             # Downloading printers with tray bins
-            for printer in self._send_printnode_request(get_printers_url):
+            for printer in self._send_printnode_request(get_printers_url) or []:
                 odoo_printer = self._get_node('printer', printer, odoo_computer.id)
 
                 # Splitted to 2 checks because capabilities can include None values in some cases
@@ -229,7 +235,7 @@ class PrintNodeAccount(models.Model):
 
             # Downloading scales
             get_scales_url = f"computer/{computer['id']}/scales"
-            for scales in self._send_printnode_request(get_scales_url):
+            for scales in self._send_printnode_request(get_scales_url) or []:
                 self._create_or_update_scales(scales, odoo_computer)
 
     def _create_printer_bin(self, bin_name, odoo_printer):
@@ -383,7 +389,7 @@ class PrintNodeAccount(models.Model):
 
         return node
 
-    def _send_printnode_request(self, uri):
+    def _send_printnode_request(self, uri, method='GET'):
         """
         Send request with basic authentication and API key
         """
@@ -393,16 +399,25 @@ class PrintNodeAccount(models.Model):
 
         try:
             request_url = f'{self.endpoint}/{uri}'
-            self.printnode_logger(Constants.REQUESTS_LOG_TYPE, f'GET request: {request_url}')
-            resp = requests.get(request_url, auth=auth, timeout=20)
+            self.printnode_logger(Constants.REQUESTS_LOG_TYPE, f'{method} request: {request_url}')
+
+            resp = self._get_requests_method(method)(request_url, auth=auth, timeout=20)
 
             # 403 is a HTTP status code which can be returned for child accounts in some cases
             # like checking printing limits on PrintNode
-            if resp.status_code not in (200, 403):
+            if resp.status_code not in (200, 204, 403):
                 resp.raise_for_status()
 
             if self.status != 'OK':
                 self.status = 'OK'
+
+            if not resp.text:
+                # Some requests return empty response, it's not an error
+                self.printnode_logger(
+                    Constants.REQUESTS_LOG_TYPE,
+                    f'Response from ({request_url}): {resp.status_code}'
+                )
+                return
 
             json_response = resp.json()
 
@@ -439,19 +454,10 @@ class PrintNodeAccount(models.Model):
         """
         Send request to DPC API with API key
         """
-        methods = {
-            'GET': requests.get,
-            'POST': requests.post,
-            'PUT': requests.put,
-        }
-
-        if method not in methods:
-            raise ValueError('Bad HTTP method')
-
         dpc_url = self.env['ir.config_parameter'].sudo().get_param('printnode_base.dpc_api_url')
 
         try:
-            resp = methods[method](f'{dpc_url}/{uri}', **kwargs)
+            resp = self._get_requests_method(method)(f'{dpc_url}/{uri}', **kwargs)
 
             if self.status != 'OK':
                 self.status = 'OK'
@@ -479,6 +485,18 @@ class PrintNodeAccount(models.Model):
             self.printnode_logger(Constants.REQUESTS_LOG_TYPE, f'JSONDecodeError: {err}')
 
         return None
+
+    def _get_requests_method(self, method):
+        methods = {
+            'GET': requests.get,
+            'POST': requests.post,
+            'PUT': requests.put,
+        }
+
+        if method not in methods:
+            raise ValueError('Bad HTTP method')
+
+        return methods[method]
 
     def _is_correct_dpc_api_key(self):
         """
@@ -627,3 +645,53 @@ class PrintNodeAccount(models.Model):
             unset_printers(model, odoo_printers_to_delete.ids)
 
         odoo_printers_to_delete.unlink()
+
+    def enable_scales_debug_mode(self):
+        """
+        Enable debug mode for scales: this includes creation of test scales and
+        showing a button to generate test measurements
+        """
+        self.ensure_one()
+
+        # Create a new test computer
+        test_computer = self.env['printnode.computer'].create({
+            'name': 'Computer with test scales',
+            'printnode_id': 0,
+            'account_id': self.id,
+        })
+
+        # Create a new test scales connected to the test computer
+        self.env['printnode.scales'].create({
+            'name': 'PrintNode Test Scale',
+            'printnode_id': 0,
+            'device_num': 0,
+            'computer_id': test_computer.id,
+            'account_id': self.id,
+        })
+
+        # Update flag
+        self.is_scales_debug_enabled = True
+
+    def disable_scales_debug_mode(self):
+        """
+        Disable debug mode for scales: this includes deletion of test scales and
+        test computer
+        """
+        self.ensure_one()
+
+        # Delete test computer
+        self.computer_ids.filtered(lambda c: c.printnode_id == 0).unlink()
+
+        # Update flag
+        self.is_scales_debug_enabled = False
+
+    def generate_debug_scales_measurement(self):
+        """
+        Generate a debug measurement for all scales connected to the current
+        account
+        """
+        self.ensure_one()
+
+        self._send_printnode_request('scale', method='PUT')
+
+        return True

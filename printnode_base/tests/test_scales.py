@@ -21,7 +21,7 @@ class TestPrintNodeScales(TestPrintNodeCommon):
 
         name = f'{self.scales.name}-{self.scales.device_num} ({self.scales.computer_id.name})'
         test_composite_scales_name = [(self.scales.id, name), ]
-        composite_scales_name_from_method = self.scales.name_get()
+        composite_scales_name_from_method = [(self.scales.id, self.scales.display_name), ]
 
         self.assertEqual(
             test_composite_scales_name,

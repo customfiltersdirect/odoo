@@ -1,6 +1,8 @@
 # Copyright 2021 VentorTech OU
 # See LICENSE file for full copyright and licensing details.
 
+from unittest.mock import patch
+
 from odoo.exceptions import UserError
 from odoo.tests import tagged
 
@@ -75,12 +77,16 @@ class TestPrintNodeIrCron(TestPrintNodeCommon):
         self.mock_scenario_print_product_labels_on_transfer.assert_not_called()
         self.mock_get_printer.assert_not_called()
 
-    def test_run_print_scenario_from_cron_case_2(self):
+    @patch('odoo.addons.printnode_base.models.ir_cron.ir_cron.with_context')
+    def test_run_print_scenario_from_cron_case_2(self, mock_with_context):
         """ Test to check run/skip print scenario from cron
         """
 
         # Set Up
         self._set_up_stock_move()
+        # Mock with_context() to avoid context substitution
+        # in the method _callback
+        mock_with_context.return_value = self.cron
 
         # Printing scenarios from crons is disabled for current company - print
         # scenario won't run.

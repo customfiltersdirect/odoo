@@ -2,6 +2,7 @@
 
 import { ActionMenus } from "@web/search/action_menus/action_menus";
 import { ListController } from "@web/views/list/list_controller";
+import { AccountMoveListController } from "@account/components/bills_upload/bills_upload";
 import { session } from "@web/session";
 
 class DownloadActionMenus extends ActionMenus {
@@ -32,3 +33,6 @@ class DownloadActionMenus extends ActionMenus {
 }
 
 ListController.components.ActionMenus = DownloadActionMenus;
+
+// account.move tree view has custom controller, so we need to override it as well
+AccountMoveListController.components.ActionMenus = DownloadActionMenus;
