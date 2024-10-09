@@ -251,13 +251,39 @@ class SaleOrder(models.Model):
                             picking.action_assign()
                         except Exception as e:
                             picking['note'] = str(e)
-                            
+                    # reservation code 
                     if picking.state != 'done':
+                        # 1st try
                         try:
                             if picking.picking_type_id.code == 'outgoing':
                                 picking.button_validate()
-                        except:
-                            # print("Except")
+                        except Exception as e:
+                            picking.note = str(e)
+                            # remove dest package
+                            for stock_line in picking.move_line_ids:
+                                if stock_line.result_package_id:
+                                    stock_line['result_package_id'] = False
+                            # 2nd try
+                            try:
+                                picking.button_validate()
+                            except Exception as e:
+                                picking.note += f"\n{str(e)}"
+                                if picking.state == 'confirmed':
+                                    # 3rd try with force quantities
+                                    try:
+                                        for move in picking.move_ids:
+                                            if move.quantity != move.product_uom_qty:
+                                                move.quantity = move.product_uom_qty
+                                                if picking.state == 'assigned':
+                                                    try:
+                                                        picking.action_assign()
+                                                        picking.button_validate()
+                                                    except Exception as e:
+                                                        picking.note = e
+
+                                    except Exception as e:
+                                        picking.note = str(e)
+                            
                             if not self.invoice_ids:
                                 self._create_invoices()
                             if self.invoice_ids:
@@ -266,7 +292,7 @@ class SaleOrder(models.Model):
                                     invoice.goflow_invoice_no = self.goflow_invoice_no
                                     invoice.action_post()
                                 self.goflow_full_invoiced = True
-                                # print("Invoiced")
+                                    # print("Invoiced")
 
                 if not self.invoice_ids:
                     self._create_invoices()
