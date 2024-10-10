@@ -232,6 +232,7 @@ class SaleOrder(models.Model):
     def create_invoice_delivery(self):
         goflow_order_status = self.goflow_order_status or ''
         order_state = self.state
+
         if goflow_order_status == 'in_picking':
             if order_state == 'draft':
                 self.action_confirm()
@@ -246,68 +247,79 @@ class SaleOrder(models.Model):
 
             if self.picking_ids:
                 for picking in self.picking_ids.filtered(lambda x: x.state != 'cancel'):
-                    if picking.state in ('waiting', 'confirmed', 'assigned'):
+                    note = picking.note or ""
+                    
+                    # Processing Delivery orders (transfers) with status: assigned/Ready
+                    if picking.picking_type_id.code == 'outgoing' and picking.state == 'assigned':
                         try:
+                            picking.button_validate()
+                            note += f"Was fully reserved: Validation successful. "
+                            
+                        except Exception as e:
+                            note += f"Was fully reserved: Validation UNsuccessful. Error: {str(e)}. Cycling Reservation now. "
+                            
+                            picking.do_unreserve()
+                            note += f"Unreserved. "
+                            
                             picking.action_assign()
-                        except Exception as e:
-                            picking['note'] = str(e)
-                    # reservation code 
-                    if picking.state != 'done':
-                        # 1st try
-                        try:
-                            if picking.picking_type_id.code == 'outgoing':
-                                picking.button_validate()
-                        except Exception as e:
-                            picking.note = str(e)
-                            # remove dest package
-                            for stock_line in picking.move_line_ids:
-                                if stock_line.result_package_id:
-                                    stock_line['result_package_id'] = False
-                            # 2nd try
+                            note += f"Reserved back. "
+                            
                             try:
                                 picking.button_validate()
+                                note += f"After Cycling Reservation: Validation successful. "
+                                
                             except Exception as e:
-                                picking.note += f"\n{str(e)}"
-                                if picking.state == 'confirmed':
-                                    # 3rd try with force quantities
-                                    try:
-                                        for move in picking.move_ids:
-                                            if move.quantity != move.product_uom_qty:
-                                                move.quantity = move.product_uom_qty
-                                                if picking.state == 'assigned':
-                                                    try:
-                                                        picking.action_assign()
-                                                        picking.button_validate()
-                                                    except Exception as e:
-                                                        picking.note = e
-
-                                    except Exception as e:
-                                        picking.note = str(e)
+                                note += f"After Cycling Reservation: Validation UNsuccessful. Error: {str(e)}. "
+                        
+                        picking.write({'note': note})
                             
-                            if not self.invoice_ids:
-                                self._create_invoices()
-                            if self.invoice_ids:
-                                for invoice in self.invoice_ids.filtered(lambda x: x.state == 'draft'):
-                                    ## copy goflow invoice no to invoice in odoo
-                                    invoice.goflow_invoice_no = self.goflow_invoice_no
-                                    invoice.action_post()
-                                self.goflow_full_invoiced = True
-                                    # print("Invoiced")
+                    # Processing Delivery orders (transfers) with status: confirmed/Waiting and waiting/Waiting Another Operation
+                    if picking.picking_type_id.code == 'outgoing' and picking.state in ('confirmed', 'waiting'):
+                        try:
+                            # forcing quantities for whatever is short
+                            for move in picking.move_ids:
+                                if move.quantity != move.product_uom_qty:
+                                    move.write({'quantity': move.product_uom_qty})
+                            
+                            picking.button_validate()
+                            note += f"After quantities were forced: Validation successful"
+                            
+                        except Exception as e:
+                            note += f"Validation after forcing quantities failed with error:  {str(e)}. Unreserving. "
+                            picking.do_unreserve()
+                            
+                            picking.action_assign()
+                            note += f"Reserved back. Forcing quantities. Status was {picking.state}"
+                            
+                            # since reservation was cycled - forcing quantities again for whatever is short
+                            for move in picking.move_ids:
+                                if move.quantity != move.product_uom_qty:
+                                    move.write({'quantity': move.product_uom_qty})
+                            
+                            try:
+                                picking.button_validate()
+                                note += f"After Cycling Reservation and forcing quantities: Validation successful"
+                            
+                            except Exception as e:
+                                note += f"After Cycling Reservation and forcing quantities: Validation failed with error:  {str(e)}. "
+                        
+                        picking.write({'note': note})
 
-                if not self.invoice_ids:
-                    self._create_invoices()
-                if self.invoice_ids:
-                    unmarked_invoices = self.invoice_ids.filtered(lambda x: not x.goflow_invoice_no)
-                    if unmarked_invoices and self.goflow_invoice_no:
-                        for unmarked_invoice in unmarked_invoices:
-                            unmarked_invoice.goflow_invoice_no = self.goflow_invoice_no
+            if not self.invoice_ids:
+                self._create_invoices()
+            if self.invoice_ids:
+                unmarked_invoices = self.invoice_ids.filtered(lambda x: not x.goflow_invoice_no)
+                if unmarked_invoices and self.goflow_invoice_no:
+                    for unmarked_invoice in unmarked_invoices:
+                        unmarked_invoice.goflow_invoice_no = self.goflow_invoice_no
 
-                    for invoice in self.invoice_ids.filtered(lambda x: x.state == 'draft'):
-                        ## copy goflow invoice no to invoice in odoo
-                        invoice.goflow_invoice_no = self.goflow_invoice_no
-                        invoice.action_post()
+                for invoice in self.invoice_ids.filtered(lambda x: x.state == 'draft'):
+                    ## copy goflow invoice no to invoice in odoo
+                    invoice.goflow_invoice_no = self.goflow_invoice_no
+                    invoice.action_post()
 
-                    self.goflow_full_invoiced = True
+                self.goflow_full_invoiced = True
+                # print("Invoiced")
 
     # create invoice delivery and reservation policy server action
     def create_invoice_delivery_server_action(self):
