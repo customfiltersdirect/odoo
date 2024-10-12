@@ -248,10 +248,21 @@ class SaleOrder(models.Model):
             if self.picking_ids:
                 for picking in self.picking_ids.filtered(lambda x: x.state != 'cancel'):
                     note = picking.note or ""
+                    note += str(datetime.datetime.now()) + " "
                     
                     # Processing Delivery orders (transfers) with status: assigned/Ready
                     if picking.picking_type_id.code == 'outgoing' and picking.state == 'assigned':
                         try:
+                            
+                            # Iterate through the stock moves to erase all destanation packs
+                            for move in picking.move_ids:
+                                if move.move_line_ids:
+                                    for move_line in move.move_line_ids:
+                                        if move_line.result_package_id:
+                                            erased_pack = str(move_line.result_package_id.name)
+                                            move_line.write({'result_package_id': False})
+                                            note += f"Destanation Pack {erased_pack} erased. "
+                                            
                             picking.button_validate()
                             note += f"Was fully reserved: Validation successful. "
                             
@@ -265,6 +276,15 @@ class SaleOrder(models.Model):
                             note += f"Reserved back. "
                             
                             try:
+                                # Iterate through the stock moves to erase all destanation packs
+                                for move in picking.move_ids:
+                                    if move.move_line_ids:
+                                        for move_line in move.move_line_ids:
+                                            if move_line.result_package_id:
+                                                erased_pack = str(move_line.result_package_id.name)
+                                                move_line.write({'result_package_id': False})
+                                                note += f"Destanation Pack {erased_pack} erased. "
+                                                
                                 picking.button_validate()
                                 note += f"After Cycling Reservation: Validation successful. "
                                 
@@ -280,6 +300,13 @@ class SaleOrder(models.Model):
                             for move in picking.move_ids:
                                 if move.quantity != move.product_uom_qty:
                                     move.write({'quantity': move.product_uom_qty})
+                                # erasing dest packs
+                                if move.move_line_ids:
+                                    for move_line in move.move_line_ids:
+                                        if move_line.result_package_id:
+                                            erased_pack = str(move_line.result_package_id.name)
+                                            move_line.write({'result_package_id': False})
+                                            note += f"Destanation Pack {erased_pack} erased. "    
                             
                             picking.button_validate()
                             note += f"After quantities were forced: Validation successful"
@@ -295,7 +322,15 @@ class SaleOrder(models.Model):
                             for move in picking.move_ids:
                                 if move.quantity != move.product_uom_qty:
                                     move.write({'quantity': move.product_uom_qty})
-                            
+                                
+                                # erasing dest packs
+                                if move.move_line_ids:
+                                    for move_line in move.move_line_ids:
+                                        if move_line.result_package_id:
+                                            erased_pack = str(move_line.result_package_id.name)
+                                            move_line.write({'result_package_id': False})
+                                            note += f"Destanation Pack {erased_pack} erased. " 
+                                            
                             try:
                                 picking.button_validate()
                                 note += f"After Cycling Reservation and forcing quantities: Validation successful"
