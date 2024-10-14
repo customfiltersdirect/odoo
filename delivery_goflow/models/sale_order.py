@@ -248,7 +248,7 @@ class SaleOrder(models.Model):
             if self.picking_ids:
                 for picking in self.picking_ids.filtered(lambda x: x.state != 'cancel'):
                     note = picking.note or ""
-                    note += str(datetime.datetime.now()) + " "
+                    note += str(datetime.now()) + " "
                     
                     # Processing Delivery orders (transfers) with status: assigned/Ready
                     if picking.picking_type_id.code == 'outgoing' and picking.state == 'assigned':
