@@ -124,7 +124,7 @@ class PrintNodeActionButton(models.Model):
         return related_model.search(
             expression.AND([
                 [
-                    ('id', 'in', ids_list),
+                    ('id', 'in', [ids_list] if isinstance(ids_list, int) else ids_list),
                     # TODO: Perhaps we need to add this ('printnode_printed', '=', False),
                 ],
                 safe_eval(self.domain),
