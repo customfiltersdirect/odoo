@@ -18,6 +18,7 @@
                         <field name="api_key" required="1" placeholder="9f68a54b09ff07ae13d4442c120ff0eeaaeadfxx" />
                         <field name="password" required="0" />
                         <field name="is_dpc_account" readonly="1" />
+                        <field name="is_scales_debug_enabled" readonly="1" />
                         <field name="printed" readonly="1" />
                         <field name="limits" readonly="1" />
                         <field name="alias" />
@@ -36,6 +37,7 @@
                     <field name="name" />
                     <field name="api_key" />
                     <field name="is_dpc_account" readonly="1" />
+                    <field name="is_scales_debug_enabled" readonly="1" />
                     <field name="printed" readonly="1" />
                     <field name="limits" readonly="1" />
                     <field name="status" />

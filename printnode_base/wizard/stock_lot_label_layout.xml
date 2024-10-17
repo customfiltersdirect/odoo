@@ -12,12 +12,6 @@
                         <field name="is_dpc_enabled" invisible="1" />
                         <field name="printer_id" invisible="is_dpc_enabled == False"/>
                         <field name="printer_bin" invisible="is_dpc_enabled == False"/>
-                        <field name="status" invisible="1"/>
-                    </group>
-                    <group>
-                         <span class="text-danger" invisible="status != 'offline'">
-                            Printer is not available. Please, choose another printer.
-                        </span>
                     </group>
                 </group>
             </xpath>

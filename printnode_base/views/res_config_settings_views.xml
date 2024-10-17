@@ -379,6 +379,28 @@
                                 </div>
                             </div>
 
+                            <div class="col-12 col-lg-6 o_setting_box" groups="base.group_no_one" >
+                                <div class="o_setting_left_pane">
+                                    <!-- Nothing to show -->
+                                </div>
+                                <div class="o_setting_right_pane">
+                                    <field name="dpc_is_scales_debug_enabled" invisible="1" />
+
+                                    <!-- Button to enable debug mode for scales integration -->
+                                    <button name="enable_scales_debug_mode" string="Enable debug mode for scales" type="object" class="oe_highlight"  invisible="dpc_is_scales_debug_enabled == True" />
+                                    <button name="disable_scales_debug_mode" string="Disable debug mode for scales" type="object" class="oe_highlight" invisible="dpc_is_scales_debug_enabled == False" />
+                                    
+                                    <button name="generate_debug_scales_measurement" string="Generate Debug Scales Measurement" type="object" class="btn btn-outline-primary mt-3 mb-2" invisible="dpc_is_scales_debug_enabled == False" />
+
+                                    <div class="text-muted">
+                                        This button will enable debug mode for scales integration. In this mode, you will be able to generate debug measurements for scales integration (without real scales).
+                                        There will be created new scales named "PrintNode Test Scale" connected to the computer "Computer with test scales".
+                                        These devices will be automatically deleted after disabling debug mode.
+                                        Please note that test scales measurement will be available for 45 seconds. After that you will need to click "Generate debug scales measurement" button again.
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
 
                         <h2>Print directly from handheld device (barcode scanner)</h2>

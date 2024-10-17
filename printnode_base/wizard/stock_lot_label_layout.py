@@ -21,3 +21,16 @@ class ProductLabelLayout(models.TransientModel):
             ProductLabelLayout,
             self.with_context(printer_id=self.printer_id.id, printer_bin=self.printer_bin.id)
         ).process()
+
+    def _prepare_report_data(self):
+        """
+        There is no such method in the parent class. But we add it to make this class compatible
+        with _get_label_printer method from 'printnode.label.layout.mixin' mixin.
+        """
+        # Code below is copied from the parent class (process method)
+        xml_id = 'stock.action_report_lot_label'
+        if self.print_format == 'zpl':
+            xml_id = 'stock.label_lot_template'
+
+        # Originally this method should return xml_id and data. But we don't need data in this case
+        return xml_id, None

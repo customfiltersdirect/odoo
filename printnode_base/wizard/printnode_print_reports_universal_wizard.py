@@ -1,4 +1,4 @@
-# Copyright 2021 VentorTech OU
+# Copyright 2024 VentorTech OU
 # See LICENSE file for full copyright and licensing details.
 
 from odoo import api, exceptions, fields, models, _
@@ -22,7 +22,13 @@ class PrintnodePrintReportsUniversalWizard(models.TransientModel):
 
     report_id = fields.Many2one(
         comodel_name='ir.actions.report',
-        domain=lambda self: self._get_reports_domain()
+        domain='[("id", "in", available_report_ids)]',
+    )
+
+    # Technical field to filter available reports for report_id field
+    available_report_ids = fields.Many2many(
+        comodel_name='ir.actions.report',
+        compute='_compute_available_report_ids',
     )
 
     number_copy = fields.Integer(
@@ -30,16 +36,16 @@ class PrintnodePrintReportsUniversalWizard(models.TransientModel):
         string='Copies',
     )
 
-    with_custom_qty = fields.Boolean(
-        string="Custom quantity for each record (Experimental)",
-        default=False,
+    record_model = fields.Char(
+        string='Model',
+        readonly=True,
+        compute='_compute_record_model',
     )
 
-    record_line_ids = fields.One2many(
-        comodel_name='printnode.print.reports.universal.wizard.line',
-        inverse_name='wizard_id',
-        string='Records',
-        default=lambda self: self._get_record_line_ids(),
+    record_ids = fields.Text(
+        string='Record IDs',
+        readonly=True,
+        compute='_compute_record_ids',
     )
 
     record_names = fields.Text(
@@ -94,105 +100,64 @@ class PrintnodePrintReportsUniversalWizard(models.TransientModel):
     def _onchange_wizard_printer(self):
         self.printer_id = self._default_printer_id()
 
-    def get_report(self):
-        self.ensure_one()
-        return self.report_id
-
-    def get_docids(self):
-        self.ensure_one()
-        objects = self._get_records()
-        return objects
-
-    def _get_records(self):
-        active_ids = self.env.context.get('active_ids')
+    @api.depends('record_ids')
+    def _compute_record_model(self):
         active_model = self.env.context.get('active_model')
-
-        if not (active_ids and active_model):
-            return None
-
-        return self.env[active_model].browse(active_ids)
-
-    @api.depends('record_line_ids')
-    def _compute_record_names(self):
-        # Update record_id field based on active_model value from context
-        self.record_line_ids._update_record_id_field()
 
         for rec in self:
-            record_names = [
-                record_line.record_id.display_name
-                for record_line in rec.record_line_ids
-            ]
-            self.record_names = ", ".join(record_names)
+            rec.record_model = active_model
 
-    def _get_reports_domain(self):
-        active_model = self.env.context.get('active_model')
-        return [*REPORT_DOMAIN, ('model', '=', active_model)]
+    @api.depends('record_ids', 'record_model')
+    def _compute_record_names(self):
+        for rec in self:
+            if rec.record_model and rec.record_ids:
+                records = self.env[rec.record_model].browse(map(int, rec.record_ids.split(',')))
+                rec.record_names = ", ".join(records.mapped('display_name'))
 
-    def _get_record_line_ids(self):
-        record_ids = self._get_records()
+    @api.depends('record_model')
+    def _compute_record_ids(self):
+        active_ids = self.env.context.get('active_ids')
 
-        lines_vals = [{'record_id': rec.id} for rec in record_ids]
-        record_line_ids = self.env['printnode.print.reports.universal.wizard.line'].create(
-            lines_vals)
+        for rec in self:
+            rec.record_ids = ", ".join(map(str, active_ids))
 
-        return [(6, 0, record_line_ids.ids)]
+    @api.depends('record_model')
+    def _compute_available_report_ids(self):
+        for rec in self:
+            if rec.record_model:
+                rec.available_report_ids = self.env['ir.actions.report'].search(
+                    [*REPORT_DOMAIN, ('model', '=', rec.record_model)]
+                )
+            else:
+                rec.available_report_ids = self.env['ir.actions.report']
 
     def do_print(self):
-        # Update record_id field based on active_model value from context
-        self.record_line_ids._update_record_id_field()
-
-        report = self.get_report()
-
-        if not report or not self.record_line_ids:
+        if not self.report_id or not self.record_ids or not self.record_model:
             raise exceptions.UserError(_('No documents to print!'))
 
-        # Create empty recordset
-        active_model = self.env.context.get('active_model')
-        docids = self.env[active_model]
-
-        # Add copies
-        # FIXME: This doesn't work for now because of bug in Odoo 16.0. Need to be uncommented
-        # when bug will be fixed
-        # if not self.with_custom_qty:
-        #     # The same quantity for all records
-        #     for i in range(self.number_copy):
-        #         docids = docids.concat(self.record_line_ids.mapped('record_id'))
-        # else:
-        #     # Custom quantity for each record
-        #     for line in self.record_line_ids:
-        #         for i in range(line.quantity):
-        #             docids += line.record_id
+        record_ids = list(map(int, self.record_ids.split(',')))
+        record_ids = self.env[self.record_model].browse(record_ids)
 
         # If immediate printing via PrintNode is disabled for the current user,
         # or if no printer is defined for the wizard, the PDF will be downloaded
         if not self.env.user.printnode_enabled or not self.printer_id:
-            return report.with_context(download_only=True).report_action(docids=docids)
+            return self.report_id.with_context(download_only=True).report_action(docids=record_ids)
 
         options = {}
         if self.printer_bin:
             options['bin'] = self.printer_bin.name
 
-        # If printer than send to printnode
-        # self.printer_id.printnode_print(
-        #     report,
-        #     docids,
-        #     options=options,
-        # )
-
-        # FIXME: Check comment above
-        for line in self.record_line_ids:
-            copies = line.quantity if self.with_custom_qty else self.number_copy
-            self.printer_id.printnode_print(
-                report,
-                line.record_id,
-                copies=copies,
-                options=options,
-            )
+        self.printer_id.printnode_print(
+            self.report_id,
+            record_ids,
+            copies=self.number_copy,
+            options=options,
+        )
 
         title = _('Report was sent to printer')
         message = _(
             'Document "%(report)s" was sent to printer %(printer)s',
-            report=report.name,
+            report=self.report_id.name,
             printer=self.printer_id.name,
         )
 
@@ -206,64 +171,3 @@ class PrintnodePrintReportsUniversalWizard(models.TransientModel):
                 'sticky': False,
             },
         }
-
-
-class PrintnodePrintReportsUniversalWizardLine(models.TransientModel):
-    _name = 'printnode.print.reports.universal.wizard.line'
-    _description = 'Record Line'
-
-    record_id = fields.Integer(
-        # Hacky way to set dynamic field
-        # Made this field to be integer because most of IDs are integer
-    )
-
-    quantity = fields.Integer(
-        required=True,
-        default=1,
-    )
-
-    wizard_id = fields.Many2one(
-        comodel_name='printnode.print.reports.universal.wizard',
-    )
-
-    @api.constrains('quantity')
-    def _check_quantity(self):
-        for rec in self:
-            if rec.quantity < 1:
-                raise exceptions.ValidationError(
-                    _('Quantity can not be less than 1 for product {product}').format(
-                        product=rec.product_id.display_name)
-                )
-
-    @api.model_create_multi
-    def create(self, vals):
-        # Update type of record_id field based on active_model value from context
-        self._update_record_id_field()
-
-        return super().create(vals)
-
-    def read(self, fields=None, load='_classic_read'):
-        # Update type of record_id field based on active_model value from context
-        self._update_record_id_field()
-
-        return super().read(fields, load)
-
-    @api.model
-    def fields_get(self, allfields=None, attributes=None):
-        # Update type of record_id field based on active_model value from context
-        self._update_record_id_field()
-
-        return super().fields_get(allfields, attributes)
-
-    def _update_record_id_field(self):
-        active_model = self.env.context.get('active_model')
-
-        if self.env.context.get('install_mode') or not active_model:
-            # Do nothing on module installation or no active_model in context
-            return
-
-        field = fields.Many2one(comodel_name=active_model)
-
-        self._pop_field('record_id')
-        self._add_field('record_id', field)
-        field.setup(self)

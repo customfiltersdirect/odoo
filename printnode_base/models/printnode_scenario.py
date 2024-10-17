@@ -157,8 +157,7 @@ class PrintNodeScenario(models.Model):
 
         if not user.has_group(SECURITY_GROUP) or not user.printnode_enabled:
             # It is possible to execute scenarios from scheduled actions
-            if not self.env.context.get('printnode_from_cron', False) \
-                    or not company.printing_scenarios_from_crons:
+            if not (self.env.context.get('printnode_from_cron', False) or company.printing_scenarios_from_crons):  # NOQA
                 return False
 
         scenarios = self.sudo().search([

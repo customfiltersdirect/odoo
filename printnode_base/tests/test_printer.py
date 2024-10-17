@@ -43,7 +43,7 @@ class TestPrintNodePrinter(TestPrintNodeCommon):
 
         name = f'{self.printer.name} ({self.printer.computer_id.name})'
         test_composite_printer_name = [(self.printer.id, name), ]
-        composite_printer_name_from_method = self.printer.name_get()
+        composite_printer_name_from_method = [(self.printer.id, self.printer.display_name), ]
         self.assertEqual(
             test_composite_printer_name,
             composite_printer_name_from_method,

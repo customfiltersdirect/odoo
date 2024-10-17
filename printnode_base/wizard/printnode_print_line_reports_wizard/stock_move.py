@@ -31,7 +31,7 @@ class PrintnodePrintStockMoveReportsWizard(models.TransientModel):
             (0, 0, {
                 'record_id': rec.id,
                 'name': rec.product_id.name,
-                'quantity': rec.quantity_done
+                'quantity': rec.quantity
             })
             for rec in record_ids
         ]

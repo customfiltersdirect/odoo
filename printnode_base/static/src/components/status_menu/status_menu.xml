@@ -4,7 +4,7 @@
 <t t-name="printnode_base.DirectPrintStatusMenu">
     <Dropdown autoOpen="false" beforeOpen.bind="beforeOpen" onStateChanged="state => this.state.isOpen = state.open" position="'bottom-end'" menuClass="directPrintStatusMenuSystray.menuClass" class="directPrintStatusMenuSystray.class">
         <t t-set-slot="toggler">
-            <i class="fa fa-lg fa-print" role="img" aria-label="Messages" t-on-click="() => store.discuss.activeTab = ui.isSmall and store.discuss.activeTab === 'main' ? 'main' : store.discuss.activeTab"></i>
+            <i class="fa fa-lg fa-print" role="img" aria-label="Direct Print Status Menu"></i>
             <span t-if="state.releases.length and state.isManager">
                 <span class="DirectPrintStatusMenu_badge badge rounded-pill">!</span>
             </span>

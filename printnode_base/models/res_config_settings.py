@@ -112,6 +112,12 @@ class ResConfigSettings(models.TransientModel):
         readonly=False,
     )
 
+    dpc_is_scales_debug_enabled = fields.Boolean(
+        string="Enable scales debug",
+        related='printnode_account_id.is_scales_debug_enabled',
+        readonly=True,
+    )
+
     debug_logging = fields.Boolean(
         readonly=False,
         related='company_id.debug_logging',
@@ -189,7 +195,7 @@ class ResConfigSettings(models.TransientModel):
         account = self.get_main_printnode_account()
 
         if not account:
-            raise exceptions.UserError(_('Please, add an account before activation'))
+            raise exceptions.UserError(_('Please add an account before activation'))
 
         return account.activate_account()
 
@@ -209,6 +215,42 @@ class ResConfigSettings(models.TransientModel):
         account = self.get_main_printnode_account()
 
         if not account:
-            raise exceptions.UserError(_('Please, add an account before clearing devices'))
+            raise exceptions.UserError(_('Please add an account before clearing devices'))
 
         return account.clear_devices_from_odoo()
+
+    def enable_scales_debug_mode(self):
+        """
+        Create a test scale with computer
+        """
+        account = self.get_main_printnode_account()
+
+        if not account:
+            raise exceptions.UserError(
+                _('Please add an account before enabling test scales integration'))
+
+        return account.enable_scales_debug_mode()
+
+    def disable_scales_debug_mode(self):
+        """
+        Delete test scale with computer
+        """
+        account = self.get_main_printnode_account()
+
+        if not account:
+            raise exceptions.UserError(
+                _('Please add an account before disabling test scales integration'))
+
+        return account.disable_scales_debug_mode()
+
+    def generate_debug_scales_measurement(self):
+        """
+        Generate a test measurement for the test scale
+        """
+        account = self.get_main_printnode_account()
+
+        if not account:
+            raise exceptions.UserError(
+                _('Please add an account before generating a test measurement'))
+
+        return account.generate_debug_scales_measurement()
