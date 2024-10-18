@@ -1,4 +1,7 @@
 from odoo import _, api, exceptions, fields, models
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 PRODUCT_LABEL_MODELS_MAPPING = {
@@ -33,6 +36,11 @@ class ProductLabelLayout(models.TransientModel):
     def _compute_zld_label_ids(self):
         for rec in self:
             # Update domain for zld_label_id field
+            _logger.warning(
+                "-----------------1--------------- "
+                "Triggered _compute_zld_label_ids"
+                "%s" % self.print_format
+            )
             if self.print_format != 'zld_label':
                 rec.zld_label_ids = False
                 return
@@ -43,6 +51,20 @@ class ProductLabelLayout(models.TransientModel):
             elif rec.product_ids:
                 active_model = 'product.product'
 
+
+            _logger.warning(
+                "----------------2---------------- "
+                "Triggered _compute_zld_label_ids"
+                "%s" % PRODUCT_LABEL_MODELS_MAPPING[active_model]
+            )
+
+            _logger.warning(
+                "----------------3---------------- "
+                "Triggered _compute_zld_label_ids"
+                "%s" % active_model
+            )
+
+
             rec.zld_label_ids = self.env['zld.label'].search([
                 ('is_published', '=', True),
                 ('model_id', '=', PRODUCT_LABEL_MODELS_MAPPING[active_model])
@@ -50,6 +72,18 @@ class ProductLabelLayout(models.TransientModel):
 
     def _prepare_report_data(self):
         xml_id, data = super()._prepare_report_data()
+
+        _logger.warning(
+            "----------------1---------------- "
+            "Triggered _prepare_report_data"
+            "%s" % self.print_format
+        )
+
+        _logger.warning(
+            "----------------2---------------- "
+            "Triggered _prepare_report_data"
+            "%s" % self.zld_label_id
+        )
 
         if self.print_format == 'zld_label':
             if not self.zld_label_id:
