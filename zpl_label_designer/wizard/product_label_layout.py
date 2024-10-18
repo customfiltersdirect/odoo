@@ -64,8 +64,18 @@ class ProductLabelLayout(models.TransientModel):
                 "%s" % active_model
             )
 
+            available_labels = self.env['zld.label'].sudo().search([
+                ('is_published', '=', True),
+                ('model_id', '=', PRODUCT_LABEL_MODELS_MAPPING[active_model])
+            ])
 
-            rec.zld_label_ids = self.env['zld.label'].search([
+            _logger.warning(
+                "----------------4---------------- "
+                "Triggered _compute_zld_label_ids"
+                "%s" % available_labels
+            )
+
+            rec.zld_label_ids = self.env['zld.label'].sudo().search([
                 ('is_published', '=', True),
                 ('model_id', '=', PRODUCT_LABEL_MODELS_MAPPING[active_model])
             ])
