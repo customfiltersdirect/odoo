@@ -78,7 +78,7 @@ class ProductLabelLayout(models.TransientModel):
             rec.zld_label_ids = self.env['zld.label'].sudo().search([
                 ('is_published', '=', True),
                 ('model_id', '=', PRODUCT_LABEL_MODELS_MAPPING[active_model])
-            ])
+            ]).ids
 
     def _prepare_report_data(self):
         xml_id, data = super()._prepare_report_data()
