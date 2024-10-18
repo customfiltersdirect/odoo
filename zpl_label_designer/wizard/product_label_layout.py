@@ -22,7 +22,7 @@ class ProductLabelLayout(models.TransientModel):
     zld_label_id = fields.Many2one(
         string='Available Labels from ZPL Designer',
         comodel_name='zld.label',
-        domain="[('id', 'in', zld_label_ids)]",
+        domain="[('is_published', '=', True)]",
     )
 
     # This field used as filter for zld_label_id field
