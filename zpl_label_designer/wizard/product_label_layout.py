@@ -35,6 +35,7 @@ class ProductLabelLayout(models.TransientModel):
             # Update domain for zld_label_id field
             if self.print_format != 'zld_label':
                 rec.zld_label_ids = False
+                rec.zld_label_id = False
                 return
 
             active_model = ''
@@ -43,10 +44,14 @@ class ProductLabelLayout(models.TransientModel):
             elif rec.product_ids:
                 active_model = 'product.product'
 
-            rec.zld_label_ids = self.env['zld.label'].search([
+            zld_label_ids = self.env['zld.label'].search([
                 ('is_published', '=', True),
                 ('model_id', '=', PRODUCT_LABEL_MODELS_MAPPING[active_model])
             ])
+            rec.zld_label_ids = zld_label_ids
+
+            if zld_label_ids:
+                rec.zld_label_id = zld_label_ids.ids[0]
 
     def _prepare_report_data(self):
         xml_id, data = super()._prepare_report_data()
